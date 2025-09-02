@@ -1,0 +1,6 @@
+straftat,beschuldigte_total,beschuldigte_m,beschuldigte_f,geschaedigte_total,geschaedigte_m,geschaedigte_f,anzeigerate,dunkelziffer,geschaedigte_m_dz,geschaedigte_f_dz,ort_rate_privat,ort_rate_oeffentlich,ort_privat_total,ort_privat_m,ort_privat_f,ort_oeffentlich_total,ort_oeffentlich_m,ort_oeffentlich_f,beziehung_partner_rate,beziehung_verwandt_rate,beziehung_bekannt_rate,beziehung_arbeit_rate,beziehung_keine_rate,beziehung_andere_rate,beziehung_partner,beziehung_verwandt,beziehung_bekannt,beziehung_arbeit,beziehung_keine,beziehung_andere
+sexuelle_noetigung,595,572,23,732,119,613,12.4,87.6,960,4944,0.5114,0.4886,374,61,313,358,58,300,0.21,0.08,0.31,0.04,0.22,0.14,151,60,227,30,158,106
+vergewaltigung,939,935,4,1044,16,1028,12.4,87.6,129,8290,0.7284,0.2716,760,12,749,284,4,279,0.41,0.05,0.28,0.03,0.12,0.11,432,52,291,32,127,110
+missbrauch,219,215,4,249,28,221,-,,,,0.6245,0.3755,156,17,138,93,11,83,0.16,0.06,0.45,0.04,0.11,0.18,40,16,111,11,28,43
+exhibitionismus,177,175,2,405,50,355,11.7,88.3,427,3034,0.1445,0.8555,59,7,51,346,43,304,0,0,0.06,0.02,0.42,0.5,2,2,26,7,172,196
+belaestigung,1038,1005,33,1649,199,1450,6.8,93.2,2926,21324,0.2213,0.7787,365,44,321,1284,155,1129,0.05,0.02,0.14,0.08,0.39,0.32,82,38,237,133,649,510

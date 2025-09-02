@@ -1,0 +1,116 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1;
+  font-weight: 700;
+
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 1);
+  background-color: black;
+  background: black;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: black;
+  text-decoration: inherit;
+  text-underline-offset: 3px;
+}
+a:hover {
+  color: black;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100dvh;                    /* besser als 100vh auf Mobile */
+  background: #000;
+  color: #fff;                            /* damit Text lesbar bleibt */
+  margin: 0;  
+}
+
+h1 {
+  font-family: PxGroteskPan, sans-serif;
+  font-weight: 700;
+  font-size: 10em;
+  line-height: 1.1;
+  color: white;
+}
+
+h2 {
+  font-family: PxGroteskPan, sans-serif;
+  font-weight: 700;
+  font-size: 2.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 0px;
+  background: black;
+  border: 1px solid black;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: 'PxGroteskPan', sans-serif;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: white;
+    border: 1px solid white;
+
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+  border: 1px solid white;
+}
+
+button:active {
+  background: black;
+  color: white;
+  border: 1px solid white;
+
+}
+
+.card {
+  padding: 2em;
+}
+
+#app {
+  min-height: 100dvh;                    /* besser als 100vh auf Mobile */
+  background: #000;
+  color: #fff;                            /* damit Text lesbar bleibt */
+  margin: 0;  
+}
+
+html{
+  min-height: 100dvh;                    /* besser als 100vh auf Mobile */
+  background: #000;
+  color: #fff;                            /* damit Text lesbar bleibt */
+  margin: 0;  
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: black;
+    background-color: #000;
+  }
+  a:hover {
+    color: black;
+  }
+  button {
+    background-color: black;
+  }
+}
+
+/* Custom Font */
+@font-face {
+  font-family: 'PxGroteskPan';
+  src: url('/Px-Grotesk-Pan-Bold.otf') format('opentype');
+  font-display: swap;
+}
+
