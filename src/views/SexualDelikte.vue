@@ -115,8 +115,8 @@ onUnmounted(() => {
       </div>
     </div>
     <div class="split-right">
-      <div style="height: 100vh;"></div>
-      <div class="side-text scrollable-text">
+  <div style="height: 150vh;"></div>
+  <div class="side-text scrollable-text">
         <h3>Wer sind die Betroffenen?</h3>
         <p>
           Sexualisierte Gewalt betrifft Menschen unterschiedlichster Herkunft, Altersgruppen und Geschlechter. Die Zahlen zeigen, dass ...
@@ -131,6 +131,7 @@ onUnmounted(() => {
           Noch mehr Beispieltext, damit gescrollt werden kann. Füge hier beliebig viel Content ein.
         </p>
       </div>
+      <div style="height: 50vh;"></div>
     </div>
   </div>
 
@@ -186,8 +187,11 @@ onUnmounted(() => {
 <style scoped>
 /* Scrollbarer Text rechts neben sticky Sketch */
 .scrollable-text {
-  height: 100vh;
-  overflow-y: auto;
+  height: auto;
+  min-height: 100vh;
+  overflow-y: visible;
+  position: sticky;
+  top: 30px;
 }
 button {
   transition: 0.2s;
@@ -203,9 +207,12 @@ button:hover {
   height: 100vh;
   background: #000;
 }
-section {
+.main-scroll > section,
+.split-section {
   scroll-snap-align: start;
-  min-height: 100vh;
+  min-height: 150vh;
+}
+section {
   display: flex;
   flex-direction: column;
   justify-content: left;
@@ -296,6 +303,7 @@ section {
   color: #fff;
   padding: 3em;
   /* Keine Linie mehr */
+  position: relative;
 }
 
 /* Fade-In Transition */
