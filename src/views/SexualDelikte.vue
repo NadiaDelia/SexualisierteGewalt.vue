@@ -93,7 +93,7 @@ onUnmounted(() => {
     <h1>Wer verübt<br/>sexualisierte<br/>Gewalt und<br/>wer ist betroffen?</h1>
   </section>
 
-  <!-- Split: Sketch Geschädigte sticky + Text -->
+  <!-- 2. Split-Section: Sketch links sticky, rechts scrollt Text hoch -->
   <div class="split-section">
     <div class="split-left sticky-sketch">
       <h2>Geschädigte Sexualisierter Gewalt 2024</h2>
@@ -115,6 +115,7 @@ onUnmounted(() => {
       </div>
     </div>
     <div class="split-right">
+      <div style="height: 100vh;"></div>
       <div class="side-text scrollable-text">
         <h3>Wer sind die Betroffenen?</h3>
         <p>
@@ -133,7 +134,7 @@ onUnmounted(() => {
     </div>
   </div>
 
-  <!-- Split: Sketch Beschuldigte sticky + Text -->
+  <!-- Split: Sketch Beschuldigte sticky + Text (unverändert) -->
   <div class="split-section">
     <div class="split-left sticky-sketch">
       <h2>Beschuldigte Sexualisierter Gewalt 2024</h2>
@@ -178,15 +179,16 @@ onUnmounted(() => {
         </p>
       </div>
     </div>
-.scrollable-text {
-  height: 100vh;
-  overflow-y: auto;
-}
   </div>
 </div>
 </template>
 
 <style scoped>
+/* Scrollbarer Text rechts neben sticky Sketch */
+.scrollable-text {
+  height: 100vh;
+  overflow-y: auto;
+}
 button {
   transition: 0.2s;
 }
