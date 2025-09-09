@@ -11,7 +11,7 @@
 
   display: flex;
   flex-direction: row;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
   margin-top: 16px;
@@ -19,7 +19,8 @@
   padding-left: 0;
 }
 
-.btns button {
+/* Allgemeine Button-Styles für Sketches ohne spezielle Container */
+.btns > button {
   border: none;
   background: #000;
   font-size: 1em;
@@ -29,19 +30,91 @@
   padding: 8px 16px;
   cursor: pointer;
   transition: background .2s, border-color .2s;
+}
 
+.btns > button.active {
+  background: #fff;
+  color: #000;
+}
+
+.btns > button:hover {
+  background: #fff;
+  color: #000;
+}
+
+.filter-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+}
+
+.filter-buttons button {
+  border: none;
+  background: #000;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: 'PxGroteskPan', sans-serif;
+  color: #fff;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background .2s, border-color .2s;
+}
+
+.filter-buttons button.active {
+  background: #fff;
+  color: #000;
+}
+
+.filter-buttons button:hover {
+  background: #fff;
+  color: #000;
+}
+
+/* Gender Toggle Button Container */
+.gender-toggle-container {
+  display: flex;
   margin-left: 0;
-
+  border: 2px solid #fff;
+  overflow: hidden;
 }
 
-.btns button.active {
+/* Gender Toggle Button Styling */
+.toggle-btn {
+  border: none;
+  border-radius: 0;
+  border-right: 1px solid #fff;
+  min-width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9em;
+  font-weight: bold;
+  background: #000;
+  color: #fff;
+  cursor: pointer;
+  transition: background .2s, color .2s;
+}
+
+.toggle-btn:last-child {
+  border-right: none;
+}
+
+.toggle-btn.active-gender {
+  background-color: #fff;
+  color: #000;
+}
+
+/* Hover-Effekt: Gehoverter Button wird weiß, aktiver Button wird schwarz */
+.gender-toggle-container:hover .toggle-btn:hover {
   background: #fff;
   color: #000;
 }
 
-.btns button:hover {
-  background: #fff;
-  color: #000;
+.gender-toggle-container:hover .toggle-btn.active-gender:not(:hover) {
+  background: #000;
+  color: #fff;
 }
 
 :root {
@@ -95,35 +168,6 @@ h2 {
   font-size: 2.2em;
   line-height: 1.1;
 }
-
-/* button {
-  border-radius: 0px;
-  background: black;
-  border: 1px solid black;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: 'PxGroteskPan', sans-serif;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: white;
-    border: 1px solid white;
-
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-  border: 1px solid white;
-}
-
-button:active {
-  background: black;
-  color: white;
-  border: 1px solid white; */
-
-/* } */
 
 .card {
   padding: 2em;

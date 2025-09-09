@@ -1,8 +1,14 @@
+
+      
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import * as d3 from 'd3'
 import P5CanvasGeschaedigte from '../components/P5CanvasGeschaedigte.vue'
 import P5CanvasBeschuldigte from '../components/P5CanvasBeschuldigte.vue'
+import P5CanvasOrt from '../components/P5CanvasOrt.vue'
+import P5CanvasBeziehung from '../components/P5CanvasBeziehung.vue'
+
+
 
 
 // Mapping wie in deinem alten Sketch
@@ -42,6 +48,30 @@ window.addEventListener('resize', () => {
   height2.value = Math.round(window.innerHeight * 0.8)
 })
 
+
+//** Für Ort-Sketch**/
+const activeOrt = ref('sexuelle_noetigung')
+const genderOrt = ref('frau')
+const widthOrt = ref(Math.round(window.innerWidth * 0.6))
+const heightOrt = ref(Math.round(window.innerHeight * 0.8))
+
+window.addEventListener('resize', () => {
+  widthOrt.value = Math.round(window.innerWidth * 0.6)
+  heightOrt.value = Math.round(window.innerHeight * 0.8)
+})
+
+//** Für Beziehung-Sketch**/
+const activeBeziehung = ref('sexuelle_noetigung')
+const widthBeziehung = ref(Math.round(window.innerWidth * 0.6))
+const heightBeziehung = ref(Math.round(window.innerHeight * 0.8))
+
+window.addEventListener('resize', () => {
+  widthBeziehung.value = Math.round(window.innerWidth * 0.6)
+  heightBeziehung.value = Math.round(window.innerHeight * 0.8)
+})
+
+
+
 // CSV laden
 onMounted(async () => {
   const csv = await d3.csv(csvUrl, d3.autoType)
@@ -49,16 +79,35 @@ onMounted(async () => {
 })
 
 // Filterdaten berechnen
+//Geschaedigte
 const filtered = computed(() =>
   active.value ? raw.value.filter(d => d.straftat === active.value) : raw.value
 )
 
+//Beschuldigte
 const filtered2 = computed(() =>
   active2.value ? raw.value.filter(d => d.straftat === active2.value) : raw.value
 )
 
+//Ort
+const filteredOrt = computed(() =>
+  activeOrt.value ? raw.value.filter(d => d.straftat === activeOrt.value) : raw.value
+)
 
-// Filter setzen
+//Beziehung
+const filteredBeziehung = computed(() =>
+  activeBeziehung.value ? raw.value.filter(d => d.straftat === activeBeziehung.value) : raw.value
+)
+
+// Debug: Überwache Änderungen
+watch(activeOrt, (newVal) => {
+  console.log('activeOrt changed:', newVal)
+})
+watch(genderOrt, (newVal) => {
+  console.log('genderOrt changed:', newVal)
+})
+
+console.log('filteredOrt', filteredOrt.value)
 function setFilter(key) {
   active.value = key
 }
@@ -135,7 +184,7 @@ onUnmounted(() => {
     </div>
   </div>
 
-  <!-- Split: Sketch Beschuldigte sticky + Text (unverändert) -->
+  <!-- 3. Split Section: Sketch Beschuldigte sticky + Text (unverändert) -->
   <div class="split-section">
     <div class="split-left sticky-sketch">
       <h2>Beschuldigte Sexualisierter Gewalt 2024</h2>
@@ -162,18 +211,6 @@ onUnmounted(() => {
           @click="active2 = s.key"
         >{{ s.label }}</button>
       </div>
-<!-- /*Button von Geschaedigte
-
-<div class="btns">
-        <button
-          v-for="s in STRAFTATEN"
-          :key="s.key"
-          :class="{active: active === s.key}"
-          @click="active = s.key"
-        >{{ s.label }}</button>
-      </div>
-
-      */ -->
 
     </div>
     <div class="split-right">
@@ -194,10 +231,107 @@ onUnmounted(() => {
       </div>
     </div>
   </div>
+
+      <!-- 4. section ort: Sketch Ort sticky + Text -->
+      <div class="split-section">
+        <div class="split-left sticky-sketch">
+          <h2>Ort der Tat 2024</h2>
+          <P5CanvasOrt
+            :key="activeOrt + '-' + genderOrt + '-' + filteredOrt.length"
+            :data="filteredOrt"
+            :width="widthOrt"
+            :height="heightOrt"
+            :background="0"
+            :font-family="'PxGroteskPan'"
+            :gender="genderOrt"
+          />
+          <div class="btns">
+            <div class="filter-buttons">
+              <button
+                v-for="s in STRAFTATEN"
+                :key="s.key"
+                :class="{active: activeOrt === s.key}"
+                @click="activeOrt = s.key"
+              >{{ s.label }}</button>
+            </div>
+            <div class="gender-toggle-container">
+              <button
+                :class="['toggle-btn', { 'active-gender': genderOrt === 'frau' }]"
+                @click="genderOrt = 'frau'"
+              >F</button>
+              <button
+                :class="['toggle-btn', { 'active-gender': genderOrt === 'mann' }]"
+                @click="genderOrt = 'mann'"
+              >M</button>
+            </div>
+          </div>
+        </div>
+        <div class="split-right">
+          <div class="side-text scrollable-text">
+            <h3>Wo finden die Taten statt?</h3>
+            <p>
+              Die Orte der Taten sind unterschiedlich verteilt. Privat und öffentlich werden hier gegenübergestellt.
+            </p>
+            <p>
+              Weitere Analysen und Hintergrundinformationen können hier ergänzt werden.
+            </p>
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, urna eu tincidunt consectetur, nisi nisl aliquam nunc, eget aliquam nisl nunc euismod nunc. Duis euismod, nisl eu aliquam tincidunt, nunc nisl aliquam nunc, eget aliquam nisl nunc euismod nunc.
+            </p>
+            <p>
+              Noch mehr Beispieltext, damit gescrollt werden kann. Füge hier beliebig viel Content ein.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. section beziehung: Sketch Beziehung sticky + Text -->
+      <div class="split-section">
+        <div class="split-left sticky-sketch">
+          <h2>Beziehung zwischen Täter:in und Geschädigter 2024</h2>
+          <P5CanvasBeziehung
+            :key="activeBeziehung + '-' + filteredBeziehung.length"
+            :data="filteredBeziehung"
+            :width="widthBeziehung"
+            :height="heightBeziehung"
+            :background="0"
+            :font-family="'PxGroteskPan'"
+            :mouse-radius="150"
+            :repel-radius="80"
+            :attract-power="1.5"
+          />
+          <div class="btns">
+            <button
+              v-for="s in STRAFTATEN"
+              :key="s.key"
+              :class="{active: activeBeziehung === s.key}"
+              @click="activeBeziehung = s.key"
+            >{{ s.label }}</button>
+          </div>
+        </div>
+        <div class="split-right">
+          <div class="side-text scrollable-text">
+            <h3>Wie ist die Beziehung zwischen Täter:in und Geschädigter?</h3>
+            <p>
+              Die Beziehung zwischen Täter:in und geschädigter Person variiert stark je nach Art der Straftat. Partner, verwandte Personen, Bekannte, Arbeitskolleg:innen oder völlig fremde Personen können Täter:innen sein.
+            </p>
+            <p>
+              Weitere Analysen und Hintergrundinformationen können hier ergänzt werden.
+            </p>
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, urna eu tincidunt consectetur, nisi nisl aliquam nunc, eget aliquam nisl nunc euismod nunc. Duis euismod, nisl eu aliquam tincidunt, nunc nisl aliquam nunc, eget aliquam nisl nunc euismod nunc.
+            </p>
+            <p>
+              Noch mehr Beispieltext, damit gescrollt werden kann. Füge hier beliebig viel Content ein.
+            </p>
+          </div>
+        </div>
+      </div>
 </div>
 </template>
 
 <style scoped>
+
 /* Scrollbarer Text rechts neben sticky Sketch */
 .scrollable-text {
   height: auto;
@@ -206,12 +340,7 @@ onUnmounted(() => {
   position: sticky;
   top: 30px;
 }
-/* button {
-  transition: 0.2s;
-}
-button:hover {
-  transform: translateY(0px);
-} */
+
 /* Sticky Header */
 /* Snap Scrolling */
 .main-scroll {

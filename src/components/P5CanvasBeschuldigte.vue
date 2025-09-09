@@ -34,22 +34,18 @@ const sketch = (p) => {
   let particles = [];
   let particleQueue = [];
   let selectedData = [];
-  let currentStraftat = null;
   let beschuldigteFrauen = 0;
   let beschuldigteMaenner = 0;
   let visibleFrauen = 0;
   let visibleMaenner = 0;
   const crossSize = 14;
   const crossStrokeWeight = 6;
-  // Button-Referenzen
-  let buttonRefs = {};
 
   // --- Setup ---
   p.setup = () => {
     p.createCanvas(props.width, props.height);
     p.frameRate(60);
     selectedData = props.data || [];
-    createFilterButtons();
     updateParticlesForCurrentSelection();
   };
 
@@ -104,46 +100,6 @@ const sketch = (p) => {
     }
   };
 
-  // --- Filterbuttons erstellen ---
-  function createFilterButtons() {
-    // Buttons im DOM erzeugen, falls noch nicht vorhanden
-    const buttonData = [
-      { key: "sexuelle_noetigung", label: "Sexuelle Nötigung" },
-      { key: "vergewaltigung", label: "Vergewaltigung" },
-      { key: "missbrauch", label: "Sexueller Missbrauch" },
-      { key: "belaestigung", label: "Sexuelle Belästigung" },
-      { key: "exhibitionismus", label: "Exhibitionismus" }
-    ];}
-  //   // Buttons unterhalb des Canvas erzeugen
-  //   const parent = p._userNode || p.canvas.parentNode;
-  //   let btnContainer = parent.querySelector('.button-container');
-  //   if (!btnContainer) {
-  //     btnContainer = document.createElement('div');
-  //     btnContainer.className = 'button-container';
-  //     btnContainer.style.marginTop = '20px';
-  //     btnContainer.style.display = 'flex';
-  //     btnContainer.style.gap = '12px';
-  //     parent.appendChild(btnContainer);
-  //   }
-  //   // Buttons erzeugen
-  //   buttonRefs = {};
-  //   btnContainer.innerHTML = '';
-  //   buttonData.forEach((btn, i) => {
-  //     const b = document.createElement('button');
-  //     b.textContent = btn.label;
-  // b.className = 'filter-btn'; // Styling jetzt über CSS
-  //     b.onclick = () => {
-  //       currentStraftat = btn.key;
-  //       selectedData = (props.data || []).filter(d => d.straftat === btn.key);
-  //       updateParticlesForCurrentSelection();
-  //       updateButtonStyles();
-  //     };
-  //     btnContainer.appendChild(b);
-  //     buttonRefs[btn.key] = b;
-  //   });
-  //   updateButtonStyles();
-  // }
-
   // --- Partikel-Update ---
   function updateParticlesForCurrentSelection() {
     beschuldigteFrauen = 0;
@@ -169,20 +125,6 @@ const sketch = (p) => {
       }
     }
     p.redraw();
-  }
-
-  // --- Button-Stile aktualisieren ---
-  function updateButtonStyles() {
-    Object.keys(buttonRefs).forEach(key => {
-      buttonRefs[key].classList.remove('active');
-      buttonRefs[key].style.background = '#fff';
-      buttonRefs[key].style.color = '#222';
-    });
-    if (currentStraftat && buttonRefs[currentStraftat]) {
-      buttonRefs[currentStraftat].classList.add('active');
-      buttonRefs[currentStraftat].style.background = '#222';
-      buttonRefs[currentStraftat].style.color = '#fff';
-    }
   }
 
   // --- Zahl formatieren ---
