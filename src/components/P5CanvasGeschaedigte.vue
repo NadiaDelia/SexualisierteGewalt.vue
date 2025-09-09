@@ -3,24 +3,29 @@ import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import p5 from 'p5'
 
 const props = defineProps({
-  data: { type: Array, default: () => [] },   // gefilterte CSV-Zeilen [{straftat, geschaedigte_f, geschaedigte_m}, ...]
+  data: { type: Array, default: () => [] },
   background: { type: [Number, Array, String], default: 0 },
   showLabels: { type: Boolean, default: true },
-  fontFamily: { type: String, default: 'PxGroteskPan' }, // über CSS @font-face geladen
+  fontFamily: { type: String, default: 'PxGroteskPan' },
 })
 
 const mountRef = ref(null)
 let p5Instance = null
-const canvasWidth = ref(Math.floor(window.innerWidth * 0.6))
-const canvasHeight = ref(Math.floor(window.innerHeight * 0.8))
+const canvasWidth = ref(1000)
+const canvasHeight = ref(800)
 
 const sketch = (p) => {
-  // Sketch-State
-  let particles = []
-  let particleQueue = []
-  let selectedData = []
-  let gesF = 0
-  let gesM = 0
+  let particles = [];
+  let particleQueue = [];
+  let selectedData;
+  let geschaedigteFrauen = 0;
+  let geschaedigteMaenner = 0;
+  let visibleFrauen = 0;
+  let visibleMaenner = 0;
+  let crossSize = 14;
+  let crossStrokeWeight = 6;
+
+  let customFont = null;
 
   p.setup = () => {
     p.createCanvas(canvasWidth.value, canvasHeight.value)
@@ -29,25 +34,23 @@ const sketch = (p) => {
   }
 
   p.draw = () => {
-    p.background(props.background)
+  p.background(props.background)
   if (props.fontFamily) p.textFont(props.fontFamily)
+  p.textSize(90)
+  p.textAlign(p.LEFT, p.BOTTOM)
+  p.fill(255)
 
     // Labels
-    if (props.showLabels) {
-      p.fill(255)
-      p.textSize(100)
-      p.textAlign(p.LEFT, p.BOTTOM)
-      p.text('Frauen', p.width * 0.05, p.height * 0.7)
-      p.text('Männer', p.width * 0.55, p.height * 0.7)
-    }
+    p.text('Frauen', p.width * 0.04, p.height * 0.65)
+    p.text('Männer', p.width * 0.54, p.height * 0.65)
 
-    // Zahlen, wenn Queue leer
-    if (particleQueue.length === 0) {
-      p.fill(255)
-      p.textSize(100)
-      p.textAlign(p.LEFT, p.BOTTOM)
-      p.text(gesF, p.width * 0.05, p.height * 0.55)
-      p.text(gesM, p.width * 0.55, p.height * 0.55)
+    // Zahlen während Animation (hochzählen)
+    if (particleQueue.length > 0) {
+      p.text(formatNumber(visibleFrauen), p.width * 0.04, p.height * 0.54)
+      p.text(formatNumber(visibleMaenner), p.width * 0.54, p.height * 0.54)
+    } else {
+      p.text(formatNumber(geschaedigteFrauen), p.width * 0.04, p.height * 0.54)
+      p.text(formatNumber(geschaedigteMaenner), p.width * 0.54, p.height * 0.54)
     }
 
     // Partikel animieren
@@ -56,18 +59,22 @@ const sketch = (p) => {
       particles[i].display(p)
     }
 
-    // Gleichzeitiges Einblenden L/R
-    const addPerFrame = 5
-    for (let k = 0; k < addPerFrame; k++) {
-      let iF = particleQueue.findIndex(pt => pt.gender === 'frau')
-      if (iF !== -1) {
-        const pt = particleQueue.splice(iF, 1)[0]
-        particles.push(new Particle(pt.x, pt.y))
+    // Kreuze für Frauen und Männer gleichzeitig erscheinen lassen
+    let addPerFrame = 5;
+    for (let i = 0; i < addPerFrame; i++) {
+      // Frauen hinzufügen
+      let frauIdx = particleQueue.findIndex(pt => pt.gender === 'frau');
+      if (frauIdx !== -1) {
+        let pt = particleQueue.splice(frauIdx, 1)[0];
+        particles.push(new Particle(pt.x, pt.y, pt.data, pt.gender, p));
+        visibleFrauen++;
       }
-      let iM = particleQueue.findIndex(pt => pt.gender === 'mann')
-      if (iM !== -1) {
-        const pt = particleQueue.splice(iM, 1)[0]
-        particles.push(new Particle(pt.x, pt.y))
+      // Männer hinzufügen
+      let mannIdx = particleQueue.findIndex(pt => pt.gender === 'mann');
+      if (mannIdx !== -1) {
+        let pt = particleQueue.splice(mannIdx, 1)[0];
+        particles.push(new Particle(pt.x, pt.y, pt.data, pt.gender, p));
+        visibleMaenner++;
       }
     }
   }
@@ -77,110 +84,106 @@ const sketch = (p) => {
   p.resizeTo = (w, h) => p.resizeCanvas(w, h)
 
   function applyData(rows) {
-    // Schutz: Canvas muss existieren und Masse müssen Zahlen sein
-    if (!p || typeof p.width !== 'number' || typeof p.height !== 'number' || p.width === 0 || p.height === 0) return;
-    selectedData = rows || []
-    gesF = 0
-    gesM = 0
-    particleQueue = []
-    particles = []
-
+    selectedData = rows || [];
+    geschaedigteFrauen = 0;
+    geschaedigteMaenner = 0;
+    visibleFrauen = 0;
+    visibleMaenner = 0;
+    particleQueue = [];
+    particles = [];
     for (let i = 0; i < selectedData.length; i++) {
-      const row = selectedData[i]
-      const f = Number(row?.geschaedigte_f) || 0
-      const m = Number(row?.geschaedigte_m) || 0
-
-      gesF += f
-      for (let j = 0; j < f; j++) {
-        const x = p.random(p.width * 0.02, p.width * 0.48)
-        const y = p.random(p.height * 0.02, p.height * 0.98)
-        particleQueue.push({ x, y, gender: 'frau' })
+      geschaedigteFrauen += Number(selectedData[i].geschaedigte_f) || 0;
+      for (let j = 0; j < (Number(selectedData[i].geschaedigte_f) || 0); j++) {
+        let px = p.random(crossSize, p.width * 0.5 - crossSize);
+        let py = p.random(crossSize, p.height - crossSize);
+        particleQueue.push({ x: px, y: py, data: selectedData[i], gender: 'frau' });
       }
-
-      gesM += m
-      for (let j = 0; j < m; j++) {
-        const x = p.random(p.width * 0.52, p.width * 1.00)
-        const y = p.random(p.height * 0.02, p.height * 0.98)
-        particleQueue.push({ x, y, gender: 'mann' })
+      geschaedigteMaenner += Number(selectedData[i].geschaedigte_m) || 0;
+      for (let j = 0; j < (Number(selectedData[i].geschaedigte_m) || 0); j++) {
+        let px = p.random(p.width * 0.50 + crossSize, p.width - crossSize);
+        let py = p.random(crossSize, p.height - crossSize);
+        particleQueue.push({ x: px, y: py, data: selectedData[i], gender: 'mann' });
       }
     }
   }
 
   class Particle {
-    constructor(x, y) {
-      this.pos = p.createVector(x, y)
-      this.home = p.createVector(x, y)
-      this.r = 12
-      this.alpha = 255
-      this.targetAlpha = 255
-      this.fadeRate = 0.08
-      this.growing = true
-      this.initialDelay = 50 + Math.floor(p.random(20))
-      this.vel = p.createVector(0, 0)
-      this.perturbed = false
-      this.perturbTimer = 0
-      this.col = p.color(255)
+    constructor(x, y, data, gender, p) {
+      this.pos = p.createVector(x, y);
+      this.home = p.createVector(x, y);
+      this.r = crossSize;
+      this.growing = true;
+      this.initialDelay = 50 + Math.floor(p.random(20));
+      this.vel = p.createVector(0, 0);
+      this.perturbed = false;
+      this.perturbTimer = 0;
+      this.data = data;
+      this.gender = gender;
     }
     update(p) {
-      // Einblenden
       if (this.growing) {
-        if (this.initialDelay > 0) { this.initialDelay--; return }
-        this.alpha = p.lerp(this.alpha, this.targetAlpha, this.fadeRate)
-        if (this.alpha > 250) { this.alpha = this.targetAlpha; this.growing = false }
+        if (this.initialDelay > 0) {
+          this.initialDelay--;
+          return;
+        }
       }
-
-      // Mausdistanz (instance-sicher)
-      const distToMouse = p.dist(this.pos.x, this.pos.y, p.mouseX, p.mouseY)
-
-      // kurzer „Stoß“
+      let mouse = p.createVector(p.mouseX, p.mouseY);
+      let distToMouse = p5.Vector.dist(this.pos, mouse);
       if (distToMouse < 80 && !this.perturbed) {
-        const dir = p.createVector(this.pos.x - p.mouseX, this.pos.y - p.mouseY)
-        dir.normalize()
-        dir.mult(10 + p.random(3))
-        this.vel = dir
-        this.perturbed = true
-        this.perturbTimer = 10 + Math.floor(p.random(10))
+        let dir = p5.Vector.sub(this.pos, mouse);
+        dir.normalize();
+        dir.mult(10 + p.random(3));
+        this.vel = dir;
+        this.perturbed = true;
+        this.perturbTimer = 10 + Math.floor(p.random(10));
       }
-
       if (this.perturbed) {
-        this.pos.add(this.vel)
-        this.vel.mult(0.7)
-        this.perturbTimer--
-        if (this.perturbTimer <= 0) this.perturbed = false
+        this.pos.add(this.vel);
+        this.vel.mult(0.7);
+        this.perturbTimer--;
+        if (this.perturbTimer <= 0) {
+          this.perturbed = false;
+        }
       } else {
-        // sanft zur Home-Position
-        const homeDir = p.createVector(this.home.x - this.pos.x, this.home.y - this.pos.y)
-        homeDir.mult(0.04)
-        this.pos.add(homeDir)
+        let homeDir = p5.Vector.sub(this.home, this.pos);
+        homeDir.mult(0.04);
+        this.pos.add(homeDir);
       }
-
-      // Ränder
-      if (this.pos.x < this.r) { this.pos.x = this.r; this.vel.x *= -0.5 }
-      else if (this.pos.x > p.width - this.r) { this.pos.x = p.width - this.r; this.vel.x *= -0.5 }
-      if (this.pos.y < this.r) { this.pos.y = this.r; this.vel.y *= -0.5 }
-      else if (this.pos.y > p.height - this.r) { this.pos.y = p.height - this.r; this.vel.y *= -0.5 }
+      if (this.gender === 'frau') {
+        this.pos.x = p.constrain(this.pos.x, this.r, p.width * 0.5 - this.r);
+      } else if (this.gender === 'mann') {
+        this.pos.x = p.constrain(this.pos.x, p.width * 0.5 + this.r, p.width - this.r);
+      }
+      if (this.pos.y < this.r) {
+        this.pos.y = this.r;
+      } else if (this.pos.y > p.height - this.r) {
+        this.pos.y = p.height - this.r;
+      }
     }
     display(p) {
-      p.push()
-      p.translate(this.pos.x, this.pos.y)
-      p.rotate(p.PI / 4)
-      p.stroke(p.red(this.col), p.green(this.col), p.blue(this.col), this.alpha)
-      p.strokeWeight(6)
-      p.strokeCap(p.SQUARE)
-      const size = 2.5 * this.r
-      p.line(-size / 2, 0, size / 2, 0)
-      p.line(0, -size / 2, 0, size / 2)
-      p.pop()
+      p.push();
+      p.translate(this.pos.x, this.pos.y);
+      p.rotate(p.PI / 4);
+      p.stroke(255);
+      p.strokeWeight(crossStrokeWeight);
+      p.strokeCap(p.SQUARE);
+      let size = 2.5 * this.r;
+      p.line(-size / 2, 0, size / 2, 0);
+      p.line(0, -size / 2, 0, size / 2);
+      p.pop();
     }
+  }
+
+  function formatNumber(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
   }
 }
 
 function handleResize() {
-  canvasWidth.value = Math.floor(window.innerWidth * 0.6)
-  canvasHeight.value = Math.floor(window.innerHeight * 0.8)
+  canvasWidth.value = 1000;
+  canvasHeight.value = 800;
   if (p5Instance && typeof p5Instance.resizeTo === 'function') {
     p5Instance.resizeTo(canvasWidth.value, canvasHeight.value)
-    // Nach Resize: Daten neu anwenden
     if (typeof p5Instance.updateData === 'function') {
       p5Instance.updateData(props.data)
     }
@@ -198,15 +201,10 @@ onBeforeUnmount(() => {
   p5Instance = null
 })
 
-// Reaktive Updates
 watch(() => props.data, (rows) => {
   if (
     p5Instance &&
-    typeof p5Instance.updateData === 'function' &&
-    typeof p5Instance.width === 'number' &&
-    typeof p5Instance.height === 'number' &&
-    p5Instance.width > 0 &&
-    p5Instance.height > 0
+    typeof p5Instance.updateData === 'function'
   ) {
     p5Instance.updateData(rows)
   }

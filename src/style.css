@@ -1,3 +1,49 @@
+.btns {
+  border-radius: 0px;
+  background: black;
+  border: non;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: 'PxGroteskPan', sans-serif;
+  cursor: pointer;
+  transition: border-color 0.25s;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 16px;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.btns button {
+  border: none;
+  background: #000;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: 'PxGroteskPan', sans-serif;
+  color: #fff;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background .2s, border-color .2s;
+
+  margin-left: 0;
+
+}
+
+.btns button.active {
+  background: #fff;
+  color: #000;
+}
+
+.btns button:hover {
+  background: #fff;
+  color: #000;
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1;
@@ -20,16 +66,19 @@ a {
   text-decoration: inherit;
   text-underline-offset: 3px;
 }
+
 a:hover {
   color: black;
 }
 
 body {
   min-width: 320px;
-  min-height: 100dvh;                    /* besser als 100vh auf Mobile */
+  min-height: 100dvh;
+  /* besser als 100vh auf Mobile */
   background: #000;
-  color: #fff;                            /* damit Text lesbar bleibt */
-  margin: 0;  
+  color: #fff;
+  /* damit Text lesbar bleibt */
+  margin: 0;
 }
 
 h1 {
@@ -47,7 +96,7 @@ h2 {
   line-height: 1.1;
 }
 
-button {
+/* button {
   border-radius: 0px;
   background: black;
   border: 1px solid black;
@@ -72,26 +121,30 @@ button:focus-visible {
 button:active {
   background: black;
   color: white;
-  border: 1px solid white;
+  border: 1px solid white; */
 
-}
+/* } */
 
 .card {
   padding: 2em;
 }
 
 #app {
-  min-height: 100dvh;                    /* besser als 100vh auf Mobile */
+  min-height: 100dvh;
+  /* besser als 100vh auf Mobile */
   background: #000;
-  color: #fff;                            /* damit Text lesbar bleibt */
-  margin: 0;  
+  color: #fff;
+  /* damit Text lesbar bleibt */
+  margin: 0;
 }
 
-html{
-  min-height: 100dvh;                    /* besser als 100vh auf Mobile */
+html {
+  min-height: 100dvh;
+  /* besser als 100vh auf Mobile */
   background: #000;
-  color: #fff;                            /* damit Text lesbar bleibt */
-  margin: 0;  
+  color: #fff;
+  /* damit Text lesbar bleibt */
+  margin: 0;
 }
 
 @media (prefers-color-scheme: light) {
@@ -99,9 +152,11 @@ html{
     color: black;
     background-color: #000;
   }
+
   a:hover {
     color: black;
   }
+
   button {
     background-color: black;
   }
@@ -113,4 +168,3 @@ html{
   src: url('/Px-Grotesk-Pan-Bold.otf') format('opentype');
   font-display: swap;
 }
-

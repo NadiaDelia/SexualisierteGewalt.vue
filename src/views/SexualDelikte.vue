@@ -158,10 +158,23 @@ onUnmounted(() => {
         <button
           v-for="s in STRAFTATEN"
           :key="s.key"
-          :class="{active2: active2 === s.key}"
+          :class="{active: active2 === s.key}"
           @click="active2 = s.key"
         >{{ s.label }}</button>
       </div>
+<!-- /*Button von Geschaedigte
+
+<div class="btns">
+        <button
+          v-for="s in STRAFTATEN"
+          :key="s.key"
+          :class="{active: active === s.key}"
+          @click="active = s.key"
+        >{{ s.label }}</button>
+      </div>
+
+      */ -->
+
     </div>
     <div class="split-right">
       <div class="side-text scrollable-text">
@@ -193,12 +206,12 @@ onUnmounted(() => {
   position: sticky;
   top: 30px;
 }
-button {
+/* button {
   transition: 0.2s;
 }
 button:hover {
   transform: translateY(0px);
-}
+} */
 /* Sticky Header */
 /* Snap Scrolling */
 .main-scroll {
@@ -220,29 +233,7 @@ section {
   margin: 0 0 0 60px;
   background: #000;
 }
-.btns {
-  margin-top: 24px;
-  display: flex; 
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.btns button {
-  border: 2px solid #000;
-  background: #000;
-  color: #fff;
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: background .2s, border-color .2s;
-}
-.btns button.active {
-  border: 2px solid #fff;
-  background: #000;
-  color: #fff;
-}
-.btns button:hover {
-  background: #000;
-  border: 2px solid #fff;
-}
+
 .overlay-text {
   position: absolute;
   top: 30px;
