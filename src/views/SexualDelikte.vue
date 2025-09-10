@@ -154,9 +154,30 @@ onUnmounted(() => {
 
 <template>
 <div class="main-scroll">
-  <!-- 1. Titelbild -->
-  <section>
-    <h1>Wer verübt<br/>sexualisierte<br/>Gewalt und<br/>wer ist betroffen?</h1>
+  <!-- 1a. Titelbild -->
+  <div class="fullscreen-section">
+    <div class="fullscreen-sketch">
+      <h1>Wer verübt<br/>sexualisierte<br/>Gewalt und<br/>wer ist betroffen?</h1>
+    </div>
+  </div>
+
+  <!-- 1b. section PKS text: Erklärungstext als Overlay/Stacking -->
+  <section class="text-overlay-section">
+    <div class="text-overlay-content">
+      <h3>Was ist die Polizeiliche Kriminalstatistik?</h3>
+      <p>
+        Die Polizeiliche Kriminalstatistik (PKS) ist eine jährliche Erhebung der Polizei, die Informationen über Straftaten und deren Aufklärung liefert. Sie bildet die Grundlage für die Analyse von Kriminalität in Deutschland.
+      </p>
+      <p>
+        Die PKS erfasst jedoch nur die Fälle, die der Polizei bekannt werden. Die Dunkelziffer, also die nicht erfassten Fälle, bleibt unberücksichtigt.
+      </p>
+      <p>
+        Studien zeigen, dass nur ein Bruchteil der tatsächlichen Fälle sexualisierter Gewalt offiziell erfasst wird. Dies macht die Bekämpfung dieser Verbrechen besonders schwierig.
+      </p>
+      <p>
+        Weitere Analysen und Hintergrundinformationen können hier ergänzt werden.
+      </p>
+    </div>
   </section>
 
   <!-- 2. Split-Section: Sketch links sticky, rechts scrollt Text hoch -->
@@ -228,9 +249,9 @@ onUnmounted(() => {
           @click="active2 = s.key"
         >{{ s.label }}</button>
       </div>
-
     </div>
     <div class="split-right">
+        <div style="height: 150vh;"></div>
       <div class="side-text scrollable-text">
         <h3>Wer sind die Beschuldigten?</h3>
         <p>
@@ -246,6 +267,7 @@ onUnmounted(() => {
           Noch mehr Beispieltext, damit gescrollt werden kann. Füge hier beliebig viel Content ein.
         </p>
       </div>
+      <div style="height: 50vh;"></div>
     </div>
   </div>
 
@@ -427,16 +449,30 @@ onUnmounted(() => {
   background: #000;
 }
 .main-scroll > section,
-.split-section {
+.split-section,
+.fullscreen-section {
   scroll-snap-align: start;
   min-height: 150vh;
 }
+
+/* Erste Section - gleiche Struktur wie Dunkelziffer */
+.fullscreen-section:first-of-type {
+  min-height: 200vh !important;
+}
+
+.fullscreen-section:first-of-type .fullscreen-sketch {
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding-left: 60px;
+  padding-top: 100px;
+}
+
 section {
   display: flex;
   flex-direction: column;
   justify-content: left;
   align-items: left;
-  margin: 0 0 0 60px;
+  margin: 0;
   background: #000;
 }
 
@@ -513,9 +549,10 @@ section {
 
 /* Fullscreen Dunkelziffer Section */
 .fullscreen-section {
-  min-height: 100vh !important;
+  min-height: 200vh !important;
   position: relative;
   scroll-snap-align: start;
+  z-index: 1;
 }
 
 .fullscreen-sketch {
@@ -524,7 +561,8 @@ section {
   margin: 0 !important;
   padding: 0;
   box-sizing: border-box;
-  position: relative;
+  position: sticky;
+  top: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -577,7 +615,7 @@ section {
   color: #000 !important;
 }
 
-/* Text Overlay Section */
+/* Text Overlay Section - scrollt über Dunkelziffer */
 .text-overlay-section {
   min-height: 100vh;
   background: #000;
@@ -587,6 +625,9 @@ section {
   justify-content: center;
   scroll-snap-align: start;
   margin: 0;
+  position: relative;
+  z-index: 3;
+  margin-top: -100vh;
 }
 
 .text-overlay-content {
