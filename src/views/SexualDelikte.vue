@@ -7,6 +7,7 @@ import P5CanvasGeschaedigte from '../components/P5CanvasGeschaedigte.vue'
 import P5CanvasBeschuldigte from '../components/P5CanvasBeschuldigte.vue'
 import P5CanvasOrt from '../components/P5CanvasOrt.vue'
 import P5CanvasBeziehung from '../components/P5CanvasBeziehung.vue'
+import P5CanvasDunkelziffer from '../components/P5CanvasDunkelziffer.vue'
 
 
 
@@ -70,6 +71,17 @@ window.addEventListener('resize', () => {
   heightBeziehung.value = Math.round(window.innerHeight * 0.8)
 })
 
+//** Für Dunkelziffer-Sketch**/
+const activeDunkelziffer = ref('sexuelle_noetigung')
+const dunkelzifferMode = ref('hell') // 'hell' oder 'dunkel'
+const widthDunkelziffer = ref(window.innerWidth)
+const heightDunkelziffer = ref(window.innerHeight)
+
+window.addEventListener('resize', () => {
+  widthDunkelziffer.value = window.innerWidth
+  heightDunkelziffer.value = window.innerHeight
+})
+
 
 
 // CSV laden
@@ -97,6 +109,11 @@ const filteredOrt = computed(() =>
 //Beziehung
 const filteredBeziehung = computed(() =>
   activeBeziehung.value ? raw.value.filter(d => d.straftat === activeBeziehung.value) : raw.value
+)
+
+//Dunkelziffer
+const filteredDunkelziffer = computed(() =>
+  activeDunkelziffer.value ? raw.value.filter(d => d.straftat === activeDunkelziffer.value) : raw.value
 )
 
 // Debug: Überwache Änderungen
@@ -327,6 +344,66 @@ onUnmounted(() => {
           </div>
         </div>
       </div>
+
+      <!-- 6. section dunkelziffer: Sketch Dunkelziffer fullscreen -->
+      <div class="fullscreen-section">
+        <div class="fullscreen-sketch">
+          <h2 class="dunkelziffer-title">Dunkelziffer - Angezeigt vs. Tatsächlich 2024</h2>
+          <div class="dunkelziffer-canvas-container">
+            <P5CanvasDunkelziffer
+              :key="activeDunkelziffer + '-' + dunkelzifferMode + '-' + filteredDunkelziffer.length"
+              :data="filteredDunkelziffer"
+              :width="widthDunkelziffer"
+              :height="heightDunkelziffer"
+              :background="'transparent'"
+              :font-family="'PxGroteskPan'"
+              :dunkelziffer="dunkelzifferMode"
+              :mouse-radius="80"
+              :repel-radius="100"
+              :attract-power="10"
+            />
+          </div>
+          <div class="btns fullscreen-buttons">
+            <div class="filter-buttons">
+              <button
+                v-for="s in STRAFTATEN"
+                :key="s.key"
+                :class="{active: activeDunkelziffer === s.key}"
+                @click="activeDunkelziffer = s.key"
+              >{{ s.label }}</button>
+            </div>
+            <div class="dunkelziffer-toggle-container">
+              <button
+                :class="['toggle-btn', { 'active-dunkelziffer': dunkelzifferMode === 'hell' }]"
+                @click="dunkelzifferMode = 'hell'"
+              >Angezeigt</button>
+              <button
+                :class="['toggle-btn', { 'active-dunkelziffer': dunkelzifferMode === 'dunkel' }]"
+                @click="dunkelzifferMode = 'dunkel'"
+              >Tatsächlich</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. section dunkelziffer text: Erklärungstext als Overlay/Stacking -->
+      <section class="text-overlay-section">
+        <div class="text-overlay-content">
+          <h3>Was ist die Dunkelziffer?</h3>
+          <p>
+            Die Dunkelziffer zeigt den Unterschied zwischen angezeigten und tatsächlichen Fällen sexualisierter Gewalt. Viele Fälle werden nie bei der Polizei gemeldet.
+          </p>
+          <p>
+            Die Gründe dafür sind vielfältig: Scham, Angst vor den Folgen, mangelndes Vertrauen in das Justizsystem oder die Nähe zum Täter.
+          </p>
+          <p>
+            Studien zeigen, dass nur ein Bruchteil der tatsächlichen Fälle sexualisierter Gewalt offiziell erfasst wird. Dies macht die Bekämpfung dieser Verbrechen besonders schwierig.
+          </p>
+          <p>
+            Weitere Analysen und Hintergrundinformationen können hier ergänzt werden.
+          </p>
+        </div>
+      </section>
 </div>
 </template>
 
@@ -432,5 +509,89 @@ section {
 }
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
+}
+
+/* Fullscreen Dunkelziffer Section */
+.fullscreen-section {
+  min-height: 100vh !important;
+  position: relative;
+  scroll-snap-align: start;
+}
+
+.fullscreen-sketch {
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0;
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.dunkelziffer-title {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-68%);
+  z-index: 1;
+  color: #fff;
+  text-align: left;
+  margin: 0;
+  pointer-events: none;
+}
+
+.dunkelziffer-canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fullscreen-buttons {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  z-index: 10;
+}
+
+.dunkelziffer-toggle-container {
+  display: flex;
+  gap: 5px;
+  margin-left: 20px;
+}
+
+.active-dunkelziffer {
+  background-color: #fff !important;
+  color: #000 !important;
+}
+
+/* Text Overlay Section */
+.text-overlay-section {
+  min-height: 100vh;
+  background: #000;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  scroll-snap-align: start;
+  margin: 0;
+}
+
+.text-overlay-content {
+  max-width: 800px;
+  padding: 60px;
+  text-align: left;
 }
 </style>

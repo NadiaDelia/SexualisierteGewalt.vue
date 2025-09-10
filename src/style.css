@@ -20,7 +20,7 @@
 }
 
 /* Allgemeine Button-Styles für Sketches ohne spezielle Container */
-.btns > button {
+.btns>button {
   border: none;
   background: #000;
   font-size: 1em;
@@ -32,12 +32,12 @@
   transition: background .2s, border-color .2s;
 }
 
-.btns > button.active {
+.btns>button.active {
   background: #fff;
   color: #000;
 }
 
-.btns > button:hover {
+.btns>button:hover {
   background: #fff;
   color: #000;
 }
@@ -89,7 +89,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9em;
+  font-size: 1em;
   font-weight: bold;
   background: #000;
   color: #fff;
@@ -116,6 +116,121 @@
   background: #000;
   color: #fff;
 }
+
+/* Spezielle Styling für Dunkelziffer Buttons - alle inline */
+.fullscreen-buttons {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 20px !important;
+  align-items: center !important;
+  background: none !important;
+  padding: 0 !important;
+  width: 80vw !important;
+  max-width: 1200px !important;
+  justify-content: center !important;
+}
+
+.fullscreen-buttons .filter-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.fullscreen-buttons button {
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 1em;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.fullscreen-buttons button:hover {
+  background: #fff;
+  color: #000;
+}
+
+.fullscreen-buttons button.active {
+  background: #fff;
+  color: #000;
+}
+
+/* Dunkelziffer Toggle Button Container */
+.dunkelziffer-toggle-container {
+  display: flex;
+  margin-left: 0;
+  border: 2px solid #fff;
+  overflow: hidden;
+}
+
+/* Dunkelziffer Toggle Buttons - ohne Trennlinie */
+.dunkelziffer-toggle-container .toggle-btn {
+  border: none !important;
+  border-right: none !important;
+  border-radius: 0 !important;
+  min-width: 80px;
+  height: 32px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1em;
+  font-weight: bold;
+  background: #000;
+  color: #fff;
+  cursor: pointer;
+  transition: background .2s, color .2s;
+}
+
+.dunkelziffer-toggle-container .toggle-btn:last-child {
+  border-right: none !important;
+}
+
+.dunkelziffer-toggle-container .toggle-btn.active-dunkelziffer {
+  background-color: #fff !important;
+  color: #000 !important;
+}
+
+/* Hover-Effekt für Dunkelziffer Toggle */
+.dunkelziffer-toggle-container:hover .toggle-btn:hover {
+  background: #fff !important;
+  color: #000 !important;
+}
+
+.dunkelziffer-toggle-container:hover .toggle-btn.active-dunkelziffer:not(:hover) {
+  background: #000 !important;
+  color: #fff !important;
+}
+
+
+.toggle-btn.active-dunkelziffer {
+  background-color: #fff;
+  color: #000;
+}
+
+/* Hover-Effekt: Gehoverter Button wird weiß, aktiver Button wird schwarz */
+.dunkelziffer-toggle-container:hover .toggle-btn:hover {
+  background: #fff;
+  color: #000;
+}
+
+.dunkelziffer-toggle-container:hover .toggle-btn.active-dunkelzifferr:not(:hover) {
+  background: #000;
+  color: #fff;
+}
+
+
+
+
+
+
+
+
+
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
