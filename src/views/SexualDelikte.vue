@@ -8,6 +8,7 @@ import P5CanvasBeschuldigte from '../components/P5CanvasBeschuldigte.vue'
 import P5CanvasOrt from '../components/P5CanvasOrt.vue'
 import P5CanvasBeziehung from '../components/P5CanvasBeziehung.vue'
 import P5CanvasDunkelziffer from '../components/P5CanvasDunkelziffer.vue'
+import P5CanvasTitelblatt from '../components/P5CanvasTitelblatt.vue'
 
 
 
@@ -69,6 +70,15 @@ const heightBeziehung = ref(Math.round(window.innerHeight * 0.8))
 window.addEventListener('resize', () => {
   widthBeziehung.value = Math.round(window.innerWidth * 0.6)
   heightBeziehung.value = Math.round(window.innerHeight * 0.8)
+})
+
+//** Für Titelblatt-Sketch**/
+const widthTitelblatt = ref(window.innerWidth)
+const heightTitelblatt = ref(window.innerHeight)
+
+window.addEventListener('resize', () => {
+  widthTitelblatt.value = window.innerWidth
+  heightTitelblatt.value = window.innerHeight
 })
 
 //** Für Dunkelziffer-Sketch**/
@@ -157,7 +167,16 @@ onUnmounted(() => {
   <!-- 1a. Titelbild -->
   <div class="fullscreen-section">
     <div class="fullscreen-sketch">
-      <h1>Wer verübt<br/>sexualisierte<br/>Gewalt und<br/>wer ist betroffen?</h1>
+      <h1>Muster<br/>und blinde<br/>Flecken</h1>
+      <h2>Was die Polizeiliche Kriminalstatistik zu sexualisierter Gewalt aufzeigt und was nicht</h2>
+      <div class="titelblatt-canvas-container">
+        <P5CanvasTitelblatt
+          :width="widthTitelblatt"
+          :height="heightTitelblatt"
+          :background="'transparent'"
+          :font-family="'PxGroteskPan'"
+        />
+      </div>
     </div>
   </div>
 
@@ -465,6 +484,18 @@ onUnmounted(() => {
   align-items: flex-start;
   padding-left: 60px;
   padding-top: 100px;
+}
+
+.titelblatt-canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 section {
