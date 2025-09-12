@@ -31,23 +31,23 @@ const fontUrl = '/Px-Grotesk-Pan-Bold.otf'
 
 /** Sketch 1 Geschaedigte **/
 const raw = ref([])
-const active = ref('sexuelle_noetigung')
-const width = ref(Math.round(window.innerWidth * 0.6))
-const height = ref(Math.round(window.innerHeight * 0.8))
+const activeGeschaedigte = ref('sexuelle_noetigung')
+const widthGeschaedigte = ref(Math.round(window.innerWidth * 0.6))
+const heightGeschaedigte = ref(Math.round(window.innerHeight * 0.8))
 
 window.addEventListener('resize', () => {
-  width.value = Math.round(window.innerWidth * 0.6)
-  height.value = Math.round(window.innerHeight * 0.8)
+  widthGeschaedigte.value = Math.round(window.innerWidth * 0.6)
+  heightGeschaedigte.value = Math.round(window.innerHeight * 0.8)
 })
 
 /** Sketch 2 Beschuldigte**/
-const active2 = ref('sexuelle_noetigung')
-const width2 = ref(Math.round(window.innerWidth * 0.6))
-const height2 = ref(Math.round(window.innerHeight * 0.8))
+const activeBeschuldigte = ref('sexuelle_noetigung')
+const widthBeschuldigte = ref(Math.round(window.innerWidth * 0.6))
+const heightBeschuldigte = ref(Math.round(window.innerHeight * 0.8))
 
 window.addEventListener('resize', () => {
-  width2.value = Math.round(window.innerWidth * 0.6)
-  height2.value = Math.round(window.innerHeight * 0.8)
+  widthBeschuldigte.value = Math.round(window.innerWidth * 0.6)
+  heightBeschuldigte.value = Math.round(window.innerHeight * 0.8)
 })
 
 
@@ -92,6 +92,19 @@ window.addEventListener('resize', () => {
   heightDunkelziffer.value = window.innerHeight
 })
 
+//** Für Accordion-Liste **/
+const openAccordions = ref({
+  sexuellerUebergriff: false,
+  vergewaltigung: false,
+  missbrauch: false,
+  sexuelleBelästigung: false,
+  exhibitionismus: false
+})
+
+const toggleAccordion = (key) => {
+  openAccordions.value[key] = !openAccordions.value[key]
+}
+
 
 
 // CSV laden
@@ -102,13 +115,13 @@ onMounted(async () => {
 
 // Filterdaten berechnen
 //Geschaedigte
-const filtered = computed(() =>
-  active.value ? raw.value.filter(d => d.straftat === active.value) : raw.value
+const filteredGeschaedigte = computed(() =>
+  activeGeschaedigte.value ? raw.value.filter(d => d.straftat === activeGeschaedigte.value) : raw.value
 )
 
 //Beschuldigte
-const filtered2 = computed(() =>
-  active2.value ? raw.value.filter(d => d.straftat === active2.value) : raw.value
+const filteredBeschuldigte = computed(() =>
+  activeBeschuldigte.value ? raw.value.filter(d => d.straftat === activeBeschuldigte.value) : raw.value
 )
 
 //Ort
@@ -136,7 +149,7 @@ watch(genderOrt, (newVal) => {
 
 console.log('filteredOrt', filteredOrt.value)
 function setFilter(key) {
-  active.value = key
+  activeGeschaedigte.value = key
 }
 
 // Text erscheint erst, wenn Sketch nicht mehr sichtbar ist
@@ -168,7 +181,7 @@ onUnmounted(() => {
   <div class="fullscreen-section">
     <div class="fullscreen-sketch">
       <h1>Muster<br/>und blinde<br/>Flecken</h1>
-      <h2>Was die Polizeiliche Kriminalstatistik zu sexualisierter Gewalt aufzeigt und was nicht</h2>
+      <h2>Was die Polizeiliche Kriminalstatistik 2024<br/>zu Sexualisierter Gewalt aufzeigt – und was nicht</h2>
       <div class="titelblatt-canvas-container">
         <P5CanvasTitelblatt
           :width="widthTitelblatt"
@@ -183,18 +196,66 @@ onUnmounted(() => {
   <!-- 1b. section PKS text: Erklärungstext als Overlay/Stacking -->
   <section class="text-overlay-section">
     <div class="text-overlay-content">
-      <h3>Was ist die Polizeiliche Kriminalstatistik?</h3>
+      <h2>Was ist die Polizeiliche Kriminalstatistik?</h2>
       <p>
-        Die Polizeiliche Kriminalstatistik (PKS) ist eine jährliche Erhebung der Polizei, die Informationen über Straftaten und deren Aufklärung liefert. Sie bildet die Grundlage für die Analyse von Kriminalität in Deutschland.
-      </p>
+    Die Polizei sammelt kontinuierlich Kennziffern zu registrierten Straftaten, auch zu Sexualisierter Gewalt. Sie werden jährlich in der Polizeilichen Kriminalstatistik der Schweiz veröffentlicht. Diese Zahlen sind wichtig: Sie zeigen Entwicklungen, Muster, Häufungen. Sie machen sichtbar, wer Gewalt ausübt, wer betroffen ist, wo Taten passieren und in welcher Beziehung Täter und Betroffene zueinander stehen. Gleichzeitig gilt: Zahlen zeichnen Muster – und lassen blinde Flecken.      
+  </p>
+  <h2 class="h2-spaced">Wir schauen genauer hin</h2>
       <p>
-        Die PKS erfasst jedoch nur die Fälle, die der Polizei bekannt werden. Die Dunkelziffer, also die nicht erfassten Fälle, bleibt unberücksichtigt.
-      </p>
-      <p>
-        Studien zeigen, dass nur ein Bruchteil der tatsächlichen Fälle sexualisierter Gewalt offiziell erfasst wird. Dies macht die Bekämpfung dieser Verbrechen besonders schwierig.
-      </p>
-      <p>
-        Weitere Analysen und Hintergrundinformationen können hier ergänzt werden.
+In fünf Visualisierungen betrachten wir zentrale Delikte Sexualisierter Gewalt. Dabei stützen wir uns auf die Daten der Kriminalstatistik, welche jeweils die angezeigten Fälle zählt. Zudem wichtig zu wissen: Die Statistik registriert nur zwei Geschlechter. Folgende Straftaten stehen im Zentrum: </p>
+<p>
+      <div class="accordion-list">
+        <div class="accordion-item">
+          <div class="accordion-header" @click="toggleAccordion('sexuellerUebergriff')">
+            <span class="accordion-icon" :class="{ 'open': openAccordions.sexuellerUebergriff }">+</span>
+            <span>Sexueller Übergriff und sexuelle Nötigung</span>
+          </div>
+          <div class="accordion-content" :class="{ 'open': openAccordions.sexuellerUebergriff }">
+            <p>Sexueller Übergriff: Sexuelle Handlung gegen den Willen oder Ausnutzen eines Schockzustands.<br/>
+                Sexuelle Nötigung: Zu sexueller Handlung zwingen (Drohung, Gewalt, psychischer Druck, Widerstandsunfähigkeit).</p>
+          </div>
+        </div>
+        
+        <div class="accordion-item">
+          <div class="accordion-header" @click="toggleAccordion('vergewaltigung')">
+            <span class="accordion-icon" :class="{ 'open': openAccordions.vergewaltigung }">+</span>
+            <span>Vergewaltigung</span>
+          </div>
+          <div class="accordion-content" :class="{ 'open': openAccordions.vergewaltigung }">
+            <p>Penetration gegen den Willen oder Ausnutzen eines Schockzustands (geschlechtsneutral).</p>
+          </div>
+        </div>
+        
+        <div class="accordion-item">
+          <div class="accordion-header" @click="toggleAccordion('missbrauch')">
+            <span class="accordion-icon" :class="{ 'open': openAccordions.missbrauch }">+</span>
+            <span>Missbrauch einer urteilsunfähigen oder zum Widerstand unfähigen Person</span>
+          </div>
+          <div class="accordion-content" :class="{ 'open': openAccordions.missbrauch }">
+            <p>Zustand der Unfähigkeit ausnutzen für sexuelle Handlungen (früher «Schändung»).</p>
+          </div>
+        </div>
+        
+        <div class="accordion-item">
+          <div class="accordion-header" @click="toggleAccordion('sexuelleBelästigung')">
+            <span class="accordion-icon" :class="{ 'open': openAccordions.sexuelleBelästigung }">+</span>
+            <span>Sexuelle Belästigung</span>
+          </div>
+          <div class="accordion-content" :class="{ 'open': openAccordions.sexuelleBelästigung }">
+            <p>Unerwartete sexuelle Handlung/Belästigung (tätlich, verbal, schriftlich, bildlich), auf Antrag.</p>
+          </div>
+        </div>
+        
+        <div class="accordion-item">
+          <div class="accordion-header" @click="toggleAccordion('exhibitionismus')">
+            <span class="accordion-icon" :class="{ 'open': openAccordions.exhibitionismus }">+</span>
+            <span>Exhibitionismus</span>
+          </div>
+          <div class="accordion-content" :class="{ 'open': openAccordions.exhibitionismus }">
+            <p>Exhibitionistische Handlung vor anderen, in der Regel auf Antrag.</p>
+          </div>
+        </div>
+      </div>
       </p>
     </div>
   </section>
@@ -202,40 +263,36 @@ onUnmounted(() => {
   <!-- 2. Split-Section: Sketch links sticky, rechts scrollt Text hoch -->
   <div class="split-section">
     <div class="split-left sticky-sketch">
-      <h2>Geschädigte Sexualisierter Gewalt 2024</h2>
+      <h2>Wer ist von Sexualisierter Gewalt betroffen?</h2>
       <P5CanvasGeschaedigte
-        :key="active + '-' + filtered.length"
-        :data="filtered"
-        :width="width"
-        :height="height"
-        :font-url="fontUrl"
+        :key="activeGeschaedigte + '-' + filteredGeschaedigte.length"
+        :data="filteredGeschaedigte"
+        :width="widthGeschaedigte"
+        :height="heightGeschaedigte"
+        :font-family="'PxGroteskPan'"
         :background="0"
       />
       <div class="btns">
         <button
           v-for="s in STRAFTATEN"
           :key="s.key"
-          :class="{active: active === s.key}"
-          @click="active = s.key"
+          :class="{active: activeGeschaedigte === s.key}"
+          @click="activeGeschaedigte = s.key"
         >{{ s.label }}</button>
       </div>
     </div>
     <div class="split-right">
   <div style="height: 150vh;"></div>
   <div class="side-text scrollable-text">
-        <h3>Wer sind die Betroffenen?</h3>
+        <h2>Es trifft vor allem Frauen</h2>
         <p>
-          Sexualisierte Gewalt betrifft Menschen unterschiedlichster Herkunft, Altersgruppen und Geschlechter. Die Zahlen zeigen, dass ...
-        </p>
-        <p>
-          Weitere Informationen, Statistiken und persönliche Geschichten können hier platziert werden.
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, urna eu tincidunt consectetur, nisi nisl aliquam nunc, eget aliquam nisl nunc euismod nunc. Duis euismod, nisl eu aliquam tincidunt, nunc nisl aliquam nunc, eget aliquam nisl nunc euismod nunc.
-        </p>
-        <p>
-          Noch mehr Beispieltext, damit gescrollt werden kann. Füge hier beliebig viel Content ein.
-        </p>
+Die Visualisierung zeigt, wieviele Personen 2024 für die jeweiligen Straftaten Anzeige erstattet haben.
+</p>
+<p>
+  Das Bild ist eindeutig: Frauen stellen bei allen Delikten die überwiegende Mehrheit der Betroffenen. Der Anteil liegt zwischen 84 Prozent (sexuelle Nötigung) und 98 Prozent (Vergewaltigung).       
+ </p>
+ <p>
+Dieses Struktur ist seit Jahren stabil: Frauen machen konstant die deutliche Mehrheit der registrierten Betroffenen aus. Einziger Ausreisser und hier nicht dargestellt: Sexuelle Handlungen mit Kindern. Hier liegt der Anteil Jungen bei rund einem Viertel der Betroffenen. </p>  
       </div>
       <div style="height: 50vh;"></div>
     </div>
@@ -244,13 +301,14 @@ onUnmounted(() => {
   <!-- 3. Split Section: Sketch Beschuldigte sticky + Text (unverändert) -->
   <div class="split-section">
     <div class="split-left sticky-sketch">
-      <h2>Beschuldigte Sexualisierter Gewalt 2024</h2>
+      <h2>Wer übt Sexualisierte Gewalt aus?</h2>
       <P5CanvasBeschuldigte
-        :key="active2 + '-' + filtered2.length"
-        :data="filtered2"
-        :width="width2"
-        :height="height2"
+        :key="activeBeschuldigte + '-' + filteredBeschuldigte.length"
+        :data="filteredBeschuldigte"
+        :width="widthBeschuldigte"
+        :height="heightBeschuldigte"
         :background="0"
+        :font-family="'PxGroteskPan'"
         :show-labels="true"
         left-field="beschuldigte_f"
         right-field="beschuldigte_m"
@@ -264,15 +322,15 @@ onUnmounted(() => {
         <button
           v-for="s in STRAFTATEN"
           :key="s.key"
-          :class="{active: active2 === s.key}"
-          @click="active2 = s.key"
+          :class="{active: activeBeschuldigte === s.key}"
+          @click="activeBeschuldigte = s.key"
         >{{ s.label }}</button>
       </div>
     </div>
     <div class="split-right">
         <div style="height: 150vh;"></div>
       <div class="side-text scrollable-text">
-        <h3>Wer sind die Beschuldigten?</h3>
+        <h2>Nicht alle Männer aber fast immer ein Mann</h2>
         <p>
           Die Beschuldigten sexualisierter Gewalt sind überwiegend männlich, aber auch Frauen sind betroffen. Die Statistiken zeigen ...
         </p>
@@ -293,7 +351,7 @@ onUnmounted(() => {
       <!-- 4. section ort: Sketch Ort sticky + Text -->
       <div class="split-section">
         <div class="split-left sticky-sketch">
-          <h2>Ort der Tat 2024</h2>
+          <h2>Wo findet Sexualisierte Gewalt statt?</h2>
           <P5CanvasOrt
             :key="activeOrt + '-' + genderOrt + '-' + filteredOrt.length"
             :data="filteredOrt"
@@ -325,10 +383,11 @@ onUnmounted(() => {
           </div>
         </div>
         <div class="split-right">
+          <div style="height: 150vh;"></div>
           <div class="side-text scrollable-text">
-            <h3>Wo finden die Taten statt?</h3>
+            <h2>Das Zuhause ist kein sicherer Ort.</h2>
             <p>
-              Die Orte der Taten sind unterschiedlich verteilt. Privat und öffentlich werden hier gegenübergestellt.
+              
             </p>
             <p>
               Weitere Analysen und Hintergrundinformationen können hier ergänzt werden.
@@ -346,7 +405,7 @@ onUnmounted(() => {
       <!-- 5. section beziehung: Sketch Beziehung sticky + Text -->
       <div class="split-section">
         <div class="split-left sticky-sketch">
-          <h2>Beziehung zwischen Täter:in und Geschädigter 2024</h2>
+          <h2>Wie ist die Beziehung zwischen Täter:in und Geschädigter?</h2>
           <P5CanvasBeziehung
             :key="activeBeziehung + '-' + filteredBeziehung.length"
             :data="filteredBeziehung"
@@ -368,10 +427,11 @@ onUnmounted(() => {
           </div>
         </div>
         <div class="split-right">
+          <div style="height: 150vh;"></div>
           <div class="side-text scrollable-text">
-            <h3>Wie ist die Beziehung zwischen Täter:in und Geschädigter?</h3>
+            <h2>Nur selten fremd.</h2>
             <p>
-              Die Beziehung zwischen Täter:in und geschädigter Person variiert stark je nach Art der Straftat. Partner, verwandte Personen, Bekannte, Arbeitskolleg:innen oder völlig fremde Personen können Täter:innen sein.
+            
             </p>
             <p>
               Weitere Analysen und Hintergrundinformationen können hier ergänzt werden.
@@ -389,7 +449,7 @@ onUnmounted(() => {
       <!-- 6. section dunkelziffer: Sketch Dunkelziffer fullscreen -->
       <div class="fullscreen-section">
         <div class="fullscreen-sketch">
-          <h2 class="dunkelziffer-title">Dunkelziffer - Angezeigt vs. Tatsächlich 2024</h2>
+          <h2 class="dunkelziffer-title">Angezeigte vs. tatsächliche Sexualisierte Gewalt</h2>
           <div class="dunkelziffer-canvas-container">
             <P5CanvasDunkelziffer
               :key="activeDunkelziffer + '-' + dunkelzifferMode + '-' + filteredDunkelziffer.length"
@@ -430,7 +490,7 @@ onUnmounted(() => {
       <!-- 7. section dunkelziffer text: Erklärungstext als Overlay/Stacking -->
       <section class="text-overlay-section">
         <div class="text-overlay-content">
-          <h3>Was ist die Dunkelziffer?</h3>
+          <h2>Der Grossteil bleibt unsichtbar.</h2>
           <p>
             Die Dunkelziffer zeigt den Unterschied zwischen angezeigten und tatsächlichen Fällen sexualisierter Gewalt. Viele Fälle werden nie bei der Polizei gemeldet.
           </p>
@@ -483,7 +543,15 @@ onUnmounted(() => {
   justify-content: flex-start;
   align-items: flex-start;
   padding-left: 60px;
-  padding-top: 100px;
+  padding-top: 40px;
+}
+
+.fullscreen-section:first-of-type .fullscreen-sketch h1 {
+  margin-bottom: 20px;
+}
+
+.fullscreen-section:first-of-type .fullscreen-sketch h2 {
+  margin-top: 0;
 }
 
 .titelblatt-canvas-container {

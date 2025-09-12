@@ -4,15 +4,16 @@ import p5 from 'p5'
 
 const props = defineProps({
   data: { type: Array, default: () => [] },
+  width: { type: Number, default: 800 },
+  height: { type: Number, default: 600 },
   background: { type: [Number, Array, String], default: 0 },
-  showLabels: { type: Boolean, default: true },
   fontFamily: { type: String, default: 'PxGroteskPan' },
 })
 
 const mountRef = ref(null)
 let p5Instance = null
-const canvasWidth = ref(1000)
-const canvasHeight = ref(800)
+const canvasWidth = ref(props.width || 800)
+const canvasHeight = ref(props.height || 600)
 
 const sketch = (p) => {
   let particles = [];
@@ -180,8 +181,8 @@ const sketch = (p) => {
 }
 
 function handleResize() {
-  canvasWidth.value = 1000;
-  canvasHeight.value = 800;
+  canvasWidth.value = props.width || 800;
+  canvasHeight.value = props.height || 600;
   if (p5Instance && typeof p5Instance.resizeTo === 'function') {
     p5Instance.resizeTo(canvasWidth.value, canvasHeight.value)
     if (typeof p5Instance.updateData === 'function') {

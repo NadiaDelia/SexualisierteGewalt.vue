@@ -3,11 +3,11 @@ import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import p5 from 'p5'
 
 const props = defineProps({
-  // CSV-Zeilen (gefiltert)
   data: { type: Array, default: () => [] },
   width: { type: Number, default: 800 },
   height: { type: Number, default: 600 },
   background: { type: [Number, Array, String], default: 0 },
+  fontFamily: { type: String, default: 'PxGroteskPan' },
   showLabels: { type: Boolean, default: true },
 
   // Spaltennamen – hier standardmäßig auf "beschuldigte_*"
@@ -22,8 +22,6 @@ const props = defineProps({
   mouseRadius:   { type: Number, default: 150 },
   repelRadius:   { type: Number, default: 80 },
   attractPower:  { type: Number, default: 1.5 },
-  fadeDelayMin:  { type: Number, default: 50 },
-  fadeDelayJitter:{ type: Number, default: 20 },
 })
 
 const mountRef = ref(null)

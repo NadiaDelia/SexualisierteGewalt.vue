@@ -16,7 +16,7 @@ const sketch = (p) => {
   let particles = []
   let crossSize = 20
   let crossStrokeWeight = 10
-  let anzahlKreuze = 400
+  let anzahlKreuze = 500
 
   p.setup = () => {
     p.createCanvas(props.width, props.height)
@@ -73,7 +73,7 @@ const sketch = (p) => {
       if (distToMouse < 80 && !this.perturbed) {
         let dir = p5.Vector.sub(this.pos, mouse)
         dir.normalize()
-        dir.mult(10 + p.random(5))
+        dir.mult(10 + p.random(3))
         this.vel = dir
         this.perturbed = true
         this.perturbTimer = 10 + p.int(p.random(10))
