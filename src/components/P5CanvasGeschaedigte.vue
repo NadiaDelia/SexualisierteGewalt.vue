@@ -2,18 +2,19 @@
 import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import p5 from 'p5'
 
+// Props-Interface: Definiert welche Daten von der Parent-Komponente übergeben werden können
 const props = defineProps({
-  data: { type: Array, default: () => [] },
-  width: { type: Number, default: 800 },
-  height: { type: Number, default: 600 },
-  background: { type: [Number, Array, String], default: 0 },
-  fontFamily: { type: String, default: 'PxGroteskPan' },
+  data: { type: Array, default: () => [] },                    // CSV-Daten für die Visualisierung
+  width: { type: Number, default: 800 },                       // Canvas-Breite in Pixel
+  height: { type: Number, default: 600 },                      // Canvas-Höhe in Pixel
+  background: { type: [Number, Array, String], default: 0 },   // Hintergrundfarbe (p5.js Format)
+  fontFamily: { type: String, default: 'PxGroteskPan' },       // Schriftart für Text-Rendering
 })
 
-const mountRef = ref(null)
+// Vue Template Ref: Verbindung zum DOM-Element für p5.js Canvas-Mounting
+let mountRef = ref(null)
+// p5.js Instance: Wird beim Mounting erstellt, beim Unmounting wieder entfernt
 let p5Instance = null
-const canvasWidth = ref(props.width || 800)
-const canvasHeight = ref(props.height || 600)
 
 const sketch = (p) => {
   let particles = [];
@@ -26,12 +27,10 @@ const sketch = (p) => {
   let crossSize = 14;
   let crossStrokeWeight = 6;
 
-  let customFont = null;
-
   p.setup = () => {
-    p.createCanvas(canvasWidth.value, canvasHeight.value)
+    p.createCanvas(props.width, props.height)
     p.frameRate(60)
-    applyData(props.data)
+    applyData(props.data) // Initiale Daten anwenden, damit die Visualisierung sofort startet
   }
 
   p.draw = () => {
@@ -84,6 +83,7 @@ const sketch = (p) => {
   p.updateData = (rows) => applyData(rows)
   p.resizeTo = (w, h) => p.resizeCanvas(w, h)
 
+  // updateParticlesForCurrentSelection > Name vereinfacht
   function applyData(rows) {
     selectedData = rows || [];
     geschaedigteFrauen = 0;
@@ -106,6 +106,11 @@ const sketch = (p) => {
         particleQueue.push({ x: px, y: py, data: selectedData[i], gender: 'mann' });
       }
     }
+  }
+
+  //1000er-Trennzeichen
+  function formatNumber(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
   }
 
   class Particle {
@@ -174,30 +179,17 @@ const sketch = (p) => {
       p.pop();
     }
   }
-
+//Tausender-Trennzeichen
   function formatNumber(num) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
   }
 }
 
-function handleResize() {
-  canvasWidth.value = props.width || 800;
-  canvasHeight.value = props.height || 600;
-  if (p5Instance && typeof p5Instance.resizeTo === 'function') {
-    p5Instance.resizeTo(canvasWidth.value, canvasHeight.value)
-    if (typeof p5Instance.updateData === 'function') {
-      p5Instance.updateData(props.data)
-    }
-  }
-}
-
 onMounted(() => {
-  window.addEventListener('resize', handleResize)
   p5Instance = new p5(sketch, mountRef.value)
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', handleResize)
   p5Instance?.remove()
   p5Instance = null
 })
@@ -214,10 +206,10 @@ watch(() => props.data, (rows) => {
 
 <template>
   <div ref="mountRef"
-    :style="`display:block; width:${canvasWidth}px; height:${canvasHeight}px;`"
+    :style="`display:block; width:${props.width}px; height:${props.height}px;`"
   ></div>
 </template>
 
 <style scoped>
-/* Nichts nötig – Styling der Schrift kommt global über @font-face */
+/* Styling der Schrift global über @font-face */
 </style>

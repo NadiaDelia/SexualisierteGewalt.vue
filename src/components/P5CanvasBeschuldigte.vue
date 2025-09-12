@@ -8,20 +8,6 @@ const props = defineProps({
   height: { type: Number, default: 600 },
   background: { type: [Number, Array, String], default: 0 },
   fontFamily: { type: String, default: 'PxGroteskPan' },
-  showLabels: { type: Boolean, default: true },
-
-  // Spaltennamen – hier standardmäßig auf "beschuldigte_*"
-  leftField:  { type: String, default: 'beschuldigte_f' },
-  rightField: { type: String, default: 'beschuldigte_m' },
-
-  // Labels
-  leftLabel:  { type: String, default: 'Frauen' },
-  rightLabel: { type: String, default: 'Männer' },
-
-  // Physik-Parameter
-  mouseRadius:   { type: Number, default: 150 },
-  repelRadius:   { type: Number, default: 80 },
-  attractPower:  { type: Number, default: 1.5 },
 })
 
 const mountRef = ref(null)
@@ -36,15 +22,15 @@ const sketch = (p) => {
   let beschuldigteMaenner = 0;
   let visibleFrauen = 0;
   let visibleMaenner = 0;
-  const crossSize = 14;
-  const crossStrokeWeight = 6;
+  let crossSize = 14;
+  let crossStrokeWeight = 6;
 
   // --- Setup ---
   p.setup = () => {
     p.createCanvas(props.width, props.height);
     p.frameRate(60);
     selectedData = props.data || [];
-    updateParticlesForCurrentSelection();
+    applyData(selectedData);
   };
 
   // --- Draw ---
@@ -98,8 +84,16 @@ const sketch = (p) => {
     }
   };
 
+  // Public API für reactive Updates / Resize
+  p.updateData = (rows) => {
+    selectedData = rows || [];
+    applyData(selectedData);
+  };
+  p.resizeTo = (w, h) => p.resizeCanvas(w, h);
+
   // --- Partikel-Update ---
-  function updateParticlesForCurrentSelection() {
+  // Ursprünglich: updateParticlesForCurrentSelection → umbenannt zu applyData für klareren Zweck
+  function applyData(rows) {
     beschuldigteFrauen = 0;
     beschuldigteMaenner = 0;
     visibleFrauen = 0;
@@ -200,12 +194,6 @@ const sketch = (p) => {
     }
   }
 
-  // --- API für Vue ---
-  p.updateData = (rows) => {
-    selectedData = rows || [];
-    updateParticlesForCurrentSelection();
-  };
-  p.resizeTo = (w, h) => p.resizeCanvas(w, h);
 };
 
 

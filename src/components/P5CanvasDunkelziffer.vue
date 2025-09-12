@@ -9,9 +9,6 @@ const props = defineProps({
   background: { type: [Number, Array, String], default: 0 },
   fontFamily: { type: String, default: 'PxGroteskPan' },
   dunkelziffer: { type: String, default: 'hell' }, // 'hell' oder 'dunkel'
-  mouseRadius: { type: Number, default: 80 },
-  repelRadius: { type: Number, default: 100 },
-  attractPower: { type: Number, default: 10 }
 })
 
 const mountRef = ref(null)
@@ -32,7 +29,7 @@ const sketch = (p) => {
     p.createCanvas(props.width, props.height)
     p.frameRate(60)
     selectedData = props.data || []
-    updateParticlesForCurrentSelection()
+    applyData()
   }
 
   p.draw = () => {
@@ -189,7 +186,21 @@ const sketch = (p) => {
     p.text(maennerText, maennerX, blockCenterY + zahlSize + 10)
   }
 
-  function updateParticlesForCurrentSelection() {
+  // Public API für reactive Updates / Resize
+  p.updateData = (rows) => {
+    selectedData = rows || []
+    applyData()
+  }
+  p.updateDunkelziffer = (dunkelziffer) => {
+    updateDunkelzifferTransition()
+  }
+  p.resizeTo = (w, h) => {
+    p.resizeCanvas(w, h)
+    applyData()
+  }
+
+  // Ursprünglich: updateParticlesForCurrentSelection → umbenannt zu applyData für klareren Zweck
+  function applyData() {
     particleQueue = []
     particles = []
     visibleFrau = 0
@@ -393,10 +404,10 @@ const sketch = (p) => {
         let mouse = p.createVector(p.mouseX, p.mouseY)
         let distToMouse = p5.Vector.dist(this.pos, mouse)
 
-        if (distToMouse < props.mouseRadius && !this.perturbed) {
+        if (distToMouse < 80 && !this.perturbed) {
           let dir = p5.Vector.sub(this.pos, mouse)
           dir.normalize()
-          dir.mult(props.attractPower + p.random(3))
+          dir.mult(10 + p.random(3))
           this.vel = dir
           this.perturbed = true
           this.perturbTimer = 2 + Math.floor(p.random(2))
@@ -457,21 +468,6 @@ const sketch = (p) => {
       p.line(0, -size / 2, 0, size / 2)
       p.pop()
     }
-  }
-
-  // API für Vue
-  p.updateData = (rows) => {
-    selectedData = rows || []
-    updateParticlesForCurrentSelection()
-  }
-
-  p.updateDunkelziffer = (dunkelziffer) => {
-    updateDunkelzifferTransition()
-  }
-
-  p.resizeTo = (w, h) => {
-    p.resizeCanvas(w, h)
-    updateParticlesForCurrentSelection()
   }
 }
 
