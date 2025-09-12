@@ -8,12 +8,9 @@ const props = defineProps({
   height: { type: Number, default: 600 },
   background: { type: [Number, Array, String], default: 0 },
   fontFamily: { type: String, default: 'PxGroteskPan' },
-  mouseRadius: { type: Number, default: 150 },
-  repelRadius: { type: Number, default: 80 },
-  attractPower: { type: Number, default: 1.5 }
 })
 
-const mountRef = ref(null)
+let mountRef = ref(null)
 let p5Instance = null
 
 // Beziehungstypen definieren
@@ -43,14 +40,14 @@ const sketch = (p) => {
     arbeit: 0, keine: 0, andere: 0
   }
 
-  const crossSize = 14
-  const crossStrokeWeight = 6
+  let crossSize = 14
+  let crossStrokeWeight = 6
 
   p.setup = () => {
     p.createCanvas(props.width, props.height)
     p.frameRate(60)
     selectedData = props.data || []
-    updateParticlesForCurrentSelection()
+    applyData()
   }
 
   p.draw = () => {
@@ -84,6 +81,13 @@ const sketch = (p) => {
     drawLabelsAndNumbers(p)
   }
 
+  // Public API für reactive Updates / Resize
+  p.updateData = (rows) => {
+    selectedData = rows || []
+    applyData()
+  }
+  p.resizeTo = (w, h) => p.resizeCanvas(w, h)
+
   function drawLabelsAndNumbers(p) {
     let borderText = 30
     
@@ -107,7 +111,8 @@ const sketch = (p) => {
     })
   }
 
-  function updateParticlesForCurrentSelection() {
+  // Ursprünglich: updateParticlesForCurrentSelection → umbenannt zu applyData für klareren Zweck
+  function applyData() {
     // Zähler zurücksetzen
     Object.keys(totals).forEach(key => {
       totals[key] = 0
@@ -172,10 +177,10 @@ const sketch = (p) => {
       let distToMouse = p5.Vector.dist(this.pos, mouse)
       let totalForce = p.createVector(0, 0)
 
-      if (distToMouse < props.mouseRadius) {
+      if (distToMouse < 150) {
         let attractionForce = p5.Vector.sub(mouse, this.pos)
         attractionForce.normalize()
-        attractionForce.mult(props.attractPower)
+        attractionForce.mult(1.5)
         totalForce.add(attractionForce)
       } else {
         let homeForce = p5.Vector.sub(this.home, this.pos)
@@ -183,11 +188,11 @@ const sketch = (p) => {
         totalForce.add(homeForce)
       }
 
-      if (distToMouse < props.mouseRadius) {
+      if (distToMouse < 150) {
         for (let other of particles) {
           if (other !== this) {
             let distance = p5.Vector.dist(this.pos, other.pos)
-            if (distance < props.repelRadius && distance > 0) {
+            if (distance < 80 && distance > 0) {
               let repelForce = p5.Vector.sub(this.pos, other.pos)
               repelForce.normalize()
               repelForce.mult(3.0 / distance)
@@ -231,14 +236,6 @@ const sketch = (p) => {
       p.pop()
     }
   }
-
-  // API für Vue
-  p.updateData = (rows) => {
-    selectedData = rows || []
-    updateParticlesForCurrentSelection()
-  }
-  
-  p.resizeTo = (w, h) => p.resizeCanvas(w, h)
 }
 
 onMounted(() => {

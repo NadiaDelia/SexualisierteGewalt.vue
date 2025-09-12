@@ -20,14 +20,14 @@ const sketch = (p) => {
   let selectedData = [];
   let visiblePrivat = 0;
   let visibleOeffentlich = 0;
-  const crossSize = 14;
-  const crossStrokeWeight = 6;
+  let crossSize = 14;
+  let crossStrokeWeight = 6;
 
   p.setup = () => {
     p.createCanvas(props.width, props.height);
     p.frameRate(60);
     selectedData = props.data || [];
-    updateParticlesForCurrentSelection();
+    applyData();
   };
 
   p.draw = () => {
@@ -75,97 +75,15 @@ const sketch = (p) => {
     p.text(formatNumber(visibleOeffentlich), p.width * 0.54, p.height * 0.54);
   };
 
-  function createFilterButtons() {
-    const buttonData = [
-      { key: 'sexuelle_noetigung', label: 'Sexuelle Nötigung' },
-      { key: 'vergewaltigung', label: 'Vergewaltigung' },
-      { key: 'missbrauch', label: 'Sexueller Missbrauch' },
-      { key: 'belaestigung', label: 'Sexuelle Belästigung' },
-      { key: 'exhibitionismus', label: 'Exhibitionismus' }
-    ];
-    const parent = p._userNode || p.canvas.parentNode;
-    let btnContainer = parent.querySelector('.button-container');
-    if (!btnContainer) {
-      btnContainer = document.createElement('div');
-      btnContainer.className = 'button-container';
-      btnContainer.style.marginTop = '20px';
-      btnContainer.style.display = 'flex';
-      btnContainer.style.gap = '12px';
-      parent.appendChild(btnContainer);
-    }
-    buttonRefs = {};
-    btnContainer.innerHTML = '';
-    buttonData.forEach((btn) => {
-      const b = document.createElement('button');
-      b.textContent = btn.label;
-      b.className = 'filter-btn';
-      b.onclick = () => {
-        currentStraftat = btn.key;
-        selectedData = (props.data || []).filter(d => d.straftat === btn.key);
-        updateParticlesForCurrentSelection();
-        updateButtonStyles();
-      };
-      btnContainer.appendChild(b);
-      buttonRefs[btn.key] = b;
-    });
-    updateButtonStyles();
-  }
+  // Public API für reactive Updates / Resize
+  p.updateData = (rows) => {
+    selectedData = rows || [];
+    applyData();
+  };
+  p.resizeTo = (w, h) => p.resizeCanvas(w, h);
 
-  function createGenderToggle() {
-    const parent = p._userNode || p.canvas.parentNode;
-    let toggleContainer = parent.querySelector('.toggle-group');
-    if (!toggleContainer) {
-      toggleContainer = document.createElement('div');
-      toggleContainer.className = 'toggle-group';
-      toggleContainer.style.marginTop = '20px';
-      toggleContainer.style.display = 'flex';
-      toggleContainer.style.gap = '12px';
-      parent.appendChild(toggleContainer);
-    }
-    genderToggleRefs = {};
-    toggleContainer.innerHTML = '';
-    const btnFrau = document.createElement('button');
-    btnFrau.textContent = 'Frau';
-    btnFrau.className = 'toggle-btn';
-    btnFrau.onclick = () => {
-      currentGender = 'frau';
-      updateGenderButtonStyles();
-      updateParticlesForCurrentSelection();
-    };
-    toggleContainer.appendChild(btnFrau);
-    genderToggleRefs['frau'] = btnFrau;
-    const btnMann = document.createElement('button');
-    btnMann.textContent = 'Mann';
-    btnMann.className = 'toggle-btn';
-    btnMann.onclick = () => {
-      currentGender = 'mann';
-      updateGenderButtonStyles();
-      updateParticlesForCurrentSelection();
-    };
-    toggleContainer.appendChild(btnMann);
-    genderToggleRefs['mann'] = btnMann;
-    updateGenderButtonStyles();
-  }
-
-  function updateButtonStyles() {
-    Object.keys(buttonRefs).forEach(key => {
-      buttonRefs[key].classList.remove('active');
-    });
-    if (currentStraftat && buttonRefs[currentStraftat]) {
-      buttonRefs[currentStraftat].classList.add('active');
-    }
-  }
-
-  function updateGenderButtonStyles() {
-    Object.keys(genderToggleRefs).forEach(key => {
-      genderToggleRefs[key].classList.remove('active-gender');
-    });
-    if (genderToggleRefs[currentGender]) {
-      genderToggleRefs[currentGender].classList.add('active-gender');
-    }
-  }
-
-  function updateParticlesForCurrentSelection() {
+  // Ursprünglich: updateParticlesForCurrentSelection → umbenannt zu applyData für klareren Zweck
+  function applyData() {
     visiblePrivat = 0;
     visibleOeffentlich = 0;
     particleQueue = [];
@@ -269,16 +187,10 @@ const sketch = (p) => {
     }
   }
 
+  //1000er-Trennzeichen
   function formatNumber(num) {
     return (num || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
   }
-
-  // Public API für Vue
-  p.updateData = (rows) => {
-    selectedData = rows || [];
-    updateParticlesForCurrentSelection();
-  };
-  p.resizeTo = (w, h) => p.resizeCanvas(w, h);
 };
 
 onMounted(() => {
