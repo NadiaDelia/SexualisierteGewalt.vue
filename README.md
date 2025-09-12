@@ -1,172 +1,112 @@
 # Sexualized Violence in Switzerland
 
-**Data Visualisation Project**: This repository is the result of the continuous training course Generative Data Design at the Bern Academy of the Arts. It shows the incidence of Sexual Violence in Switzerland based on official statistics.
+**Data Visualization Project**  
+*Bern Academy of the Arts – Generative Data Design*
+
+This project visualizes the incidence of sexualized violence in Switzerland using official statistics and explores interaction-driven forms of data representation.
+
+---
 
 ## Project Description
 
-This project visualizes sexual violence in Switzerland based on five of the crucial offences. It shows who is victim an perpetrator of violence focusing on gender, place and relationship. Furthermore it targets the topic of dark figures. The visualisations use particle systems and mouse interactions and are embedded in a mini website giving necessary context information.
+The visualizations focus on five key offences and show who the victims and perpetrators are by gender, place, and relationship. The project also addresses unreported cases (the "dark figure"). Particle systems and mouse interaction are used to move beyond conventional bar charts and present sensitive data with care.
 
-## Purpose & Goal
+---
 
-This project explores inusual ways of visualising violence data – beyond conventional bar charts:
-- Working with official data from the police crime statistics of the Swiss Federal Statistical Office
-- Using particle systems and mouse interaction for data visualization
-- Exploring visual metaphors of covering and exposing
-- Contextualising the single visualisations in a mini website
-- Integrating multiple web technologies (p5.js, d3.js, vue)
+## Purpose & Goals
 
-## Data Sources & Information
+- Visualize official crime data using generative, non-traditional techniques  
+- Work with data from the Swiss Federal Statistical Office (SFSO)  
+- Use particle systems and interactive behaviors to represent individuals and incidents  
+- Explore visual metaphors of covering and exposing  
+- Embed each visualization in a contextual mini-website  
+- Integrate p5.js, D3.js, and Vue.js
 
-### Data on registered crimes on Sexual Violence
-- **Source**: Police Crime Statistics, Swiss Federal Statistical Office (https://www.bfs.admin.ch/bfs/en/home/statistics/crime-criminal-justice/police/sexualised-violence.html) 
-- **File**: `data_sg.csv`
-- **Time Period**: Data collection from 2024, published in March 2025
-- **Coverage**: Officially registered crimes on Sexual Violence in Switzerland
-- **Usage**: Filtered to show the following crimes: Sexual abuse and indecent assault (Art. 189), rape (Art. 190), abuse of persons incapable of proper judgement or resistanceindecent conduct (Art. 191), indecent conduct (Art. 194) sexual harassment (Art. 198), 
+---
 
+## Data Sources & Structure
 
-### Dark figure
-- **Source**: Crime Survey by Dirk Baier and Nora Markwalder commissioned by the Conference of Cantonal Police Commanders of Switzerland (https://www.unisg.ch/fileadmin/user_upload/HSG_ROOT/_Kernauftritt_HSG/Universitaet/Crime_Survey_2022_Hauptbericht.pdf)
-- **File**: `data_sg.csv` 
-- **Time Period**: Data collection 2021, publication 2022 
-- **Coverage**: National representative survey on prevalence of crime in Switzerland
-- **Usage**: Filtered to show dark figures for sexual abuse and indecent assault,  rape, indecent conduct, sexual harassment (dark figure for Abuse of persons incapable of proper judgement or resistance not available)
+### 1) Official Crime Statistics – Sexualized Violence
 
-### Data Structure
-Each crime of the five entries contains:
-```anzeigerate
-: 
-12.4
-beschuldigte_f
-: 
-23
-beschuldigte_m
-: 
-572
-beschuldigte_total
-: 
-595
-beziehung_andere
-: 
-106
-beziehung_andere_rate
-: 
-0.14
-beziehung_arbeit
-: 
-30
-beziehung_arbeit_rate
-: 
-0.04
-beziehung_bekannt
-: 
-227
-beziehung_bekannt_rate
-: 
-0.31
-beziehung_keine
-: 
-158
-beziehung_keine_rate
-: 
-0.22
-beziehung_partner
-: 
-151
-beziehung_partner_rate
-: 
-0.21
-beziehung_verwandt
-: 
-60
-beziehung_verwandt_rate
-: 
-0.08
-dunkelziffer
-: 
-87.6
-geschaedigte_f
-: 
-613
-geschaedigte_f_dz
-: 
-4944
-geschaedigte_m
-: 
-119
-geschaedigte_m_dz
-: 
-960
-geschaedigte_total
-: 
-732
-ort_oeffentlich_f
-: 
-300
-ort_oeffentlich_m
-: 
-58
-ort_oeffentlich_total
-: 
-358
-ort_privat_f
-: 
-313
-ort_privat_m
-: 
-61
-ort_privat_total
-: 
-374
-ort_rate_oeffentlich
-: 
-0.4886
-ort_rate_privat
-: 
-0.5114
-straftat
-: 
-"sexuelle_noetigung"
+- Source: Police Crime Statistics, Swiss Federal Statistical Office  
+  <https://www.bfs.admin.ch/bfs/en/home/statistics/crime-criminal-justice/police/sexualised-violence.html>
+- File: `data_sg.csv`  
+- Time Period: Data from 2024, published March 2025  
+- Scope: Officially registered sexualized-violence crimes in Switzerland  
+- Filtered offences:
+  - Sexual abuse and indecent assault (Art. 189)
+  - Rape (Art. 190)
+  - Abuse of persons incapable of judgment or resistance (Art. 191)
+  - Indecent conduct (Art. 194)
+  - Sexual harassment (Art. 198)
+
+### 2) Dark Figure (Unreported Cases)
+
+- Source: Crime Survey by Dirk Baier and Nora Markwalder, commissioned by the Conference of Cantonal Police Commanders of Switzerland  
+  PDF: <https://www.unisg.ch/fileadmin/user_upload/HSG_ROOT/_Kernauftritt_HSG/Universitaet/Crime_Survey_2022_Hauptbericht.pdf>
+- File: `data_sg.csv`  
+- Time Period: Survey 2021, published 2022  
+- Scope: Nationally representative survey on crime prevalence  
+- Note: Dark-figure values available for all listed offences except Art. 191.
+
+### Data Structure (example fields)
+
+```json
+{
+  "straftat": "sexuelle_noetigung",
+  "anzeigerate": 12.4,
+  "geschaedigte_total": 732,
+  "geschaedigte_f": 613,
+  "geschaedigte_m": 119,
+  "geschaedigte_f_dz": 4944,
+  "geschaedigte_m_dz": 960,
+  "beschuldigte_total": 595,
+  "beschuldigte_m": 572,
+  "beschuldigte_f": 23,
+  "ort_rate_privat": 0.5114,
+  "ort_rate_oeffentlich": 0.4886,
+  "beziehung_partner_rate": 0.21,
+  "beziehung_bekannt_rate": 0.31
+}
 ```
 
 ## How It Works
 
-This project visualizes sexual violence statistics through interactive particle animations. Each dataset is represented by animated crosses (particles) that respond to mouse interactions, creating an engaging way to explore sensitive data.
+Raw CSV data is transformed into animated visualizations using physics-inspired particle systems. Each particle represents an individual or incident and responds to user input (attraction and repulsion) to reveal patterns and context.
 
-**Core Concept**
-- CSV data is parsed and converted into animated particles
-- Each particle represents a data point (victim, perpetrator, location, etc.)
-- Particles use physics-based interactions (attraction, repulsion) for mouse responsiveness
-- Real-time animations show data loading and filtering effects
+### Visualization Components
 
-**Visualization Components**
-- Victims by Gender (P5CanvasGeschaedigte) - Split-screen showing male/female victims
-- Perpetrators by Gender (P5CanvasBeschuldigte) - Split-screen showing male/female perpetrators 
-- Location Analysis (P5CanvasOrt) - Private vs. public incidents with gender filtering
-- Relationship Context (P5CanvasBeziehung) - 3x2 grid showing perpetrator-victim relationships
-- Dark Figure Estimation (P5CanvasDunkelziffer) - Unreported cases visualization
-- Title Animation (P5CanvasTitelblatt) - Static particle animation for landing page
+- **Title Animation** (`P5CanvasTitelblatt`) — Ambient intro animation for the landing page
+- **Victims by Gender** (`P5CanvasGeschaedigte`) — Split-screen view of female/male victims  
+- **Perpetrators by Gender** (`P5CanvasBeschuldigte`) — Split-screen view of female/male perpetrators  
+- **Location of Incidents** (`P5CanvasOrt`) — Private vs. public, with gender filters  
+- **Relationship Context** (`P5CanvasBeziehung`) — 3x2 grid of victim–perpetrator relationships  
+- **Dark Figure (Unreported Cases)** (`P5CanvasDunkelziffer`) — Reported vs. estimated actual cases  
 
-## Technologies Used
+---
 
-- **p5.js**: Canvas rendering and particle system animation
-- **d3.js**: Geographic projections and spatial data structures
-- **vue.js**
-- **CSV parsing**: Direct data import and processing
-- **CSS**: Responsive styling and typography
-- **HTML**: Structure and semantic markup
+## Technologies
 
-## Setup & Installation
+- **p5.js** — Particle animation and interaction  
+- **D3.js** — CSV parsing  
+- **Vue.js** — Component-driven app structure  
+- **HTML/CSS** — Semantic structure and responsive styling
+
+---
+
+## Setup and Installation
 
 ### Prerequisites
-- Node.js (version 16 or higher)
-- npm or yarn package manager
+
+- Node.js v16 or newer  
+- npm or yarn  
+- VS Code (recommended) with Vue Language Features extension
 
 ### Installation Steps
-1. Clone the repository to your local machine:
+1. **Clone the repository to your local machine:**
 ```bash
-git clone https://github.com/NadiaDelia/SexualisierteGewalt.vue.git
-cd SexualisierteGewalt.vue
+   git clone https://github.com/NadiaDelia/SexualisierteGewalt.vue.git
+   cd SexualisierteGewalt.vue
 ```
 2. Open the project folder in VS Code
 3. Install the Vue extension (recommended for syntax highlighting and IntelliSense)
@@ -178,28 +118,36 @@ npm install
 ```bash
 npm run dev
 ```
-6. Open in browser: Navigate to http://localhost:5173 (or the port shown in terminal)
+Open in browser: Navigate to http://localhost:5173 (or the port shown in terminal)
 
+### Build for Production
+```bash
+npm run build
+```
+The built files will be in the dist/ directory, ready for deployment.
 
-
-### Prerequisites
-- VS Code with the p5.vscode extension (which includes Live Server)
-
-### Running the Project
-1. Clone this repository to your local machine
-2. Open the project folder in VS Code
-3. Install the p5.vscode extension if not already installed
-4. Click "Go Live" button in the VS Code status bar
-5. The project will open in your browser at `http://localhost:5500`
-
-## Live Demo
-
-View the live visualization at: [xxx.www.www]
-
-## Project Status
-
-**Status**: not completed
-**Last Updated**: September 2025  
-**Version**: 1.0
+**Project Structure**
+src/
+├── components/           # P5.js visualization components
+│   ├── P5CanvasGeschaedigte.vue    # Victim statistics
+│   ├── P5CanvasBeschuldigte.vue    # Perpetrator statistics
+│   ├── P5CanvasOrt.vue             # Location analysis
+│   ├── P5CanvasBeziehung.vue       # Relationship context
+│   ├── P5CanvasDunkelziffer.vue    # Dark figure estimation
+│   └── P5CanvasTitelblatt.vue      # Title animation
+├── assets/
+│   └── data_sg.csv       # Source data
+├── App.vue               # Main application component
+└── main.js              # Application entry point
 
 ---
+
+## Live Demo
+View the live visualization at: [Coming Soon]
+
+---
+
+## Project Status
+Status: In Development
+Last Updated: September 2025
+Version: 1.0
