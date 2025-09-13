@@ -90,7 +90,7 @@ Raw CSV data is transformed into animated visualizations using physics-inspired 
 - **p5.js** — Particle animation and interaction  
 - **D3.js** — CSV parsing  
 - **Vue.js** — Component-driven app structure  
-- **HTML/CSS** — Semantic structure and responsive styling
+- **HTML/CSS** — Semantic structure and styling
 
 ---
 
