@@ -28,7 +28,7 @@ const sketch = (p) => {
     p.frameRate(60);
     selectedData = props.data || [];
     applyData();
-  };
+  }
 
   p.draw = () => {
     p.background(props.background);

@@ -88,7 +88,7 @@ const sketch = (p) => {
       if (particle.dunkelziffer === props.dunkelziffer) {
         if (particle.gender === 'frau' && addedFrau < maxPerGender) {
           particleQueue.splice(i, 1)
-          
+
           let newX = particle.x
           let newY = particle.y
 
@@ -124,7 +124,7 @@ const sketch = (p) => {
           addedFrau++
         } else if (particle.gender === 'mann' && addedMann < maxPerGender) {
           particleQueue.splice(i, 1)
-          
+
           let newX = particle.x
           let newY = particle.y
 
@@ -178,12 +178,19 @@ const sketch = (p) => {
     let frauenX = props.width / 2 - abstand - frauenBreite
     let maennerX = props.width / 2 + abstand
 
-    p.textSize(zahlSize)
-    p.textAlign(p.LEFT, p.TOP)
-    p.text(formatNumber(visibleFrau), frauenX, blockCenterY)
-    p.text(formatNumber(visibleMann), maennerX, blockCenterY)
-    p.text(frauenText, frauenX, blockCenterY + zahlSize + 10)
-    p.text(maennerText, maennerX, blockCenterY + zahlSize + 10)
+    // Wenn keine Daten zur Dunkelziffer vorhanden sind, Hinweistext anzeigen
+    if (visibleFrau === 0 && visibleMann === 0) {
+      p.textSize(zahlSize)
+      p.textAlign(p.LEFT, p.CENTER)
+      p.text('Keine Daten\nzur Dunkelziffer\nverfügbar', props.width / 4, props.height / 2)
+    } else {
+      p.textSize(zahlSize)
+      p.textAlign(p.LEFT, p.TOP)
+      p.text(formatNumber(visibleFrau), frauenX, blockCenterY)
+      p.text(formatNumber(visibleMann), maennerX, blockCenterY)
+      p.text(frauenText, frauenX, blockCenterY + zahlSize + 10)
+      p.text(maennerText, maennerX, blockCenterY + zahlSize + 10)
+    }
   }
 
   // Public API für reactive Updates / Resize
