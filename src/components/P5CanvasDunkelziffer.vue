@@ -526,6 +526,19 @@ watch([() => props.width, () => props.height], ([w, h]) => {
 })
 </script>
 
+
 <template>
-  <div ref="mountRef" style="display:block; width:100%; height:100%"></div>
+  <div ref="mountRef" class="canvas-overlay"></div>
 </template>
+
+<style scoped>
+.canvas-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  pointer-events: none;
+}
+</style>
