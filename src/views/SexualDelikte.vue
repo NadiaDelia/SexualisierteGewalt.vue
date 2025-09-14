@@ -1,7 +1,7 @@
 
       
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import * as d3 from 'd3'
 import P5CanvasGeschaedigte from '../components/P5CanvasGeschaedigte.vue'
 import P5CanvasBeschuldigte from '../components/P5CanvasBeschuldigte.vue'
@@ -111,6 +111,74 @@ const toggleAccordion = (key) => {
 onMounted(async () => {
   const csv = await d3.csv(csvUrl, d3.autoType)
   raw.value = csv
+  
+  // Intersection Observer für Auto-Reset
+  setupIntersectionObservers()
+})
+
+// Intersection Observer Logik - Reset auf 'sexuelle_noetigung' wenn Sketch aus Viewport verschwindet
+let intersectionObserver = null
+
+const setupIntersectionObservers = () => {
+  intersectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      // Wenn Element den Viewport verlässt (nicht mehr sichtbar)
+      if (!entry.isIntersecting) {
+        const id = entry.target.id
+        resetSketchToDefault(id)
+      }
+    })
+  }, {
+    threshold: 0.05, // Element gilt als "nicht sichtbar" wenn weniger als 10% sichtbar sind
+    rootMargin: '-50px' // Zusätzlicher Puffer
+  })
+  
+  // Beobachte alle Sketch-Container
+  // Diese IDs müssen im Template gesetzt werden
+  const sketchIds = [
+    'sketch-geschaedigte',
+    'sketch-beschuldigte', 
+    'sketch-ort',
+    'sketch-beziehung',
+    'sketch-dunkelziffer'
+  ]
+  
+  sketchIds.forEach(id => {
+    const element = document.getElementById(id)
+    if (element) {
+      intersectionObserver.observe(element)
+    }
+  })
+}
+
+const resetSketchToDefault = (sketchId) => {
+  console.log(`Resetting ${sketchId} to default`)
+  
+  switch (sketchId) {
+    case 'sketch-geschaedigte':
+      activeGeschaedigte.value = 'sexuelle_noetigung'
+      break
+    case 'sketch-beschuldigte':
+      activeBeschuldigte.value = 'sexuelle_noetigung'
+      break
+    case 'sketch-ort':
+      activeOrt.value = 'sexuelle_noetigung'
+      genderOrt.value = 'frau' // Optional: auch Gender zurücksetzen
+      break
+    case 'sketch-beziehung':
+      activeBeziehung.value = 'sexuelle_noetigung'
+      break
+    case 'sketch-dunkelziffer':
+      activeDunkelziffer.value = 'sexuelle_noetigung'
+      dunkelzifferMode.value = 'hell' // Optional: auch Modus zurücksetzen
+      break
+  }
+}
+
+onBeforeUnmount(() => {
+  if (intersectionObserver) {
+    intersectionObserver.disconnect()
+  }
 })
 
 // Filterdaten berechnen
@@ -145,6 +213,12 @@ watch(activeOrt, (newVal) => {
 })
 watch(genderOrt, (newVal) => {
   console.log('genderOrt changed:', newVal)
+})
+
+// Reset Dunkelziffer-Toggle auf "Angezeigt" wenn Straftat geändert wird
+watch(activeDunkelziffer, (newVal) => {
+  console.log('activeDunkelziffer changed:', newVal)
+  dunkelzifferMode.value = 'hell'
 })
 
 console.log('filteredOrt', filteredOrt.value)
@@ -262,7 +336,7 @@ In fünf Visualisierungen betrachten wir zentrale Delikte Sexualisierter Gewalt.
 
   <!-- 2. Split-Section: Sketch links sticky, rechts scrollt Text hoch -->
   <div class="split-section">
-    <div class="split-left sticky-sketch">
+    <div id="sketch-geschaedigte" class="split-left sticky-sketch">
       <h2>Wer ist von Sexualisierter Gewalt betroffen?</h2>
       <P5CanvasGeschaedigte
         :key="activeGeschaedigte + '-' + filteredGeschaedigte.length"
@@ -300,7 +374,7 @@ Dieses Struktur ist seit Jahren stabil: Frauen machen konstant die deutliche Meh
 
   <!-- 3. Split Section: Sketch Beschuldigte sticky + Text (unverändert) -->
   <div class="split-section">
-    <div class="split-left sticky-sketch">
+    <div class="split-left sticky-sketch" id="sketch-beschuldigte">
       <h2>Wer übt Sexualisierte Gewalt aus?</h2>
       <P5CanvasBeschuldigte
         :key="activeBeschuldigte + '-' + filteredBeschuldigte.length"
@@ -350,7 +424,7 @@ Dieses Struktur ist seit Jahren stabil: Frauen machen konstant die deutliche Meh
 
       <!-- 4. section ort: Sketch Ort sticky + Text -->
       <div class="split-section">
-        <div class="split-left sticky-sketch">
+        <div class="split-left sticky-sketch" id="sketch-ort">
           <h2>Wo findet Sexualisierte Gewalt statt?</h2>
           <P5CanvasOrt
             :key="activeOrt + '-' + genderOrt + '-' + filteredOrt.length"
@@ -405,7 +479,7 @@ Dieses Struktur ist seit Jahren stabil: Frauen machen konstant die deutliche Meh
 
       <!-- 5. section beziehung: Sketch Beziehung sticky + Text -->
       <div class="split-section">
-        <div class="split-left sticky-sketch">
+        <div class="split-left sticky-sketch" id="sketch-beziehung">
           <h2>Wie ist die Beziehung zwischen Täter:in und Geschädigter?</h2>
           <P5CanvasBeziehung
             :key="activeBeziehung + '-' + filteredBeziehung.length"
@@ -450,7 +524,7 @@ Dieses Struktur ist seit Jahren stabil: Frauen machen konstant die deutliche Meh
 
       <!-- 6. section dunkelziffer: Sketch Dunkelziffer fullscreen -->
       <div class="fullscreen-section">
-        <div class="fullscreen-sketch">
+        <div class="fullscreen-sketch" id="sketch-dunkelziffer">
           <h2 class="dunkelziffer-title">Angezeigte vs. tatsächliche Sexualisierte Gewalt</h2>
           <div class="dunkelziffer-canvas-container">
             <P5CanvasDunkelziffer
@@ -673,7 +747,7 @@ section {
 
 .dunkelziffer-title {
   position: absolute;
-  top: 40px;
+  top: 30px;
   left: 50%;
   transform: translateX(-68%);
   z-index: 1;
@@ -689,21 +763,33 @@ section {
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 2;
+  z-index: 15; /* Höher als Buttons, damit Kreuze über alles erscheinen */
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: none; /* Canvas selbst nicht klickbar, damit Buttons durchklickbar bleiben */
 }
 
 .fullscreen-buttons {
   position: absolute;
-  bottom: 40px;
+  bottom: -30px; /* Mehr Abstand vom unteren Rand */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   gap: 20px;
   align-items: center;
   z-index: 10;
+  pointer-events: auto; /* Explizit anklickbar machen */
+}
+
+/* Sicherstellen, dass alle Buttons in fullscreen-buttons anklickbar bleiben */
+.fullscreen-buttons button {
+  pointer-events: auto;
+}
+
+/* Button-Container in Split-Sections - mehr Abstand vom unteren Rand */
+.btns {
+  margin-bottom: 60px; /* Abstand vom unteren Rand der sticky-Elemente */
 }
 
 .dunkelziffer-toggle-container {

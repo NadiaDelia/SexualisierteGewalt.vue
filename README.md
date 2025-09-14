@@ -1,9 +1,9 @@
-# Sexualized Violence in Switzerland
+# Sexualised Violence in Switzerland
 
 **Data Visualization Project**  
 *Bern Academy of the Arts – Generative Data Design*
 
-This project visualizes the incidence of sexualized violence in Switzerland using official statistics and explores interaction-driven forms of data representation.
+This project visualizes the incidence of sexualised violence in Switzerland using official statistics and explores interaction-driven forms of data representation.
 
 ---
 
@@ -19,21 +19,21 @@ The visualizations focus on five key offences and show who the victims and perpe
 - Work with data from the Swiss Federal Statistical Office (SFSO)  
 - Use particle systems and interactive behaviors to represent individuals and incidents  
 - Explore visual metaphors of covering and exposing  
-- Embed each visualization in a contextual mini-website  
+- Embed the visualizations in a contextual mini-website  
 - Integrate p5.js, D3.js, and Vue.js
 
 ---
 
 ## Data Sources & Structure
 
-### 1) Official Crime Statistics – Sexualized Violence
+### 1) Official Crime Statistics – sexualised Violence
 
-- Source: Police Crime Statistics, Swiss Federal Statistical Office  
+- **Source**: Police Crime Statistics, Swiss Federal Statistical Office  
   <https://www.bfs.admin.ch/bfs/en/home/statistics/crime-criminal-justice/police/sexualised-violence.html>
-- File: `data_sg.csv`  
-- Time Period: Data from 2024, published March 2025  
-- Scope: Officially registered sexualized-violence crimes in Switzerland  
-- Filtered offences:
+- **File**: `data_sg.csv`  
+- **Time Period**: Data from 2024, published March 2025  
+- **Scope**: Officially registered sexualised-violence crimes in Switzerland  
+- **Filtered offences**:
   - Sexual abuse and indecent assault (Art. 189)
   - Rape (Art. 190)
   - Abuse of persons incapable of judgment or resistance (Art. 191)
@@ -42,12 +42,12 @@ The visualizations focus on five key offences and show who the victims and perpe
 
 ### 2) Dark Figure (Unreported Cases)
 
-- Source: Crime Survey by Dirk Baier and Nora Markwalder, commissioned by the Conference of Cantonal Police Commanders of Switzerland  
+- **Source**: Crime Survey by Dirk Baier and Nora Markwalder, commissioned by the Conference of Cantonal Police Commanders of Switzerland  
   PDF: <https://www.unisg.ch/fileadmin/user_upload/HSG_ROOT/_Kernauftritt_HSG/Universitaet/Crime_Survey_2022_Hauptbericht.pdf>
-- File: `data_sg.csv`  
-- Time Period: Survey 2021, published 2022  
-- Scope: Nationally representative survey on crime prevalence  
-- Note: Dark-figure values available for all listed offences except Art. 191.
+- **File**: `data_sg.csv`  
+- **Time Period**: Survey 2021, published 2022  
+- **Scope**: Nationally representative survey on crime prevalence  
+- **Note**: Dark-figure values available for all listed offences except Art. 191.
 
 ### Data Structure (example fields)
 
@@ -79,9 +79,9 @@ Raw CSV data is transformed into animated visualizations using physics-inspired 
 - **Title Animation** (`P5CanvasTitelblatt`) — Ambient intro animation for the landing page
 - **Victims by Gender** (`P5CanvasGeschaedigte`) — Split-screen view of female/male victims  
 - **Perpetrators by Gender** (`P5CanvasBeschuldigte`) — Split-screen view of female/male perpetrators  
-- **Location of Incidents** (`P5CanvasOrt`) — Private vs. public, with gender filters  
-- **Relationship Context** (`P5CanvasBeziehung`) — 3x2 grid of victim–perpetrator relationships  
-- **Dark Figure (Unreported Cases)** (`P5CanvasDunkelziffer`) — Reported vs. estimated actual cases  
+- **Location of Incidents** (`P5CanvasOrt`) — Private vs. public, with gender filter  
+- **Relationship Context** (`P5CanvasBeziehung`) — 3x2 grid of victim–perpetrator relationships for reported victims
+- **Dark Figure (Unreported Cases)** (`P5CanvasDunkelziffer`) — Reported vs. estimated victims (dark figure)
 
 ---
 
