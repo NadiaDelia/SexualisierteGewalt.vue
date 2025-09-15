@@ -273,6 +273,7 @@ h2 {
   font-weight: 700;
   font-size: 2.2em;
   line-height: 1.1;
+  margin-bottom: 3px; /* Noch weniger Abstand nach h2 */
 }
 
 /* Spezielle Überschrift mit mehr Abstand */
@@ -286,6 +287,16 @@ p {
   font-weight: 700;
   font-size: 1.4em;
   line-height: 1.3;
+}
+
+/* Kleinere Schriftgröße für Anmerkungen zu Visualisierungen */
+.annotation {
+  font-family: PxGroteskPan, sans-serif;
+  font-weight: 700;
+  font-size: 1em;
+  line-height: 1.3;
+  color: #fff;
+  margin: 0px 0 10px 0; /* Kein Abstand oben mehr */
 }
 
 ul {
@@ -376,7 +387,7 @@ html {
 }
 
 .accordion-item {
-  border-bottom: 2px solid #fff;
+  border-top: 2px solid #fff;
   margin-bottom: 10px;
 }
 
@@ -435,5 +446,66 @@ html {
   font-family: 'PxGroteskPan', sans-serif;
   font-size: 1em;
   line-height: 1.3;
+}
+
+/* Bullet list with crosses */
+.bullet-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.bullet-list li {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  color: #fff;
+  font-family: 'PxGroteskPan', sans-serif;
+  font-size: 1.4em;
+  line-height: 1.3;
+}
+
+.bullet-cross {
+  font-size: 1.85em;
+  font-weight: 700;
+  color: #fff;
+  margin-right: 15px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transform: rotate(45deg);
+  transition: transform 0.3s ease;
+}
+
+/* =========================
+   TRANSITIONS & ANIMATIONS
+   ========================= */
+
+/* Fade-In Transition */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.8s;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* =========================
+   LAYOUT ELEMENTS
+   ========================= */
+
+/* Global Section Styles */
+section {
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+  align-items: left;
+  margin: 0;
+  background: #000;
 }
 
