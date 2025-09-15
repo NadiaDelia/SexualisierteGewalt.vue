@@ -942,7 +942,4 @@ onUnmounted(() => {
   color: #000;
 }
 
-/* =========================
-   FORDERUNGEN FULLSCREEN SECTION (nicht mehr verwendet)
-   ========================= */
 </style>
