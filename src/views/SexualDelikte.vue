@@ -1,5 +1,3 @@
-
-      
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import * as d3 from 'd3'
@@ -16,14 +14,14 @@ import P5CanvasTitelblatt from '../components/P5CanvasTitelblatt.vue'
 // Mapping wie in deinem alten Sketch
 const STRAFTATEN = [
   { key: 'sexuelle_noetigung', label: 'Sexuelle Nötigung' },
-  { key: 'vergewaltigung',     label: 'Vergewaltigung' },
-  { key: 'missbrauch',         label: 'Sexueller Missbrauch' },
-  { key: 'belaestigung',       label: 'Sexuelle Belästigung' },
-  { key: 'exhibitionismus',    label: 'Exhibitionismus' },
+  { key: 'vergewaltigung', label: 'Vergewaltigung' },
+  { key: 'missbrauch', label: 'Sexueller Missbrauch' },
+  { key: 'belaestigung', label: 'Sexuelle Belästigung' },
+  { key: 'exhibitionismus', label: 'Exhibitionismus' },
 ]
 
 // CSV- & Font-Dateien (liegen in src/assets/)
-const csvUrl  = new URL('../assets/data_sg.csv', import.meta.url).href
+const csvUrl = new URL('../assets/data_sg.csv', import.meta.url).href
 // Direkt-URL aus dem public-Ordner:
 const fontUrl = '/Px-Grotesk-Pan-Bold.otf'
 
@@ -111,7 +109,7 @@ const toggleAccordion = (key) => {
 onMounted(async () => {
   const csv = await d3.csv(csvUrl, d3.autoType)
   raw.value = csv
-  
+
   // Intersection Observer für Auto-Reset
   setupIntersectionObservers()
 })
@@ -132,17 +130,17 @@ const setupIntersectionObservers = () => {
     threshold: 0.05, // Element gilt als "nicht sichtbar" wenn weniger als 10% sichtbar sind
     rootMargin: '-50px' // Zusätzlicher Puffer
   })
-  
+
   // Beobachte alle Sketch-Container
   // Diese IDs müssen im Template gesetzt werden
   const sketchIds = [
     'sketch-geschaedigte',
-    'sketch-beschuldigte', 
+    'sketch-beschuldigte',
     'sketch-ort',
     'sketch-beziehung',
     'sketch-dunkelziffer'
   ]
-  
+
   sketchIds.forEach(id => {
     const element = document.getElementById(id)
     if (element) {
@@ -153,7 +151,7 @@ const setupIntersectionObservers = () => {
 
 const resetSketchToDefault = (sketchId) => {
   console.log(`Resetting ${sketchId} to default`)
-  
+
   switch (sketchId) {
     case 'sketch-geschaedigte':
       activeGeschaedigte.value = 'sexuelle_noetigung'
@@ -250,366 +248,337 @@ onUnmounted(() => {
 </script>
 
 <template>
-<div class="main-scroll">
-  <!-- 1a. Titelbild -->
-  <div class="fullscreen-section">
-    <div class="fullscreen-sketch">
-      <h1>Muster<br/>und blinde<br/>Flecken</h1>
-      <h2>Was die Polizeiliche Kriminalstatistik 2024<br/>zu Sexualisierter Gewalt aufzeigt – und was nicht</h2>
-      <div class="titelblatt-canvas-container">
-        <P5CanvasTitelblatt
-          :width="widthTitelblatt"
-          :height="heightTitelblatt"
-          :background="'transparent'"
-          :font-family="'PxGroteskPan'"
-        />
+  <div class="main-scroll">
+    <!-- 1a. Titelbild -->
+    <div class="fullscreen-section">
+      <div class="fullscreen-sketch">
+        <h1>Muster<br />und blinde<br />Flecken</h1>
+        <h2>Was die Polizeiliche Kriminalstatistik 2024<br />zu Sexualisierter Gewalt aufzeigt – und was nicht</h2>
+        <div class="titelblatt-canvas-container">
+          <P5CanvasTitelblatt :width="widthTitelblatt" :height="heightTitelblatt" :background="'transparent'"
+            :font-family="'PxGroteskPan'" />
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- 1b. section PKS text: Erklärungstext als Overlay/Stacking -->
-  <section class="text-overlay-section">
-    <div class="text-overlay-content">
-      <h2>Was ist die Polizeiliche Kriminalstatistik?</h2>
-      <p>
-    Die Polizei sammelt kontinuierlich Kennziffern zu registrierten Straftaten, auch zu Sexualisierter Gewalt. Sie werden jährlich in der Polizeilichen Kriminalstatistik der Schweiz veröffentlicht. Diese Zahlen sind wichtig: Sie zeigen Entwicklungen, Muster, Häufungen. Sie machen sichtbar, wer Gewalt ausübt, wer betroffen ist, wo Taten passieren und in welcher Beziehung Täter und Betroffene zueinander stehen. Gleichzeitig gilt: Zahlen zeichnen Muster – und lassen blinde Flecken.      
-  </p>
-  <h2 class="h2-spaced">Wir schauen genauer hin</h2>
-      <p>
-In fünf Visualisierungen betrachten wir zentrale Delikte Sexualisierter Gewalt. Dabei stützen wir uns auf die Daten der Kriminalstatistik, welche jeweils die angezeigten Fälle zählt. Zudem wichtig zu wissen: Die Statistik registriert nur zwei Geschlechter. Folgende Straftaten stehen im Zentrum: </p>
-<p>
-      <div class="accordion-list">
-        <div class="accordion-item">
-          <div class="accordion-header" @click="toggleAccordion('sexuellerUebergriff')">
-            <span class="accordion-icon" :class="{ 'open': openAccordions.sexuellerUebergriff }">+</span>
-            <span>Sexueller Übergriff und sexuelle Nötigung</span>
-          </div>
-          <div class="accordion-content" :class="{ 'open': openAccordions.sexuellerUebergriff }">
-            <p>Sexueller Übergriff: Sexuelle Handlung gegen den Willen oder Ausnutzen eines Schockzustands.<br/>
-                Sexuelle Nötigung: Zu sexueller Handlung zwingen (Drohung, Gewalt, psychischer Druck, Widerstandsunfähigkeit).</p>
-          </div>
-        </div>
-        
-        <div class="accordion-item">
-          <div class="accordion-header" @click="toggleAccordion('vergewaltigung')">
-            <span class="accordion-icon" :class="{ 'open': openAccordions.vergewaltigung }">+</span>
-            <span>Vergewaltigung</span>
-          </div>
-          <div class="accordion-content" :class="{ 'open': openAccordions.vergewaltigung }">
-            <p>Penetration gegen den Willen oder Ausnutzen eines Schockzustands (geschlechtsneutral).</p>
-          </div>
-        </div>
-        
-        <div class="accordion-item">
-          <div class="accordion-header" @click="toggleAccordion('missbrauch')">
-            <span class="accordion-icon" :class="{ 'open': openAccordions.missbrauch }">+</span>
-            <span>Missbrauch einer urteilsunfähigen oder zum Widerstand unfähigen Person</span>
-          </div>
-          <div class="accordion-content" :class="{ 'open': openAccordions.missbrauch }">
-            <p>Zustand der Unfähigkeit ausnutzen für sexuelle Handlungen (früher «Schändung»).</p>
-          </div>
-        </div>
-        
-        <div class="accordion-item">
-          <div class="accordion-header" @click="toggleAccordion('sexuelleBelästigung')">
-            <span class="accordion-icon" :class="{ 'open': openAccordions.sexuelleBelästigung }">+</span>
-            <span>Sexuelle Belästigung</span>
-          </div>
-          <div class="accordion-content" :class="{ 'open': openAccordions.sexuelleBelästigung }">
-            <p>Unerwartete sexuelle Handlung/Belästigung (tätlich, verbal, schriftlich, bildlich), auf Antrag.</p>
-          </div>
-        </div>
-        
-        <div class="accordion-item">
-          <div class="accordion-header" @click="toggleAccordion('exhibitionismus')">
-            <span class="accordion-icon" :class="{ 'open': openAccordions.exhibitionismus }">+</span>
-            <span>Exhibitionismus</span>
-          </div>
-          <div class="accordion-content" :class="{ 'open': openAccordions.exhibitionismus }">
-            <p>Exhibitionistische Handlung vor anderen, in der Regel auf Antrag.</p>
-          </div>
-        </div>
-      </div>
-      </p>
-    </div>
-  </section>
-
-  <!-- 2. Split-Section: Sketch links sticky, rechts scrollt Text hoch -->
-  <div class="split-section">
-    <div id="sketch-geschaedigte" class="split-left sticky-sketch">
-      <h2>Wer ist von Sexualisierter Gewalt betroffen?</h2>
-      <P5CanvasGeschaedigte
-        :key="activeGeschaedigte + '-' + filteredGeschaedigte.length"
-        :data="filteredGeschaedigte"
-        :width="widthGeschaedigte"
-        :height="heightGeschaedigte"
-        :font-family="'PxGroteskPan'"
-        :background="0"
-      />
-      <div class="btns">
-        <button
-          v-for="s in STRAFTATEN"
-          :key="s.key"
-          :class="{active: activeGeschaedigte === s.key}"
-          @click="activeGeschaedigte = s.key"
-        >{{ s.label }}</button>
-      </div>
-    </div>
-    <div class="split-right">
-  <div style="height: 150vh;"></div>
-  <div class="side-text scrollable-text">
-        <h2>Es trifft vor allem Frauen</h2>
+    <!-- 1b. section PKS text: Erklärungstext als Overlay/Stacking -->
+    <section class="text-overlay-section">
+      <div class="text-overlay-content">
+        <h2>Was ist die Polizeiliche Kriminalstatistik?</h2>
         <p>
-Die Visualisierung zeigt, wieviele Personen 2024 für die jeweiligen Straftaten Anzeige erstattet haben.
-</p>
-<p>
-  Das Bild ist eindeutig: Frauen stellen bei allen Delikten die überwiegende Mehrheit der Betroffenen. Der Anteil liegt zwischen 84 Prozent (sexuelle Nötigung) und 98 Prozent (Vergewaltigung).       
- </p>
- <p>
-Dieses Struktur ist seit Jahren stabil: Frauen machen konstant die deutliche Mehrheit der registrierten Betroffenen aus. Einziger Ausreisser und hier nicht dargestellt: Sexuelle Handlungen mit Kindern. Hier liegt der Anteil Jungen bei rund einem Viertel der Betroffenen. </p>  
-      </div>
-      <div style="height: 50vh;"></div>
-    </div>
-  </div>
+          Die Polizei sammelt kontinuierlich Kennziffern zu registrierten Straftaten, auch zu Sexualisierter Gewalt. Sie
+          werden jährlich in der Polizeilichen Kriminalstatistik der Schweiz veröffentlicht. Diese Zahlen sind wichtig:
+          Sie zeigen Entwicklungen, Muster, Häufungen. Sie machen sichtbar, wer Gewalt ausübt, wer betroffen ist, wo
+          Taten passieren und in welcher Beziehung Täter und Betroffene zueinander stehen. Gleichzeitig gilt: Zahlen
+          zeichnen Muster – und lassen blinde Flecken.
+        </p>
+        <h2 class="h2-spaced">Wir schauen genauer hin</h2>
+        <p>
+          In fünf Visualisierungen betrachten wir zentrale Delikte Sexualisierter Gewalt. Dabei stützen wir uns auf die
+          Daten der Kriminalstatistik, welche jeweils die angezeigten Fälle zählt. Zudem wichtig zu wissen: Die
+          Statistik registriert nur zwei Geschlechter. Folgende Straftaten stehen im Zentrum: </p>
+        <p>
+        <div class="accordion-list">
+          <div class="accordion-item">
+            <div class="accordion-header" @click="toggleAccordion('sexuellerUebergriff')">
+              <span class="accordion-icon" :class="{ 'open': openAccordions.sexuellerUebergriff }">+</span>
+              <span>Sexueller Übergriff und sexuelle Nötigung</span>
+            </div>
+            <div class="accordion-content" :class="{ 'open': openAccordions.sexuellerUebergriff }">
+              <p>Sexueller Übergriff: Sexuelle Handlung gegen den Willen oder Ausnutzen eines Schockzustands.<br />
+                Sexuelle Nötigung: Zu sexueller Handlung zwingen (Drohung, Gewalt, psychischer Druck,
+                Widerstandsunfähigkeit).</p>
+            </div>
+          </div>
 
-  <!-- 3. Split Section: Sketch Beschuldigte sticky + Text (unverändert) -->
-  <div class="split-section">
-    <div class="split-left sticky-sketch" id="sketch-beschuldigte">
-      <h2>Wer übt Sexualisierte Gewalt aus?</h2>
-      <P5CanvasBeschuldigte
-        :key="activeBeschuldigte + '-' + filteredBeschuldigte.length"
-        :data="filteredBeschuldigte"
-        :width="widthBeschuldigte"
-        :height="heightBeschuldigte"
-        :background="0"
-        :font-family="'PxGroteskPan'"
-        :show-labels="true"
-        left-field="beschuldigte_f"
-        right-field="beschuldigte_m"
-        left-label="Frauen"
-        right-label="Männer"
-        :mouse-radius="150"
-        :repel-radius="80"
-        :attract-power="1.5"
-      />
-      <div class="btns">
-        <button
-          v-for="s in STRAFTATEN"
-          :key="s.key"
-          :class="{active: activeBeschuldigte === s.key}"
-          @click="activeBeschuldigte = s.key"
-        >{{ s.label }}</button>
+          <div class="accordion-item">
+            <div class="accordion-header" @click="toggleAccordion('vergewaltigung')">
+              <span class="accordion-icon" :class="{ 'open': openAccordions.vergewaltigung }">+</span>
+              <span>Vergewaltigung</span>
+            </div>
+            <div class="accordion-content" :class="{ 'open': openAccordions.vergewaltigung }">
+              <p>Penetration gegen den Willen oder durch das Ausnutzen eines Schockzustands (geschlechtsneutral).</p>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header" @click="toggleAccordion('missbrauch')">
+              <span class="accordion-icon" :class="{ 'open': openAccordions.missbrauch }">+</span>
+              <span>Missbrauch einer urteilsunfähigen oder zum Widerstand unfähigen Person</span>
+            </div>
+            <div class="accordion-content" :class="{ 'open': openAccordions.missbrauch }">
+              <p>Zustand der Unfähigkeit ausnutzen für sexuelle Handlungen (früher «Schändung»).</p>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header" @click="toggleAccordion('sexuelleBelästigung')">
+              <span class="accordion-icon" :class="{ 'open': openAccordions.sexuelleBelästigung }">+</span>
+              <span>Sexuelle Belästigung</span>
+            </div>
+            <div class="accordion-content" :class="{ 'open': openAccordions.sexuelleBelästigung }">
+              <p>Unerwartete sexuelle Handlung/Belästigung (tätlich, verbal, schriftlich, bildlich), auf Antrag.</p>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header" @click="toggleAccordion('exhibitionismus')">
+              <span class="accordion-icon" :class="{ 'open': openAccordions.exhibitionismus }">+</span>
+              <span>Exhibitionismus</span>
+            </div>
+            <div class="accordion-content" :class="{ 'open': openAccordions.exhibitionismus }">
+              <p>Exhibitionistische Handlung vor anderen, in der Regel auf Antrag.</p>
+            </div>
+          </div>
+        </div>
+        </p>
       </div>
-    </div>
-    <div class="split-right">
+    </section>
+
+    <!-- 2. Split-Section: Sketch links sticky, rechts scrollt Text hoch -->
+    <div class="split-section">
+      <div id="sketch-geschaedigte" class="split-left sticky-sketch">
+        <h2>Wer ist von Sexualisierter Gewalt betroffen?</h2>
+        <p class="annotation">Ein Kreuz entspricht einer geschädigten Person</p>
+        <P5CanvasGeschaedigte :key="activeGeschaedigte + '-' + filteredGeschaedigte.length" :data="filteredGeschaedigte"
+          :width="widthGeschaedigte" :height="heightGeschaedigte" :font-family="'PxGroteskPan'" :background="0" />
+        <div class="btns">
+          <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeGeschaedigte === s.key }"
+            @click="activeGeschaedigte = s.key">{{ s.label }}</button>
+        </div>
+      </div>
+      <div class="split-right">
         <div style="height: 150vh;"></div>
-      <div class="side-text scrollable-text">
-        <h2>Nicht alle Männer aber fast immer ein Mann</h2>
+        <div class="side-text scrollable-text">
+          <h2>Es trifft vor allem Frauen</h2>
+          <p>
+            Die Visualisierung zeigt, wieviele Personen 2024 für die jeweiligen Straftaten Anzeige erstattet haben.
+          </p>
+          <p>
+            Frauen stellen bei allen Delikten die überwiegende Mehrheit der Betroffenen. Der Anteil liegt zwischen 84
+            Prozent (sexuelle Nötigung) und 98 Prozent (Vergewaltigung).
+          </p>
+          <p>
+            Dieses Struktur ist seit Jahren stabil: Frauen machen konstant die deutliche Mehrheit der Betroffenen aus.
+            Einziger Ausreisser und hier nicht dargestellt: Sexuelle Handlungen mit Kindern. Hier liegt der Anteil
+            Jungen bei rund einem Viertel der Betroffenen. </p>
+        </div>
+        <div style="height: 50vh;"></div>
+      </div>
+    </div>
+
+    <!-- 3. Split Section: Sketch Beschuldigte sticky + Text (unverändert) -->
+    <div class="split-section">
+      <div class="split-left sticky-sketch" id="sketch-beschuldigte">
+        <h2>Wer übt Sexualisierte Gewalt aus?</h2>
+        <p class="annotation">Ein Kreuz entspricht einer beschuldigten Person</p>
+        <P5CanvasBeschuldigte :key="activeBeschuldigte + '-' + filteredBeschuldigte.length" :data="filteredBeschuldigte"
+          :width="widthBeschuldigte" :height="heightBeschuldigte" :background="0" :font-family="'PxGroteskPan'"
+          :show-labels="true" left-field="beschuldigte_f" right-field="beschuldigte_m" left-label="Frauen"
+          right-label="Männer" :mouse-radius="150" :repel-radius="80" :attract-power="1.5" />
+        <div class="btns">
+          <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeBeschuldigte === s.key }"
+            @click="activeBeschuldigte = s.key">{{ s.label }}</button>
+        </div>
+      </div>
+      <div class="split-right">
+        <div style="height: 150vh;"></div>
+        <div class="side-text scrollable-text">
+          <h2>Nicht alle Männer aber fast immer ein Mann</h2>
+          <p>
+            Die Darstellung weist das Geschlecht der beschuldigten Personen für die einzelnen Straftaten aus. Das
+            Verhältnis ist noch eindeutiger als bei den Betroffenen Sexualisierter Gewalt. Zwischen 96 Prozent (sexuelle
+            Nötigung) und annähernd 100 Prozent (Vergewaltigung) der Beschuldigten sind Männer.
+          </p>
+          <p>
+            Wichtig zu wissen: Vor der Sexualstrafrechtsreform kannte der Straftatbestand Vergewaltigung ausschliesslich
+            weibliche Betroffene und männliche Täter. Seit 1. Juli 2024 ist das Gesetz geschlechtsneutral definiert.
+            Vergewaltigung umfasst jegliche Penetration gegen den Willen der betroffenen Person oder durch das Ausnutzen
+            eines Schockzustands.
+          </p>
+        </div>
+        <div style="height: 50vh;"></div>
+      </div>
+    </div>
+
+    <!-- 4. section ort: Sketch Ort sticky + Text -->
+    <div class="split-section">
+      <div class="split-left sticky-sketch" id="sketch-ort">
+        <h2>Wo findet Sexualisierte Gewalt statt?</h2>
+        <p class="annotation">Ein Kreuz entspricht einer Straftat</p>
+        <P5CanvasOrt :key="activeOrt + '-' + genderOrt + '-' + filteredOrt.length" :data="filteredOrt" :width="widthOrt"
+          :height="heightOrt" :background="0" :font-family="'PxGroteskPan'" :gender="genderOrt" />
+        <div class="btns">
+          <div class="filter-buttons">
+            <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeOrt === s.key }"
+              @click="activeOrt = s.key">{{ s.label }}</button>
+          </div>
+          <div class="gender-toggle-container">
+            <button :class="['toggle-btn', { 'active-gender': genderOrt === 'frau' }]"
+              @click="genderOrt = 'frau'">F</button>
+            <button :class="['toggle-btn', { 'active-gender': genderOrt === 'mann' }]"
+              @click="genderOrt = 'mann'">M</button>
+          </div>
+        </div>
+      </div>
+      <div class="split-right">
+        <div style="height: 150vh;"></div>
+        <div class="side-text scrollable-text">
+          <h2>Das Zuhause ist kein sicherer Ort.</h2>
+          <p>
+            Die Taten Sexualisierter Gewalt finden überwiegend im privaten Umfeld statt. Ausgenommen sind sexuelle
+            Belästigung und Exhibitionismus. Unter privatem Raum werden ausschliesslich die «eigenen vier Wände»
+            verstanden. Ein Raum gilt als öffentlich, wenn er grundsätzlich für verschiedenste Personen zugänglich ist
+            (beispielsweise auch das Treppenhaus oder die gemeinsame Waschküche eines Mehrfamilienhauses).
+          </p>
+          <p>
+            Sexuelle Nötigung, Vergewaltigung und sexuelle Übergriffe finden überwiegend im privaten Umfeld statt. Das
+            steht im Widerspruch zu verbreiteten Vergewaltigungsmythen, die den Täter als fremden Mann im Dunkeln
+            zeichnen.
+          </p>
+        </div>
+        <div style="height: 50vh;"></div>
+      </div>
+    </div>
+
+    <!-- 5. section beziehung: Sketch Beziehung sticky + Text -->
+    <div class="split-section">
+      <div class="split-left sticky-sketch" id="sketch-beziehung">
+        <h2>Welche Beziehung haben Beschuldigte und Geschädigte?</h2>
+        <p class="annotation">Ein Kreuz entspricht einer geschädigten Person</p>
+        <P5CanvasBeziehung :key="activeBeziehung + '-' + filteredBeziehung.length" :data="filteredBeziehung"
+          :width="widthBeziehung" :height="heightBeziehung" :background="0" :font-family="'PxGroteskPan'"
+          :mouse-radius="150" :repel-radius="80" :attract-power="1.5" />
+        <div class="btns">
+          <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeBeziehung === s.key }"
+            @click="activeBeziehung = s.key">{{ s.label }}</button>
+        </div>
+      </div>
+      <div class="split-right">
+        <div style="height: 150vh;"></div>
+        <div class="side-text scrollable-text">
+          <h2>Nur selten fremd.</h2>
+          <p>
+            Die Visualisierung zeigt anhand der Anzahl Geschädigten die Beziehung zu den Beschuldigten auf. Die sechs
+            Kategorien sind: Partner (Partner*innen und Ex-Partner*innen), verwandt, bekannt (Kollegen, Freunde
+            Bekannte), Arbeit (Arbeit und Ausbildung), keine Beziehung und andere Beziehung (Amtsverhältnis, gesetzliche
+            Vertretung, ärztlicher Kontext, ohne Angabe und unaufgeklärte Straftaten).
+          </p>
+          <p>
+            Es bestätigt sich, was die Daten zur Örtlichkeit andeuten. Die Taten Sexualisierter Gewalt finden vor allem
+            in einem vermeintlich vertrauten Umfeld statt. Einzig bei Exhibitionismus und sexueller Belästigung besteht
+            meist keine Beziehung. Sexuelle Belästigung findet jedoch überall statt, gehäuft auch im Bekanntenkreis oder
+            bei der Arbeit oder in der Ausbildungsstätte.
+          </p>
+        </div>
+        <div style="height: 50vh;"></div>
+      </div>
+    </div>
+
+    <!-- 6. section dunkelziffer: Sketch Dunkelziffer fullscreen -->
+    <div class="fullscreen-section">
+      <div class="fullscreen-sketch" id="sketch-dunkelziffer">
+        <h2 class="dunkelziffer-title">Angezeigte vs. tatsächliche Sexualisierte Gewalt</h2>
+        <p class="dunkelziffer-annotation">Ein Kreuz entspricht einer geschädigten Person</p>
+        <div class="dunkelziffer-canvas-container">
+          <P5CanvasDunkelziffer :key="activeDunkelziffer + '-' + dunkelzifferMode + '-' + filteredDunkelziffer.length"
+            :data="filteredDunkelziffer" :width="widthDunkelziffer" :height="heightDunkelziffer"
+            :background="'transparent'" :font-family="'PxGroteskPan'" :dunkelziffer="dunkelzifferMode"
+            :mouse-radius="80" :repel-radius="100" :attract-power="10" />
+        </div>
+        <div class="btns fullscreen-buttons">
+          <div class="filter-buttons">
+            <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeDunkelziffer === s.key }"
+              @click="activeDunkelziffer = s.key">{{ s.label }}</button>
+          </div>
+          <div class="dunkelziffer-toggle-container">
+            <button :class="['toggle-btn', { 'active-dunkelziffer': dunkelzifferMode === 'hell' }]"
+              @click="dunkelzifferMode = 'hell'">Angezeigt</button>
+            <button :class="['toggle-btn', { 'active-dunkelziffer': dunkelzifferMode === 'dunkel' }]"
+              @click="dunkelzifferMode = 'dunkel'">Tatsächlich</button>
+          </div>
+        </div>
+        <div style="height: 50vh;"></div>
+      </div>
+    </div>
+
+    <!-- 7. section dunkelziffer text: Erklärungstext als Overlay/Stacking -->
+    <section class="text-overlay-section">
+      <div class="text-overlay-content">
+        <h2>Der Grossteil bleibt unsichtbar.</h2>
         <p>
-          Die Beschuldigten sexualisierter Gewalt sind überwiegend männlich, aber auch Frauen sind betroffen. Die Statistiken zeigen ...
+          Die Polizeiliche Kriminalstatistik zählt ausschliesslich, was polizeilich erfasst wird. Was nicht angezeigt
+          wird verbleibt im Dunkeln. Um neben dem Hellfeld auch das Dunkelfeld zu erfassen, werden in der Schweiz
+          regelmässig Prävalenzstudien durchgeführt. Hier wird erfragt, ob die Betroffenen eine Straftat erlebt haben,
+          unabhängig davon, ob sie diese auch zur Anzeige gebracht haben.
         </p>
         <p>
-          Weitere Analysen und Hintergrundinformationen können hier ergänzt werden.
+          Die Dunkelziffern für Sexualisierte Gewalt sind hierbei stets erschreckend hoch. Sie bewegen sich zwischen 88
+          Prozent (Vergewaltigung und Sexuelle Nötigung) und 93 Prozent (sexuelle Belästigung). Das heisst nur rund eine
+          von zehn Personen geht zur Polizei! Damit sind Straftaten im Bereich Sexualisierte Gewalt jene mit der
+          geringsten Anzeigerate. Im Vergleich dazu: Autodiebstahl hat eine Dunkelziffer von 18 Prozent.
         </p>
+        <h2 class="h2-spaced">Warum ist das so?</h2>
         <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, urna eu tincidunt consectetur, nisi nisl aliquam nunc, eget aliquam nisl nunc euismod nunc. Duis euismod, nisl eu aliquam tincidunt, nunc nisl aliquam nunc, eget aliquam nisl nunc euismod nunc.
-        </p>
-        <p>
-          Noch mehr Beispieltext, damit gescrollt werden kann. Füge hier beliebig viel Content ein.
+          Viele Betroffene sehen aus Scham, Schuldgefühlen oder aus Angst, dass ihnen nicht geglaubt wird von einer
+          Anzeige ab. Das hängt unter anderem damit zusammen, dass die meisten Tatpersonen aus dem nahen Umfeld der
+          Geschädigten stammen. So sind sich Betroffene oft unsicher, ob sie überhaupt Anzeige erstatten können. Dass es
+          sich bei Sexualisierter Gewalt um einen massiven, gewaltvollen Eingriff in die Intimsphäre eines Menschen
+          handelt, trägt weiter zur geringen Anzeigerate bei. Vielen Betroffenen fällt es schwer, über das Erlebte zu
+          sprechen. In der Gleichung zwischen Selbstschutz und Recht überwiegt die Angst vor einer Retraumatisierung.
         </p>
       </div>
-      <div style="height: 50vh;"></div>
-    </div>
+    </section>
+
+    <!-- 8. Finale Forderungen Section -->
+    <section class="final-text-overlay-section">
+      <div class="text-overlay-content">
+        <h2 class="h2-spaced">Wir fordern</h2><br/>
+        <ul class="bullet-list">
+          <li><span class="bullet-cross">+</span>Präventionsarbeit: Beispielsweise in Form von nationalen
+            Präventionskampagnen und Arbeit mit Tatpersonen</li>
+          <li><span class="bullet-cross">+</span>Konsequenter Opferschutz: Beispielsweise durch Krisenzentren und
+            24h-Beratungsstellen</li>
+          <li><span class="bullet-cross">+</span>Bessere Strafverfolgung: durch eine konsequente und lückenlose
+            Umsetzung des neuen Sexualstrafrechts</li>
+          <li><span class="bullet-cross">+</span>Finanzielle Ressourcen: eine professionelle und nachhaltige Umsetzung
+            von Massnahmen steht und fällt mit der Finanzierung</li>
+        </ul>
+        <h2 class="h2-spaced">Hilf mit!</h2>
+          <p>
+            Bestelle jetzt ein Postkarten-Set und schreibe Freund*innen, Politiker*innen und Behörden an.
+            Fordere sie auf, Sexualisierte Gewalt konsequent zu bekämpfen. Oder unterstütze unsere Arbeit mit einer Spende.
+          </p>
+      </div>
+    </section>
   </div>
 
-      <!-- 4. section ort: Sketch Ort sticky + Text -->
-      <div class="split-section">
-        <div class="split-left sticky-sketch" id="sketch-ort">
-          <h2>Wo findet Sexualisierte Gewalt statt?</h2>
-          <P5CanvasOrt
-            :key="activeOrt + '-' + genderOrt + '-' + filteredOrt.length"
-            :data="filteredOrt"
-            :width="widthOrt"
-            :height="heightOrt"
-            :background="0"
-            :font-family="'PxGroteskPan'"
-            :gender="genderOrt"
-          />
-          <div class="btns">
-            <div class="filter-buttons">
-              <button
-                v-for="s in STRAFTATEN"
-                :key="s.key"
-                :class="{active: activeOrt === s.key}"
-                @click="activeOrt = s.key"
-              >{{ s.label }}</button>
-            </div>
-            <div class="gender-toggle-container">
-              <button
-                :class="['toggle-btn', { 'active-gender': genderOrt === 'frau' }]"
-                @click="genderOrt = 'frau'"
-              >F</button>
-              <button
-                :class="['toggle-btn', { 'active-gender': genderOrt === 'mann' }]"
-                @click="genderOrt = 'mann'"
-              >M</button>
-            </div>
-          </div>
-        </div>
-        <div class="split-right">
-          <div style="height: 150vh;"></div>
-          <div class="side-text scrollable-text">
-            <h2>Das Zuhause ist kein sicherer Ort.</h2>
-            <p>
-              
-            </p>
-            <p>
-              Weitere Analysen und Hintergrundinformationen können hier ergänzt werden.
-            </p>
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, urna eu tincidunt consectetur, nisi nisl aliquam nunc, eget aliquam nisl nunc euismod nunc. Duis euismod, nisl eu aliquam tincidunt, nunc nisl aliquam nunc, eget aliquam nisl nunc euismod nunc.
-            </p>
-            <p>
-              Noch mehr Beispieltext, damit gescrollt werden kann. Füge hier beliebig viel Content ein.
-            </p>
-          </div>
-          <div style="height: 50vh;"></div>
-        </div>
-      </div>
-
-      <!-- 5. section beziehung: Sketch Beziehung sticky + Text -->
-      <div class="split-section">
-        <div class="split-left sticky-sketch" id="sketch-beziehung">
-          <h2>Wie ist die Beziehung zwischen Täter:in und Geschädigter?</h2>
-          <P5CanvasBeziehung
-            :key="activeBeziehung + '-' + filteredBeziehung.length"
-            :data="filteredBeziehung"
-            :width="widthBeziehung"
-            :height="heightBeziehung"
-            :background="0"
-            :font-family="'PxGroteskPan'"
-            :mouse-radius="150"
-            :repel-radius="80"
-            :attract-power="1.5"
-          />
-          <div class="btns">
-            <button
-              v-for="s in STRAFTATEN"
-              :key="s.key"
-              :class="{active: activeBeziehung === s.key}"
-              @click="activeBeziehung = s.key"
-            >{{ s.label }}</button>
-          </div>
-        </div>
-        <div class="split-right">
-          <div style="height: 150vh;"></div>
-          <div class="side-text scrollable-text">
-            <h2>Nur selten fremd.</h2>
-            <p>
-            
-            </p>
-            <p>
-              Weitere Analysen und Hintergrundinformationen können hier ergänzt werden.
-            </p>
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, urna eu tincidunt consectetur, nisi nisl aliquam nunc, eget aliquam nisl nunc euismod nunc. Duis euismod, nisl eu aliquam tincidunt, nunc nisl aliquam nunc, eget aliquam nisl nunc euismod nunc.
-            </p>
-            <p>
-              Noch mehr Beispieltext, damit gescrollt werden kann. Füge hier beliebig viel Content ein.
-            </p>
-          </div>
-          <div style="height: 50vh;"></div>
-        </div>
-      </div>
-
-      <!-- 6. section dunkelziffer: Sketch Dunkelziffer fullscreen -->
-      <div class="fullscreen-section">
-        <div class="fullscreen-sketch" id="sketch-dunkelziffer">
-          <h2 class="dunkelziffer-title">Angezeigte vs. tatsächliche Sexualisierte Gewalt</h2>
-          <div class="dunkelziffer-canvas-container">
-            <P5CanvasDunkelziffer
-              :key="activeDunkelziffer + '-' + dunkelzifferMode + '-' + filteredDunkelziffer.length"
-              :data="filteredDunkelziffer"
-              :width="widthDunkelziffer"
-              :height="heightDunkelziffer"
-              :background="'transparent'"
-              :font-family="'PxGroteskPan'"
-              :dunkelziffer="dunkelzifferMode"
-              :mouse-radius="80"
-              :repel-radius="100"
-              :attract-power="10"
-            />
-          </div>
-          <div class="btns fullscreen-buttons">
-            <div class="filter-buttons">
-              <button
-                v-for="s in STRAFTATEN"
-                :key="s.key"
-                :class="{active: activeDunkelziffer === s.key}"
-                @click="activeDunkelziffer = s.key"
-              >{{ s.label }}</button>
-            </div>
-            <div class="dunkelziffer-toggle-container">
-              <button
-                :class="['toggle-btn', { 'active-dunkelziffer': dunkelzifferMode === 'hell' }]"
-                @click="dunkelzifferMode = 'hell'"
-              >Angezeigt</button>
-              <button
-                :class="['toggle-btn', { 'active-dunkelziffer': dunkelzifferMode === 'dunkel' }]"
-                @click="dunkelzifferMode = 'dunkel'"
-              >Tatsächlich</button>
-            </div>
-          </div>
-          <div style="height: 50vh;"></div>
-        </div>
-      </div>
-
-      <!-- 7. section dunkelziffer text: Erklärungstext als Overlay/Stacking -->
-      <section class="text-overlay-section">
-        <div class="text-overlay-content">
-          <h2>Der Grossteil bleibt unsichtbar.</h2>
-          <p>
-            Die Dunkelziffer zeigt den Unterschied zwischen angezeigten und tatsächlichen Fällen sexualisierter Gewalt. Viele Fälle werden nie bei der Polizei gemeldet.
-          </p>
-          <p>
-            Die Gründe dafür sind vielfältig: Scham, Angst vor den Folgen, mangelndes Vertrauen in das Justizsystem oder die Nähe zum Täter.
-          </p>
-          <p>
-            Studien zeigen, dass nur ein Bruchteil der tatsächlichen Fälle sexualisierter Gewalt offiziell erfasst wird. Dies macht die Bekämpfung dieser Verbrechen besonders schwierig.
-          </p>
-          <p>
-            Weitere Analysen und Hintergrundinformationen können hier ergänzt werden.
-          </p>
-        </div>
-      </section>
-</div>
 </template>
 
 <style scoped>
+/* =========================
+   SCROLL & LAYOUT SYSTEM
+   ========================= */
 
-/* Scrollbarer Text rechts neben sticky Sketch */
-.scrollable-text {
-  height: auto;
-  min-height: 100vh;
-  overflow-y: visible;
-  position: sticky;
-  top: 30px;
-}
-
-/* Sticky Header */
-/* Snap Scrolling */
+/* Main Scroll Container */
 .main-scroll {
   scroll-snap-type: y mandatory;
   overflow-y: auto;
   height: 100vh;
   background: #000;
 }
-.main-scroll > section,
+
+/* Scroll Snap Behavior */
+.main-scroll>section,
 .split-section,
 .fullscreen-section {
   scroll-snap-align: start;
   min-height: 150vh;
 }
+
+/* =========================
+   FULLSCREEN SECTIONS
+   ========================= */
 
 /* Erste Section - gleiche Struktur wie Dunkelziffer */
 .fullscreen-section:first-of-type {
@@ -643,15 +612,6 @@ Dieses Struktur ist seit Jahren stabil: Frauen machen konstant die deutliche Meh
   justify-content: center;
 }
 
-section {
-  display: flex;
-  flex-direction: column;
-  justify-content: left;
-  align-items: left;
-  margin: 0;
-  background: #000;
-}
-
 .overlay-text {
   position: absolute;
   top: 30px;
@@ -666,6 +626,11 @@ section {
   border: 2px solid #fff;
   pointer-events: none;
 }
+
+/* =========================
+   SPLIT SECTIONS LAYOUT
+   ========================= */
+
 .split-section {
   min-height: 100vh;
   display: flex;
@@ -674,6 +639,7 @@ section {
   scroll-snap-align: start;
   background: #000;
 }
+
 .split-left {
   flex: 1 1 60%;
   display: flex;
@@ -697,12 +663,6 @@ section {
   margin-left: 60px;
 }
 
-.side-text {
-  margin: auto 0;
-  padding: 3em;
-  color: #fff;
-  max-width: 600px;
-}
 .split-right {
   flex: 1 1 40%;
   display: flex;
@@ -711,17 +671,27 @@ section {
   background: #000;
   color: #fff;
   padding: 3em;
-  /* Keine Linie mehr */
   position: relative;
 }
 
-/* Fade-In Transition */
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.8s;
+.side-text {
+  margin: auto 0;
+  padding: 3em;
+  color: #fff;
+  max-width: 600px;
 }
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
+
+.scrollable-text {
+  height: auto;
+  min-height: 100vh;
+  overflow-y: visible;
+  position: sticky;
+  top: 30px;
 }
+
+/* =========================
+   FULLSCREEN SECTIONS
+   ========================= */
 
 /* Fullscreen Dunkelziffer Section */
 .fullscreen-section {
@@ -757,29 +727,48 @@ section {
   pointer-events: none;
 }
 
+.dunkelziffer-annotation {
+  position: absolute;
+  top: 75px;
+  left: 18.4%;
+  z-index: 1;
+  color: #fff;
+  text-align: left;
+  margin: 0;
+  pointer-events: none;
+  font-family: PxGroteskPan, sans-serif;
+  font-weight: 700;
+  font-size: 1em;
+  line-height: 1.3;
+}
+
 .dunkelziffer-canvas-container {
   position: absolute;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 15; /* Höher als Buttons, damit Kreuze über alles erscheinen */
+  z-index: 15;
+  /* Höher als Buttons, damit Kreuze über alles erscheinen */
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none; /* Canvas selbst nicht klickbar, damit Buttons durchklickbar bleiben */
+  pointer-events: none;
+  /* Canvas selbst nicht klickbar, damit Buttons durchklickbar bleiben */
 }
 
 .fullscreen-buttons {
   position: absolute;
-  bottom: -30px; /* Mehr Abstand vom unteren Rand */
+  bottom: -30px;
+  /* Mehr Abstand vom unteren Rand */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   gap: 20px;
   align-items: center;
   z-index: 10;
-  pointer-events: auto; /* Explizit anklickbar machen */
+  pointer-events: auto;
+  /* Explizit anklickbar machen */
 }
 
 /* Sicherstellen, dass alle Buttons in fullscreen-buttons anklickbar bleiben */
@@ -789,7 +778,8 @@ section {
 
 /* Button-Container in Split-Sections - mehr Abstand vom unteren Rand */
 .btns {
-  margin-bottom: 60px; /* Abstand vom unteren Rand der sticky-Elemente */
+  margin-bottom: 60px;
+  /* Abstand vom unteren Rand der sticky-Elemente */
 }
 
 .dunkelziffer-toggle-container {
@@ -803,10 +793,21 @@ section {
   color: #000 !important;
 }
 
-/* Text Overlay Section - scrollt über Dunkelziffer */
+/* =========================
+   TEXT OVERLAY SECTIONS
+   ========================= */
+
+/* Text Overlay Section - scrollt über Dunkelziffer mit sanftem Übergang */
 .text-overlay-section {
-  min-height: 100vh;
-  background: #000;
+  min-height: 200vh; /* Mehr Höhe für besseres Snap-Verhalten */
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 10%,
+    rgba(0, 0, 0, 0.5) 30%,
+    rgba(0, 0, 0, 1) 50%,
+    #000 100%
+  );
   color: #fff;
   display: flex;
   align-items: center;
@@ -816,11 +817,31 @@ section {
   position: relative;
   z-index: 3;
   margin-top: -100vh;
+  padding-top: 100vh; /* Platz für Fade, dann zentrierter Text */
 }
 
 .text-overlay-content {
   max-width: 800px;
   padding: 60px;
   text-align: left;
+}
+
+/* H2 in Text-Overlay-Bereichen sollen auch engen Abstand haben */
+.text-overlay-content h2 {
+  margin-bottom: 3px;
+}
+
+/* Finale Forderungen Section - normale Sektion ohne Overlay */
+.final-text-overlay-section {
+  min-height: 100vh;
+  background: #000;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  scroll-snap-align: start;
+  margin: 0;
+  position: relative;
+  z-index: 4;
 }
 </style>
