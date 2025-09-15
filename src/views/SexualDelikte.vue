@@ -7,6 +7,28 @@ import P5CanvasOrt from '../components/P5CanvasOrt.vue'
 import P5CanvasBeziehung from '../components/P5CanvasBeziehung.vue'
 import P5CanvasDunkelziffer from '../components/P5CanvasDunkelziffer.vue'
 import P5CanvasTitelblatt from '../components/P5CanvasTitelblatt.vue'
+import P5CanvasForderungen from '../components/P5CanvasForderungen.vue'
+
+// Für Forderungen-Sketch
+const widthForderungen = ref(window.innerWidth)
+const heightForderungen = ref(window.innerHeight)
+const triggerFallForderungen = ref(false)
+const resetForderungen = ref(0) // Counter für Reset-Trigger
+
+window.addEventListener('resize', () => {
+  widthForderungen.value = window.innerWidth
+  heightForderungen.value = window.innerHeight
+})
+
+const triggerCrossesFall = () => {
+  // Kreuze fallen lassen
+  triggerFallForderungen.value = true
+  
+  // Nach 3 Sekunden neuen Tab mit brava-ngo.ch öffnen
+  setTimeout(() => {
+    window.open('https://www.brava-ngo.ch/', '_blank')
+  }, 3000)
+}
 
 
 
@@ -120,15 +142,22 @@ let intersectionObserver = null
 const setupIntersectionObservers = () => {
   intersectionObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      // Wenn Element den Viewport verlässt (nicht mehr sichtbar)
       if (!entry.isIntersecting) {
         const id = entry.target.id
-        resetSketchToDefault(id)
+        // Für Forderungen nur reagieren wenn Kreuze tatsächlich fallen
+        if (id === 'sketch-forderungen') {
+          console.log('🔄 Forderungen section left viewport - resetting')
+          if (triggerFallForderungen.value) {
+            resetSketchToDefault(id)
+          }
+        } else {
+          resetSketchToDefault(id)
+        }
       }
     })
   }, {
-    threshold: 0.05, // Element gilt als "nicht sichtbar" wenn weniger als 10% sichtbar sind
-    rootMargin: '-50px' // Zusätzlicher Puffer
+    threshold: 0.1,
+    rootMargin: '-100px'
   })
 
   // Beobachte alle Sketch-Container
@@ -138,7 +167,8 @@ const setupIntersectionObservers = () => {
     'sketch-beschuldigte',
     'sketch-ort',
     'sketch-beziehung',
-    'sketch-dunkelziffer'
+    'sketch-dunkelziffer',
+    'sketch-forderungen' // Forderungen-Sektion hinzugefügt
   ]
 
   sketchIds.forEach(id => {
@@ -169,6 +199,13 @@ const resetSketchToDefault = (sketchId) => {
     case 'sketch-dunkelziffer':
       activeDunkelziffer.value = 'sexuelle_noetigung'
       dunkelzifferMode.value = 'hell' // Optional: auch Modus zurücksetzen
+      break
+    case 'sketch-forderungen':
+      // Forderungen-Sketch zurücksetzen
+      console.log('🔄 Resetting Forderungen sketch via prop...')
+      triggerFallForderungen.value = false
+      resetForderungen.value++
+      console.log('✅ Forderungen reset triggered, counter:', resetForderungen.value)
       break
   }
 }
@@ -530,25 +567,30 @@ onUnmounted(() => {
       </div>
     </section>
 
-    <!-- 8. Finale Forderungen Section -->
-    <section class="final-text-overlay-section">
+    <!-- 8. Finale Forderungen Section mit P5 Canvas im Vordergrund -->
+    <section class="final-text-overlay-section" id="sketch-forderungen">
+      <div class="forderungen-canvas-container">
+        <P5CanvasForderungen :width="widthForderungen" :height="heightForderungen" :background="'transparent'"
+          :font-family="'PxGroteskPan'" :trigger-fall="triggerFallForderungen" :reset-counter="resetForderungen" />
+      </div>
       <div class="text-overlay-content">
-        <h2 class="h2-spaced">Wir fordern</h2><br/>
-        <ul class="bullet-list">
-          <li><span class="bullet-cross">+</span>Präventionsarbeit: Beispielsweise in Form von nationalen
-            Präventionskampagnen und Arbeit mit Tatpersonen</li>
-          <li><span class="bullet-cross">+</span>Konsequenter Opferschutz: Beispielsweise durch Krisenzentren und
-            24h-Beratungsstellen</li>
-          <li><span class="bullet-cross">+</span>Bessere Strafverfolgung: durch eine konsequente und lückenlose
-            Umsetzung des neuen Sexualstrafrechts</li>
-          <li><span class="bullet-cross">+</span>Finanzielle Ressourcen: eine professionelle und nachhaltige Umsetzung
-            von Massnahmen steht und fällt mit der Finanzierung</li>
-        </ul>
-        <h2 class="h2-spaced">Hilf mit!</h2>
-          <p>
-            Bestelle jetzt ein Postkarten-Set und schreibe Freund*innen, Politiker*innen und Behörden an.
-            Fordere sie auf, Sexualisierte Gewalt konsequent zu bekämpfen. Oder unterstütze unsere Arbeit mit einer Spende.
-          </p>
+        <h2 class="h2-spaced">Wir fordern</h2><br />
+        <p>Präventionsarbeit: Beispielsweise in Form von nationalen
+          Präventionskampagnen und Arbeit mit Tatpersonen</p>
+        <p>Konsequenter Opferschutz: Beispielsweise durch Krisenzentren und
+          24h-Beratungsstellen</p>
+        <p>Bessere Strafverfolgung: durch eine konsequente und lückenlose
+          Umsetzung des neuen Sexualstrafrechts</p>
+        <p>Finanzielle Ressourcen: eine professionelle und nachhaltige Umsetzung
+          von Massnahmen steht und fällt mit der Finanzierung</p>
+        <br />
+        <h2>Hilf mit!</h2>
+        <p>
+          Bestelle jetzt ein Postkarten-Set und schreibe Freund*innen, Politiker*innen und Behörden an.
+          Fordere sie auf, Sexualisierte Gewalt konsequent zu bekämpfen. Oder unterstütze unsere Arbeit mit einer
+          Spende.
+        </p>
+        <button class="fall-button" @click="triggerCrossesFall">Jetzt mitmachen!</button>
       </div>
     </section>
   </div>
@@ -562,18 +604,25 @@ onUnmounted(() => {
 
 /* Main Scroll Container */
 .main-scroll {
-  scroll-snap-type: y mandatory;
+  scroll-snap-type: y mandatory; /* Starkes Scroll-Snap wie ursprünglich */
   overflow-y: auto;
   height: 100vh;
   background: #000;
+  /* scroll-behavior entfernt für stärkeres Snap */
 }
 
-/* Scroll Snap Behavior */
+/* Scroll Snap Behavior - stark */
 .main-scroll>section,
 .split-section,
 .fullscreen-section {
   scroll-snap-align: start;
+  scroll-snap-stop: always; /* Noch stärkeres Kleben */
   min-height: 150vh;
+}
+
+/* Finale Sektion - reduzierte Höhe */
+.final-text-overlay-section {
+  min-height: 100vh !important; /* Überschreibt die 150vh von oben */
 }
 
 /* =========================
@@ -799,15 +848,14 @@ onUnmounted(() => {
 
 /* Text Overlay Section - scrollt über Dunkelziffer mit sanftem Übergang */
 .text-overlay-section {
-  min-height: 200vh; /* Mehr Höhe für besseres Snap-Verhalten */
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    transparent 10%,
-    rgba(0, 0, 0, 0.5) 30%,
-    rgba(0, 0, 0, 1) 50%,
-    #000 100%
-  );
+  min-height: 200vh;
+  /* Mehr Höhe für besseres Snap-Verhalten */
+  background: linear-gradient(to bottom,
+      transparent 0%,
+      transparent 10%,
+      rgba(0, 0, 0, 0.5) 30%,
+      rgba(0, 0, 0, 1) 50%,
+      #000 100%);
   color: #fff;
   display: flex;
   align-items: center;
@@ -817,7 +865,8 @@ onUnmounted(() => {
   position: relative;
   z-index: 3;
   margin-top: -100vh;
-  padding-top: 100vh; /* Platz für Fade, dann zentrierter Text */
+  padding-top: 100vh;
+  /* Platz für Fade, dann zentrierter Text */
 }
 
 .text-overlay-content {
@@ -833,15 +882,67 @@ onUnmounted(() => {
 
 /* Finale Forderungen Section - normale Sektion ohne Overlay */
 .final-text-overlay-section {
-  min-height: 100vh;
+  min-height: 100vh; /* Gleich wie andere Sektionen */
   background: #000;
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   scroll-snap-align: start;
+  scroll-snap-stop: always; /* Auch hier starkes Kleben */
   margin: 0;
   position: relative;
   z-index: 4;
 }
+
+/* Forderungen Canvas Container - Vollbild Canvas, zentriert */
+.forderungen-canvas-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100vw;
+  height: 100vh;
+  z-index: 10;
+  /* Hoch genug über dem Text */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  /* Canvas selbst nicht klickbar, damit Button durchklickbar bleibt */
+}
+
+/* Canvas innerhalb des Containers soll interaktiv bleiben */
+.forderungen-canvas-container canvas {
+  pointer-events: auto;
+}
+
+/* Fall Button für Forderungen Section */
+.fall-button {
+  margin-top: 30px;
+  padding: 12px 24px;
+  background-color: #000;
+  color: #fff;
+  border: 2px solid #fff;
+  font-family: 'PxGroteskPan', sans-serif;
+  font-weight: bold;
+  font-size: 1.4em;
+  cursor: pointer;
+  border-radius: 0;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 20;
+  /* Höher als Canvas, damit Button klickbar bleibt */
+  pointer-events: auto;
+  /* Button explizit klickbar machen */
+}
+
+.fall-button:hover {
+  background-color: #fff;
+  color: #000;
+}
+
+/* =========================
+   FORDERUNGEN FULLSCREEN SECTION (nicht mehr verwendet)
+   ========================= */
 </style>
