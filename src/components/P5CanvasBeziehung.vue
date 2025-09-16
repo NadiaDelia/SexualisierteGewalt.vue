@@ -6,7 +6,7 @@ const props = defineProps({
   data: { type: Array, default: () => [] },
   width: { type: Number, default: 800 },
   height: { type: Number, default: 600 },
-  background: { type: [Number, Array, String], default: 0 },
+  background: { type: [Number, Array, String], default: 255 },
   fontFamily: { type: String, default: 'PxGroteskPan' },
 })
 
@@ -55,7 +55,7 @@ const sketch = (p) => {
     p.textFont('PxGroteskPan')
     p.textSize(60)
     p.textAlign(p.LEFT, p.BOTTOM)
-    p.fill(0)
+    p.fill(255)
 
     // Partikel zeichnen
     for (let i = 0; i < particles.length; i++) {
@@ -227,7 +227,7 @@ const sketch = (p) => {
       p.push()
       p.translate(this.pos.x, this.pos.y)
       p.rotate(p.PI / 4)
-      p.stroke(255)
+      p.stroke(0)
       p.strokeWeight(crossStrokeWeight)
       p.strokeCap(p.SQUARE)
       let size = 2.5 * this.r
