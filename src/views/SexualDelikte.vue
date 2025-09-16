@@ -529,7 +529,7 @@ onUnmounted(() => {
     <!-- 7. section dunkelziffer text: Erklärungstext als Overlay/Stacking -->
     <section class="text-overlay-section">
       <div class="text-overlay-content">
-        <h2>Der Grossteil bleibt unsichtbar.</h2>
+        <h2>Das meiste bleibt im Dunkeln.</h2>
         <p>
           Die Polizeiliche Kriminalstatistik zählt ausschliesslich, was polizeilich erfasst wird. Was nicht angezeigt
           wird verbleibt im Dunkeln. Um neben dem Hellfeld auch das Dunkelfeld zu erfassen, werden in der Schweiz

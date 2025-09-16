@@ -143,7 +143,7 @@ src/
 ---
 
 ## Live Demo
-View the live visualization at: [Coming Soon]
+View the live visualization at: [https://sexualisiertegewalt.ch/]
 
 ---
 
