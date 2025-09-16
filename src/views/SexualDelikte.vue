@@ -378,7 +378,7 @@ onUnmounted(() => {
         <h2>Wer ist von Sexualisierter Gewalt betroffen?</h2>
         <p class="annotation">Ein Kreuz entspricht einer geschädigten Person</p>
         <P5CanvasGeschaedigte :key="activeGeschaedigte + '-' + filteredGeschaedigte.length" :data="filteredGeschaedigte"
-          :width="widthGeschaedigte" :height="heightGeschaedigte" :font-family="'PxGroteskPan'" :background="0" />
+          :width="widthGeschaedigte" :height="heightGeschaedigte" :font-family="'PxGroteskPan'" :background="255" />
         <div class="btns">
           <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeGeschaedigte === s.key }"
             @click="activeGeschaedigte = s.key">{{ s.label }}</button>
@@ -410,7 +410,7 @@ onUnmounted(() => {
         <h2>Wer übt Sexualisierte Gewalt aus?</h2>
         <p class="annotation">Ein Kreuz entspricht einer beschuldigten Person</p>
         <P5CanvasBeschuldigte :key="activeBeschuldigte + '-' + filteredBeschuldigte.length" :data="filteredBeschuldigte"
-          :width="widthBeschuldigte" :height="heightBeschuldigte" :background="0" :font-family="'PxGroteskPan'"
+          :width="widthBeschuldigte" :height="heightBeschuldigte" :background="255" :font-family="'PxGroteskPan'"
           :show-labels="true" left-field="beschuldigte_f" right-field="beschuldigte_m" left-label="Frauen"
           right-label="Männer" :mouse-radius="150" :repel-radius="80" :attract-power="1.5" />
         <div class="btns">
@@ -444,7 +444,7 @@ onUnmounted(() => {
         <h2>Wo findet Sexualisierte Gewalt statt?</h2>
         <p class="annotation">Ein Kreuz entspricht einer Straftat</p>
         <P5CanvasOrt :key="activeOrt + '-' + genderOrt + '-' + filteredOrt.length" :data="filteredOrt" :width="widthOrt"
-          :height="heightOrt" :background="0" :font-family="'PxGroteskPan'" :gender="genderOrt" />
+          :height="heightOrt" :background="255" :font-family="'PxGroteskPan'" :gender="genderOrt" />
         <div class="btns">
           <div class="filter-buttons">
             <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeOrt === s.key }"
@@ -484,7 +484,7 @@ onUnmounted(() => {
         <h2>Welche Beziehung haben Beschuldigte und Geschädigte?</h2>
         <p class="annotation">Ein Kreuz entspricht einer geschädigten Person</p>
         <P5CanvasBeziehung :key="activeBeziehung + '-' + filteredBeziehung.length" :data="filteredBeziehung"
-          :width="widthBeziehung" :height="heightBeziehung" :background="0" :font-family="'PxGroteskPan'"
+          :width="widthBeziehung" :height="heightBeziehung" :background="255" :font-family="'PxGroteskPan'"
           :mouse-radius="150" :repel-radius="80" :attract-power="1.5" />
         <div class="btns">
           <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeBeziehung === s.key }"
@@ -607,7 +607,7 @@ onUnmounted(() => {
   scroll-snap-type: y mandatory; /* Starkes Scroll-Snap wie ursprünglich */
   overflow-y: auto;
   height: 100vh;
-  background: #000;
+  background: #fff;
   /* scroll-behavior entfernt für stärkeres Snap */
 }
 
@@ -629,9 +629,9 @@ onUnmounted(() => {
    FULLSCREEN SECTIONS
    ========================= */
 
-/* Erste Section - gleiche Struktur wie Dunkelziffer */
+/* Erste Section - gleiche Struktur wie Dunkelziffer, erweitert für Overlay */
 .fullscreen-section:first-of-type {
-  min-height: 200vh !important;
+  min-height: 350vh !important; /* Erweitert für längeren Text-Overlay */
 }
 
 .fullscreen-section:first-of-type .fullscreen-sketch {
@@ -666,13 +666,13 @@ onUnmounted(() => {
   top: 30px;
   left: 30px;
   right: 30px;
-  background: #000;
-  color: #fff;
+  background: #fff;
+  color: #000;
   padding: 24px;
   opacity: 0.95;
   z-index: 2;
   font-size: 1.2em;
-  border: 2px solid #fff;
+  border: 3px solid #fff;
   pointer-events: none;
 }
 
@@ -686,7 +686,7 @@ onUnmounted(() => {
   flex-direction: row;
   align-items: stretch;
   scroll-snap-align: start;
-  background: #000;
+  background: #fff;
 }
 
 .split-left {
@@ -695,7 +695,7 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: left;
   justify-content: left;
-  background: #000;
+  background: #fff;
   margin-left: 60px;
 }
 
@@ -704,7 +704,7 @@ onUnmounted(() => {
   top: 0;
   height: 100vh;
   z-index: 1;
-  background: #000;
+  background: #fff;
   display: flex;
   flex-direction: column;
   align-items: left;
@@ -717,8 +717,8 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   justify-content: left;
-  background: #000;
-  color: #fff;
+  background: #fff;
+  color: #000;
   padding: 3em;
   position: relative;
 }
@@ -726,7 +726,7 @@ onUnmounted(() => {
 .side-text {
   margin: auto 0;
   padding: 3em;
-  color: #fff;
+  color:#000;
   max-width: 600px;
 }
 
@@ -742,9 +742,9 @@ onUnmounted(() => {
    FULLSCREEN SECTIONS
    ========================= */
 
-/* Fullscreen Dunkelziffer Section */
+/* Fullscreen Dunkelziffer Section - erweitert für Text-Overlay */
 .fullscreen-section {
-  min-height: 200vh !important;
+  min-height: 350vh !important; /* Erweitert für längeren Text-Overlay */
   position: relative;
   scroll-snap-align: start;
   z-index: 1;
@@ -770,7 +770,7 @@ onUnmounted(() => {
   left: 50%;
   transform: translateX(-68%);
   z-index: 1;
-  color: #fff;
+  color: #000;
   text-align: left;
   margin: 0;
   pointer-events: none;
@@ -781,7 +781,8 @@ onUnmounted(() => {
   top: 75px;
   left: 18.4%;
   z-index: 1;
-  color: #fff;
+  color:#000;
+;
   text-align: left;
   margin: 0;
   pointer-events: none;
@@ -846,27 +847,28 @@ onUnmounted(() => {
    TEXT OVERLAY SECTIONS
    ========================= */
 
-/* Text Overlay Section - scrollt über Dunkelziffer mit sanftem Übergang */
+/* Text Overlay Section - scrollt über vorherige Section mit sanftem Übergang */
 .text-overlay-section {
-  min-height: 200vh;
-  /* Mehr Höhe für besseres Snap-Verhalten */
+  min-height: 250vh;
+  /* Mehr Höhe für besseres Snap-Verhalten und mehr Weißraum */
   background: linear-gradient(to bottom,
       transparent 0%,
-      transparent 10%,
-      rgba(0, 0, 0, 0.5) 30%,
-      rgba(0, 0, 0, 1) 50%,
-      #000 100%);
-  color: #fff;
+      rgba(255, 255, 255, 0.3) 8%,
+      rgba(255, 255, 255, 0.7) 20%,
+      rgba(255, 255, 255, 0.9) 28%,
+      #fff 35%,
+      #fff 100%);
+  color: #000;
   display: flex;
   align-items: center;
   justify-content: center;
   scroll-snap-align: start;
   margin: 0;
   position: relative;
-  z-index: 3;
+  z-index: 5;
   margin-top: -100vh;
-  padding-top: 100vh;
-  /* Platz für Fade, dann zentrierter Text */
+  padding-top: 50vh;
+  /* Mehr Weißraum vor dem Text */
 }
 
 .text-overlay-content {
@@ -883,8 +885,8 @@ onUnmounted(() => {
 /* Finale Forderungen Section - normale Sektion ohne Overlay */
 .final-text-overlay-section {
   min-height: 100vh; /* Gleich wie andere Sektionen */
-  background: #000;
-  color: #fff;
+  background: #fff;
+  color: #000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -921,9 +923,9 @@ onUnmounted(() => {
 .fall-button {
   margin-top: 30px;
   padding: 12px 24px;
-  background-color: #000;
-  color: #fff;
-  border: 2px solid #fff;
+  background-color: #fff;
+  color: #000;
+  border: 3px solid #000;
   font-family: 'PxGroteskPan', sans-serif;
   font-weight: bold;
   font-size: 1.4em;

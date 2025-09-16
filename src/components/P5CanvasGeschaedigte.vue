@@ -38,7 +38,7 @@ const sketch = (p) => {
   if (props.fontFamily) p.textFont(props.fontFamily)
   p.textSize(90)
   p.textAlign(p.LEFT, p.BOTTOM)
-  p.fill(255)
+  p.fill(0)
 
     // Labels
     p.text('Frauen', p.width * 0.04, p.height * 0.65)
@@ -170,7 +170,7 @@ const sketch = (p) => {
       p.push();
       p.translate(this.pos.x, this.pos.y);
       p.rotate(p.PI / 4);
-      p.stroke(255);
+      p.stroke(0);
       p.strokeWeight(crossStrokeWeight);
       p.strokeCap(p.SQUARE);
       let size = 2.5 * this.r;

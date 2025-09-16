@@ -40,7 +40,7 @@ const sketch = (p) => {
       p.background(props.background)
     }
     if (props.fontFamily) p.textFont(props.fontFamily)
-    p.fill(255)
+    p.fill(0)
 
     totalParticleCount = particles.length
 
@@ -467,7 +467,7 @@ const sketch = (p) => {
       p.push()
       p.translate(this.pos.x, this.pos.y)
       p.rotate(p.PI / 4)
-      p.stroke(255)
+      p.stroke(0)
       p.strokeWeight(crossStrokeWeight)
       p.strokeCap(p.SQUARE)
       let size = 2.5 * this.r
