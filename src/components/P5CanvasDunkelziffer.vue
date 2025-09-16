@@ -21,6 +21,7 @@ const sketch = (p) => {
   let totalParticleCount = 0
   let visibleFrau = 0
   let visibleMann = 0
+  let currentDunkelziffer = 'hell' // Lokale Variable wie in deinem ursprünglichen Code
 
   const crossSize = 14
   const crossStrokeWeight = 6
@@ -29,6 +30,7 @@ const sketch = (p) => {
     p.createCanvas(props.width, props.height)
     p.frameRate(60)
     selectedData = props.data || []
+    currentDunkelziffer = props.dunkelziffer // Initialisiere mit dem Prop-Wert
     applyData()
   }
 
@@ -85,80 +87,79 @@ const sketch = (p) => {
 
     for (let i = particleQueue.length - 1; i >= 0 && (addedFrau + addedMann) < addPerFrame; i--) {
       let particle = particleQueue[i]
-      if (particle.dunkelziffer === props.dunkelziffer) {
-        if (particle.gender === 'frau' && addedFrau < maxPerGender) {
-          particleQueue.splice(i, 1)
-          
-          let newX = particle.x
-          let newY = particle.y
+      // WICHTIG: Entferne den Filter nach dunkelziffer - alle Partikel in der Queue sollen verarbeitet werden
+      if (particle.gender === 'frau' && addedFrau < maxPerGender) {
+        particleQueue.splice(i, 1)
+        
+        let newX = particle.x
+        let newY = particle.y
 
-          if (props.dunkelziffer === 'dunkel') {
-            // Progressive Expansion für "tatsächlich"
-            let totalCurrentVisible = particles.filter(p => p.dunkelziffer === 'dunkel').length
-            let totalQueueRemaining = particleQueue.filter(q => q.dunkelziffer === 'dunkel').length
-            let totalTarget = totalCurrentVisible + totalQueueRemaining
+        if (currentDunkelziffer === 'dunkel') {
+          // Progressive Expansion für "tatsächlich"
+          let totalCurrentVisible = particles.filter(p => p.dunkelziffer === 'dunkel').length
+          let totalQueueRemaining = particleQueue.filter(q => q.dunkelziffer === 'dunkel').length
+          let totalTarget = totalCurrentVisible + totalQueueRemaining
 
-            let globalProgress = totalCurrentVisible / Math.max(totalTarget, 1)
-            let expansionFactor = 0.1 + globalProgress * 0.9
+          let globalProgress = totalCurrentVisible / Math.max(totalTarget, 1)
+          let expansionFactor = 0.1 + globalProgress * 0.9
 
-            let centerX = props.width / 2
-            let centerY = props.height / 2
-            let areaWidth = 1000
-            let areaHeight = 800
+          let centerX = props.width / 2
+          let centerY = props.height / 2
+          let areaWidth = 1000
+          let areaHeight = 800
 
-            let baseMinX = centerX - areaWidth / 2
-            let baseMaxX = centerX
-            let baseMinY = centerY - areaHeight / 2
-            let baseMaxY = centerY + areaHeight / 2
+          let baseMinX = centerX - areaWidth / 2
+          let baseMaxX = centerX
+          let baseMinY = centerY - areaHeight / 2
+          let baseMaxY = centerY + areaHeight / 2
 
-            let expandedMinX = baseMinX - (baseMinX - 0) * expansionFactor
-            let expandedMaxX = baseMaxX
-            let expandedMinY = baseMinY - (baseMinY - 0) * expansionFactor
-            let expandedMaxY = baseMaxY + (props.height - baseMaxY) * expansionFactor
+          let expandedMinX = baseMinX - (baseMinX - 0) * expansionFactor
+          let expandedMaxX = baseMaxX
+          let expandedMinY = baseMinY - (baseMinY - 0) * expansionFactor
+          let expandedMaxY = baseMaxY + (props.height - baseMaxY) * expansionFactor
 
-            newX = p.random(expandedMinX, expandedMaxX)
-            newY = p.random(expandedMinY, expandedMaxY)
-          }
-
-          particles.push(new Particle(newX, newY, particle.data, particle.dunkelziffer, particle.gender, p))
-          addedFrau++
-        } else if (particle.gender === 'mann' && addedMann < maxPerGender) {
-          particleQueue.splice(i, 1)
-          
-          let newX = particle.x
-          let newY = particle.y
-
-          if (props.dunkelziffer === 'dunkel') {
-            // Progressive Expansion für "tatsächlich"
-            let totalCurrentVisible = particles.filter(p => p.dunkelziffer === 'dunkel').length
-            let totalQueueRemaining = particleQueue.filter(q => q.dunkelziffer === 'dunkel').length
-            let totalTarget = totalCurrentVisible + totalQueueRemaining
-
-            let globalProgress = totalCurrentVisible / Math.max(totalTarget, 1)
-            let expansionFactor = 0.1 + globalProgress * 0.9
-
-            let centerX = props.width / 2
-            let centerY = props.height / 2
-            let areaWidth = 1000
-            let areaHeight = 800
-
-            let baseMinX = centerX
-            let baseMaxX = centerX + areaWidth / 2
-            let baseMinY = centerY - areaHeight / 2
-            let baseMaxY = centerY + areaHeight / 2
-
-            let expandedMinX = baseMinX
-            let expandedMaxX = baseMaxX + (props.width - baseMaxX) * expansionFactor
-            let expandedMinY = baseMinY - (baseMinY - 0) * expansionFactor
-            let expandedMaxY = baseMaxY + (props.height - baseMaxY) * expansionFactor
-
-            newX = p.random(expandedMinX, expandedMaxX)
-            newY = p.random(expandedMinY, expandedMaxY)
-          }
-
-          particles.push(new Particle(newX, newY, particle.data, particle.dunkelziffer, particle.gender, p))
-          addedMann++
+          newX = p.random(expandedMinX, expandedMaxX)
+          newY = p.random(expandedMinY, expandedMaxY)
         }
+
+        particles.push(new Particle(newX, newY, particle.data, currentDunkelziffer, particle.gender, p))
+        addedFrau++
+      } else if (particle.gender === 'mann' && addedMann < maxPerGender) {
+        particleQueue.splice(i, 1)
+        
+        let newX = particle.x
+        let newY = particle.y
+
+        if (currentDunkelziffer === 'dunkel') {
+          // Progressive Expansion für "tatsächlich"
+          let totalCurrentVisible = particles.filter(p => p.dunkelziffer === 'dunkel').length
+          let totalQueueRemaining = particleQueue.filter(q => q.dunkelziffer === 'dunkel').length
+          let totalTarget = totalCurrentVisible + totalQueueRemaining
+
+          let globalProgress = totalCurrentVisible / Math.max(totalTarget, 1)
+          let expansionFactor = 0.1 + globalProgress * 0.9
+
+          let centerX = props.width / 2
+          let centerY = props.height / 2
+          let areaWidth = 1000
+          let areaHeight = 800
+
+          let baseMinX = centerX
+          let baseMaxX = centerX + areaWidth / 2
+          let baseMinY = centerY - areaHeight / 2
+          let baseMaxY = centerY + areaHeight / 2
+
+          let expandedMinX = baseMinX
+          let expandedMaxX = baseMaxX + (props.width - baseMaxX) * expansionFactor
+          let expandedMinY = baseMinY - (baseMinY - 0) * expansionFactor
+          let expandedMaxY = baseMaxY + (props.height - baseMaxY) * expansionFactor
+
+          newX = p.random(expandedMinX, expandedMaxX)
+          newY = p.random(expandedMinY, expandedMaxY)
+        }
+
+        particles.push(new Particle(newX, newY, particle.data, currentDunkelziffer, particle.gender, p))
+        addedMann++
       }
     }
 
@@ -195,11 +196,15 @@ const sketch = (p) => {
 
   // Public API für reactive Updates / Resize
   p.updateData = (rows) => {
+    console.log(`updateData called - this will reset particles`)
     selectedData = rows || []
+    currentDunkelziffer = props.dunkelziffer // Sync mit aktuellem Prop
     applyData()
   }
   p.updateDunkelziffer = (dunkelziffer) => {
-    updateDunkelzifferTransition()
+    console.log(`updateDunkelziffer called with: ${dunkelziffer}`)
+    currentDunkelziffer = dunkelziffer // Aktualisiere die lokale Variable
+    updateDunkelzifferTransition() // Verwende Transition, NICHT applyData!
   }
   p.resizeTo = (w, h) => {
     p.resizeCanvas(w, h)
@@ -208,13 +213,14 @@ const sketch = (p) => {
 
   // Ursprünglich: updateParticlesForCurrentSelection → umbenannt zu applyData für klareren Zweck
   function applyData() {
+    console.log(`applyData called - resetting all particles and queue`)
     particleQueue = []
     particles = []
     visibleFrau = 0
     visibleMann = 0
 
     for (let i = 0; i < selectedData.length; i++) {
-      if (props.dunkelziffer === 'hell') {
+      if (currentDunkelziffer === 'hell') {
         // Bei "registriert" - getrennte Geschlechterverteilung in 1000x800px Bereich
         let centerX = props.width / 2
         let centerY = props.height / 2
@@ -255,12 +261,19 @@ const sketch = (p) => {
   }
 
   function updateDunkelzifferTransition() {
+    console.log(`Starting transition to: ${currentDunkelziffer}`)
+    
+    // WICHTIG: Aktualisiere den Dunkelziffer-Modus für alle bestehenden Partikel
+    for (let i = 0; i < particles.length; i++) {
+      particles[i].dunkelziffer = currentDunkelziffer
+    }
+    
     // Berechne Zielwerte für aktuelle Auswahl
     let targetFrau = 0
     let targetMann = 0
 
     for (let i = 0; i < selectedData.length; i++) {
-      if (props.dunkelziffer === 'hell') {
+      if (currentDunkelziffer === 'hell') {
         targetFrau += selectedData[i].geschaedigte_f || 0
         targetMann += selectedData[i].geschaedigte_m || 0
       } else {
@@ -269,13 +282,18 @@ const sketch = (p) => {
       }
     }
 
+    console.log(`Target particles - Frau: ${targetFrau}, Mann: ${targetMann}`)
+
     // Aktuelle Anzahl der sichtbaren Partikel
     let currentFrau = particles.filter(particle => particle.gender === 'frau').length
     let currentMann = particles.filter(particle => particle.gender === 'mann').length
 
+    console.log(`Current particles - Frau: ${currentFrau}, Mann: ${currentMann}`)
+
     // Wenn wir mehr Partikel brauchen (von hell zu dunkel) - zur Queue hinzufügen
     if (targetFrau > currentFrau) {
       let needed = targetFrau - currentFrau
+      console.log(`Adding ${needed} Frau particles to queue`)
       let centerX = props.width / 2
       let centerY = props.height / 2
       let areaWidth = 1000
@@ -283,7 +301,7 @@ const sketch = (p) => {
 
       for (let i = 0; i < needed; i++) {
         let px, py
-        if (props.dunkelziffer === 'hell') {
+        if (currentDunkelziffer === 'hell') {
           px = p.random(centerX - areaWidth / 2, centerX)
           py = p.random(centerY - areaHeight / 2, centerY + areaHeight / 2)
         } else {
@@ -305,10 +323,11 @@ const sketch = (p) => {
           px = p.random(expandedMinX, expandedMaxX)
           py = p.random(expandedMinY, expandedMaxY)
         }
-        particleQueue.push({ x: px, y: py, data: selectedData[0], gender: 'frau', dunkelziffer: props.dunkelziffer })
+        particleQueue.push({ x: px, y: py, data: selectedData[0], gender: 'frau', dunkelziffer: currentDunkelziffer })
       }
     } else if (targetFrau < currentFrau) {
       let toRemove = currentFrau - targetFrau
+      console.log(`Removing ${toRemove} Frau particles`)
       for (let i = particles.length - 1; i >= 0 && toRemove > 0; i--) {
         if (particles[i].gender === 'frau') {
           particles.splice(i, 1)
@@ -320,6 +339,7 @@ const sketch = (p) => {
     // Das gleiche für Männer
     if (targetMann > currentMann) {
       let needed = targetMann - currentMann
+      console.log(`Adding ${needed} Mann particles to queue`)
       let centerX = props.width / 2
       let centerY = props.height / 2
       let areaWidth = 1000
@@ -327,7 +347,7 @@ const sketch = (p) => {
 
       for (let i = 0; i < needed; i++) {
         let px, py
-        if (props.dunkelziffer === 'hell') {
+        if (currentDunkelziffer === 'hell') {
           px = p.random(centerX, centerX + areaWidth / 2)
           py = p.random(centerY - areaHeight / 2, centerY + areaHeight / 2)
         } else {
@@ -349,10 +369,11 @@ const sketch = (p) => {
           px = p.random(expandedMinX, expandedMaxX)
           py = p.random(expandedMinY, expandedMaxY)
         }
-        particleQueue.push({ x: px, y: py, data: selectedData[0], gender: 'mann', dunkelziffer: props.dunkelziffer })
+        particleQueue.push({ x: px, y: py, data: selectedData[0], gender: 'mann', dunkelziffer: currentDunkelziffer })
       }
     } else if (targetMann < currentMann) {
       let toRemove = currentMann - targetMann
+      console.log(`Removing ${toRemove} Mann particles`)
       for (let i = particles.length - 1; i >= 0 && toRemove > 0; i--) {
         if (particles[i].gender === 'mann') {
           particles.splice(i, 1)
@@ -360,6 +381,8 @@ const sketch = (p) => {
         }
       }
     }
+    
+    console.log(`Transition complete. Queue length: ${particleQueue.length}, Current particles: ${particles.length}`)
   }
 
   function formatNumber(num) {
@@ -515,9 +538,10 @@ watch(() => props.data, (rows) => {
   }
 }, { deep: true })
 
-watch(() => props.dunkelziffer, () => {
+watch(() => props.dunkelziffer, (newVal, oldVal) => {
+  console.log(`Dunkelziffer prop changed from ${oldVal} to ${newVal}`)
   if (p5Instance && p5Instance.updateDunkelziffer) {
-    p5Instance.updateDunkelziffer(props.dunkelziffer)
+    p5Instance.updateDunkelziffer(newVal)
   }
 })
 

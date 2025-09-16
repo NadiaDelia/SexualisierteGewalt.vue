@@ -73,7 +73,6 @@ window.addEventListener('resize', () => {
 
 //** Für Ort-Sketch**/
 const activeOrt = ref('sexuelle_noetigung')
-const genderOrt = ref('frau')
 const widthOrt = ref(Math.round(window.innerWidth * 0.6))
 const heightOrt = ref(Math.round(window.innerHeight * 0.8))
 
@@ -191,7 +190,6 @@ const resetSketchToDefault = (sketchId) => {
       break
     case 'sketch-ort':
       activeOrt.value = 'sexuelle_noetigung'
-      genderOrt.value = 'frau' // Optional: auch Gender zurücksetzen
       break
     case 'sketch-beziehung':
       activeBeziehung.value = 'sexuelle_noetigung'
@@ -245,9 +243,6 @@ const filteredDunkelziffer = computed(() =>
 // Debug: Überwache Änderungen
 watch(activeOrt, (newVal) => {
   console.log('activeOrt changed:', newVal)
-})
-watch(genderOrt, (newVal) => {
-  console.log('genderOrt changed:', newVal)
 })
 
 // Reset Dunkelziffer-Toggle auf "Angezeigt" wenn Straftat geändert wird
@@ -441,21 +436,13 @@ onUnmounted(() => {
     <!-- 4. section ort: Sketch Ort sticky + Text -->
     <div class="split-section">
       <div class="split-left sticky-sketch" id="sketch-ort">
-        <h2>Wo findet Sexualisierte Gewalt statt?</h2>
+        <h2>Wo findet Sexualisierte Gewalt gegen Frauen statt?</h2>
         <p class="annotation">Ein Kreuz entspricht einer Straftat</p>
-        <P5CanvasOrt :key="activeOrt + '-' + genderOrt + '-' + filteredOrt.length" :data="filteredOrt" :width="widthOrt"
-          :height="heightOrt" :background="255" :font-family="'PxGroteskPan'" :gender="genderOrt" />
+        <P5CanvasOrt :key="activeOrt + '-' + filteredOrt.length" :data="filteredOrt" :width="widthOrt"
+          :height="heightOrt" :background="255" :font-family="'PxGroteskPan'" />
         <div class="btns">
-          <div class="filter-buttons">
-            <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeOrt === s.key }"
-              @click="activeOrt = s.key">{{ s.label }}</button>
-          </div>
-          <div class="gender-toggle-container">
-            <button :class="['toggle-btn', { 'active-gender': genderOrt === 'frau' }]"
-              @click="genderOrt = 'frau'">F</button>
-            <button :class="['toggle-btn', { 'active-gender': genderOrt === 'mann' }]"
-              @click="genderOrt = 'mann'">M</button>
-          </div>
+          <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeOrt === s.key }"
+            @click="activeOrt = s.key">{{ s.label }}</button>
         </div>
       </div>
       <div class="split-right">
@@ -494,7 +481,7 @@ onUnmounted(() => {
       <div class="split-right">
         <div style="height: 150vh;"></div>
         <div class="side-text scrollable-text">
-          <h2>Nur selten fremd.</h2>
+          <h2>Täter*innen sind selten fremd.</h2>
           <p>
             Die Visualisierung zeigt anhand der Anzahl Geschädigten die Beziehung zu den Beschuldigten auf. Die sechs
             Kategorien sind: Partner (Partner*innen und Ex-Partner*innen), verwandt, bekannt (Kollegen, Freunde
@@ -518,7 +505,7 @@ onUnmounted(() => {
         <h2 class="dunkelziffer-title">Angezeigte vs. tatsächliche Sexualisierte Gewalt</h2>
         <p class="dunkelziffer-annotation">Ein Kreuz entspricht einer geschädigten Person</p>
         <div class="dunkelziffer-canvas-container">
-          <P5CanvasDunkelziffer :key="activeDunkelziffer + '-' + dunkelzifferMode + '-' + filteredDunkelziffer.length"
+          <P5CanvasDunkelziffer :key="activeDunkelziffer + '-' + filteredDunkelziffer.length"
             :data="filteredDunkelziffer" :width="widthDunkelziffer" :height="heightDunkelziffer"
             :background="'transparent'" :font-family="'PxGroteskPan'" :dunkelziffer="dunkelzifferMode"
             :mouse-radius="80" :repel-radius="100" :attract-power="10" />

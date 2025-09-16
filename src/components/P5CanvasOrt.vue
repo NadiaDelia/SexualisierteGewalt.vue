@@ -8,7 +8,6 @@ const props = defineProps({
   height: { type: Number, default: 800 },
   background: { type: [Number, Array, String], default: 0 },
   fontFamily: { type: String, default: 'PxGroteskPan' },
-  gender: { type: String, default: 'frau' },
 })
 
 const mountRef = ref(null)
@@ -43,32 +42,32 @@ const sketch = (p) => {
       particles[i].display(p);
     }
 
-    // Kreuze für das aktuell gewählte Geschlecht und Ort
-    let privatQueue = particleQueue.filter(pt => pt.gender === props.gender && pt.ort === 'privat');
-    let oeffentlichQueue = particleQueue.filter(pt => pt.gender === props.gender && pt.ort === 'oeffentlich');
+    // Kreuze für Frauen (privat und öffentlich)
+    let privatQueue = particleQueue.filter(pt => pt.ort === 'privat');
+    let oeffentlichQueue = particleQueue.filter(pt => pt.ort === 'oeffentlich');
     let addPerFrame = 5;
     for (let i = 0; i < addPerFrame; i++) {
       if (privatQueue.length > 0) {
-        let idx = particleQueue.findIndex(pt => pt.gender === props.gender && pt.ort === 'privat');
+        let idx = particleQueue.findIndex(pt => pt.ort === 'privat');
         if (idx !== -1) {
           let pt = particleQueue.splice(idx, 1)[0];
-          particles.push(new Particle(pt.x, pt.y, pt.data, pt.gender, pt.ort, p));
+          particles.push(new Particle(pt.x, pt.y, pt.data, pt.ort, p));
           visiblePrivat++;
         }
       }
       if (oeffentlichQueue.length > 0) {
-        let idx = particleQueue.findIndex(pt => pt.gender === props.gender && pt.ort === 'oeffentlich');
+        let idx = particleQueue.findIndex(pt => pt.ort === 'oeffentlich');
         if (idx !== -1) {
           let pt = particleQueue.splice(idx, 1)[0];
-          particles.push(new Particle(pt.x, pt.y, pt.data, pt.gender, pt.ort, p));
+          particles.push(new Particle(pt.x, pt.y, pt.data, pt.ort, p));
           visibleOeffentlich++;
         }
       }
     }
 
     // Labels
-    p.text('Privat', p.width * 0.04, p.height * 0.65);
-    p.text('Öffentlich', p.width * 0.54, p.height * 0.65);
+    p.text('privat', p.width * 0.04, p.height * 0.65);
+    p.text('öffentlich', p.width * 0.54, p.height * 0.65);
 
     // Zahlen
     p.text(formatNumber(visiblePrivat), p.width * 0.04, p.height * 0.54);
@@ -89,41 +88,28 @@ const sketch = (p) => {
     particleQueue = [];
     particles = [];
     for (let i = 0; i < selectedData.length; i++) {
-      if (props.gender === 'frau') {
-        for (let j = 0; j < (selectedData[i].ort_privat_f || 0); j++) {
-          let px = p.random(crossSize, p.width * 0.50 - crossSize);
-          let py = p.random(crossSize, p.height - crossSize);
-          particleQueue.push({ x: px, y: py, data: selectedData[i], ort: 'privat', gender: 'frau' });
-        }
-        for (let j = 0; j < (selectedData[i].ort_oeffentlich_f || 0); j++) {
-          let px = p.random(p.width * 0.50 + crossSize, p.width - crossSize);
-          let py = p.random(crossSize, p.height - crossSize);
-          particleQueue.push({ x: px, y: py, data: selectedData[i], ort: 'oeffentlich', gender: 'frau' });
-        }
-      } else {
-        for (let j = 0; j < (selectedData[i].ort_privat_m || 0); j++) {
-          let px = p.random(crossSize, p.width * 0.50 - crossSize);
-          let py = p.random(crossSize, p.height - crossSize);
-          particleQueue.push({ x: px, y: py, data: selectedData[i], ort: 'privat', gender: 'mann' });
-        }
-        for (let j = 0; j < (selectedData[i].ort_oeffentlich_m || 0); j++) {
-          let px = p.random(p.width * 0.50 + crossSize, p.width - crossSize);
-          let py = p.random(crossSize, p.height - crossSize);
-          particleQueue.push({ x: px, y: py, data: selectedData[i], ort: 'oeffentlich', gender: 'mann' });
-        }
+      // Nur Frauen-Daten verwenden
+      for (let j = 0; j < (selectedData[i].ort_privat_total || 0); j++) {
+        let px = p.random(crossSize, p.width * 0.50 - crossSize);
+        let py = p.random(crossSize, p.height - crossSize);
+        particleQueue.push({ x: px, y: py, data: selectedData[i], ort: 'privat' });
+      }
+      for (let j = 0; j < (selectedData[i].ort_oeffentlich_total || 0); j++) {
+        let px = p.random(p.width * 0.50 + crossSize, p.width - crossSize);
+        let py = p.random(crossSize, p.height - crossSize);
+        particleQueue.push({ x: px, y: py, data: selectedData[i], ort: 'oeffentlich' });
       }
     }
     p.redraw();
   }
 
   class Particle {
-    constructor(x, y, data, gender, ort, p) {
+    constructor(x, y, data, ort, p) {
       this.pos = p.createVector(x, y);
       this.home = p.createVector(x, y);
       this.r = crossSize;
       this.growing = true;
       this.initialDelay = 50 + Math.floor(p.random(20));
-      this.gender = gender;
       this.data = data;
       this.ort = ort;
     }
