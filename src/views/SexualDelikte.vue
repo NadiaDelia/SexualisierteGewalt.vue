@@ -23,7 +23,7 @@ window.addEventListener('resize', () => {
 const triggerCrossesFall = () => {
   // Kreuze fallen lassen
   triggerFallForderungen.value = true
-  
+
   // Nach 3 Sekunden neuen Tab mit brava-ngo.ch öffnen
   setTimeout(() => {
     window.open('https://www.brava-ngo.ch/', '_blank')
@@ -484,14 +484,20 @@ onUnmounted(() => {
           <h2>Täter*innen sind selten fremd.</h2>
           <p>
             Die Visualisierung zeigt anhand der Anzahl Geschädigten die Beziehung zu den Beschuldigten auf. Die sechs
-            Kategorien sind: Partner (Partner*innen und Ex-Partner*innen), verwandt, bekannt (Kollegen, Freunde
-            Bekannte), Arbeit (Arbeit und Ausbildung), keine Beziehung und andere Beziehung (Amtsverhältnis, gesetzliche
-            Vertretung, ärztlicher Kontext, ohne Angabe und unaufgeklärte Straftaten).
-          </p>
+            Kategorien sind: </p>
+          <ul class="cross-list">
+            <li>Partner (Partner*innen und Ex-Partner*innen)</li>
+            <li>verwandt</li>
+            <li>bekannt (Kolleg*innen, Freund*innen, Bekannte)</li>
+            <li>Arbeit (Arbeit und Ausbildung)</li>
+            <li>keine Beziehung</li>
+            <li>andere Beziehung (Amtsverhältnis, gesetzliche Vertretung, ärztlicher Kontext, ohne Angabe und
+                unaufgeklärte Straftaten)</li>
+          </ul>
           <p>
             Es bestätigt sich, was die Daten zur Örtlichkeit andeuten. Die Taten Sexualisierter Gewalt finden vor allem
-            in einem vermeintlich vertrauten Umfeld statt. Einzig bei Exhibitionismus und sexueller Belästigung besteht
-            meist keine Beziehung. Sexuelle Belästigung findet jedoch überall statt, gehäuft auch im Bekanntenkreis oder
+            in vertrautem Umfeld statt. Einzig bei Exhibitionismus und sexueller Belästigung besteht keine Beziehung.
+            Sexuelle Belästigung findet jedoch überall statt, auch im Bekanntenkreis,
             bei der Arbeit oder in der Ausbildungsstätte.
           </p>
         </div>
@@ -591,7 +597,8 @@ onUnmounted(() => {
 
 /* Main Scroll Container */
 .main-scroll {
-  scroll-snap-type: y mandatory; /* Starkes Scroll-Snap wie ursprünglich */
+  scroll-snap-type: y mandatory;
+  /* Starkes Scroll-Snap wie ursprünglich */
   overflow-y: auto;
   height: 100vh;
   background: #fff;
@@ -603,13 +610,15 @@ onUnmounted(() => {
 .split-section,
 .fullscreen-section {
   scroll-snap-align: start;
-  scroll-snap-stop: always; /* Noch stärkeres Kleben */
+  scroll-snap-stop: always;
+  /* Noch stärkeres Kleben */
   min-height: 150vh;
 }
 
 /* Finale Sektion - reduzierte Höhe */
 .final-text-overlay-section {
-  min-height: 100vh !important; /* Überschreibt die 150vh von oben */
+  min-height: 100vh !important;
+  /* Überschreibt die 150vh von oben */
 }
 
 /* =========================
@@ -618,7 +627,8 @@ onUnmounted(() => {
 
 /* Erste Section - gleiche Struktur wie Dunkelziffer, erweitert für Overlay */
 .fullscreen-section:first-of-type {
-  min-height: 350vh !important; /* Erweitert für längeren Text-Overlay */
+  min-height: 350vh !important;
+  /* Erweitert für längeren Text-Overlay */
 }
 
 .fullscreen-section:first-of-type .fullscreen-sketch {
@@ -713,7 +723,7 @@ onUnmounted(() => {
 .side-text {
   margin: auto 0;
   padding: 3em;
-  color:#000;
+  color: #000;
   max-width: 600px;
 }
 
@@ -731,7 +741,8 @@ onUnmounted(() => {
 
 /* Fullscreen Dunkelziffer Section - erweitert für Text-Overlay */
 .fullscreen-section {
-  min-height: 350vh !important; /* Erweitert für längeren Text-Overlay */
+  min-height: 350vh !important;
+  /* Erweitert für längeren Text-Overlay */
   position: relative;
   scroll-snap-align: start;
   z-index: 1;
@@ -768,8 +779,8 @@ onUnmounted(() => {
   top: 75px;
   left: 18.4%;
   z-index: 1;
-  color:#000;
-;
+  color: #000;
+  ;
   text-align: left;
   margin: 0;
   pointer-events: none;
@@ -871,14 +882,16 @@ onUnmounted(() => {
 
 /* Finale Forderungen Section - normale Sektion ohne Overlay */
 .final-text-overlay-section {
-  min-height: 100vh; /* Gleich wie andere Sektionen */
+  min-height: 100vh;
+  /* Gleich wie andere Sektionen */
   background: #fff;
   color: #000;
   display: flex;
   align-items: center;
   justify-content: center;
   scroll-snap-align: start;
-  scroll-snap-stop: always; /* Auch hier starkes Kleben */
+  scroll-snap-stop: always;
+  /* Auch hier starkes Kleben */
   margin: 0;
   position: relative;
   z-index: 4;
@@ -930,8 +943,4 @@ onUnmounted(() => {
   background-color: #fff;
   color: #000;
 }
-
-/* =========================
-   FORDERUNGEN FULLSCREEN SECTION (nicht mehr verwendet)
-   ========================= */
 </style>
