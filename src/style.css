@@ -2,6 +2,39 @@
    GLOBAL BASE STYLES
    ========================= */
 
+/* =========================
+   P5 CANVAS COMPONENTS
+   ========================= */
+
+/* Standard P5 Canvas Container */
+.p5-canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* Canvas-Element direkt stylen */
+.p5-canvas-container canvas {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* P5 Canvas Titelblatt - zentrierte Anordnung */
+.p5-canvas-titlepage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 /* Basis Button Styles - für alle Buttons */
 button {
   border: none;

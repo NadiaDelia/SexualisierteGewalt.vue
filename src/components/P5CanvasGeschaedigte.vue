@@ -209,7 +209,3 @@ watch(() => props.data, (rows) => {
     :style="`display:block; width:${props.width}px; height:${props.height}px;`"
   ></div>
 </template>
-
-<style scoped>
-/* Styling der Schrift global über @font-face */
-</style>

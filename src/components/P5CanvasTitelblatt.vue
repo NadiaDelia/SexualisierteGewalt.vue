@@ -130,15 +130,5 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="mountRef"></div>
+  <div ref="mountRef" class="p5-canvas-titlepage"></div>
 </template>
-
-<style scoped>
-div {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-</style>

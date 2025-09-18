@@ -196,13 +196,11 @@ const sketch = (p) => {
 
   // Public API für reactive Updates / Resize
   p.updateData = (rows) => {
-    console.log(`updateData called - this will reset particles`)
     selectedData = rows || []
     currentDunkelziffer = props.dunkelziffer // Sync mit aktuellem Prop
     applyData()
   }
   p.updateDunkelziffer = (dunkelziffer) => {
-    console.log(`updateDunkelziffer called with: ${dunkelziffer}`)
     currentDunkelziffer = dunkelziffer // Aktualisiere die lokale Variable
     updateDunkelzifferTransition() // Verwende Transition, NICHT applyData!
   }
@@ -213,7 +211,6 @@ const sketch = (p) => {
 
   // Ursprünglich: updateParticlesForCurrentSelection → umbenannt zu applyData für klareren Zweck
   function applyData() {
-    console.log(`applyData called - resetting all particles and queue`)
     particleQueue = []
     particles = []
     visibleFrau = 0
@@ -261,8 +258,6 @@ const sketch = (p) => {
   }
 
   function updateDunkelzifferTransition() {
-    console.log(`Starting transition to: ${currentDunkelziffer}`)
-    
     // WICHTIG: Aktualisiere den Dunkelziffer-Modus für alle bestehenden Partikel
     for (let i = 0; i < particles.length; i++) {
       particles[i].dunkelziffer = currentDunkelziffer
@@ -282,18 +277,13 @@ const sketch = (p) => {
       }
     }
 
-    console.log(`Target particles - Frau: ${targetFrau}, Mann: ${targetMann}`)
-
     // Aktuelle Anzahl der sichtbaren Partikel
     let currentFrau = particles.filter(particle => particle.gender === 'frau').length
     let currentMann = particles.filter(particle => particle.gender === 'mann').length
 
-    console.log(`Current particles - Frau: ${currentFrau}, Mann: ${currentMann}`)
-
     // Wenn wir mehr Partikel brauchen (von hell zu dunkel) - zur Queue hinzufügen
     if (targetFrau > currentFrau) {
       let needed = targetFrau - currentFrau
-      console.log(`Adding ${needed} Frau particles to queue`)
       let centerX = props.width / 2
       let centerY = props.height / 2
       let areaWidth = 1000
@@ -327,7 +317,6 @@ const sketch = (p) => {
       }
     } else if (targetFrau < currentFrau) {
       let toRemove = currentFrau - targetFrau
-      console.log(`Removing ${toRemove} Frau particles`)
       for (let i = particles.length - 1; i >= 0 && toRemove > 0; i--) {
         if (particles[i].gender === 'frau') {
           particles.splice(i, 1)
@@ -339,7 +328,6 @@ const sketch = (p) => {
     // Das gleiche für Männer
     if (targetMann > currentMann) {
       let needed = targetMann - currentMann
-      console.log(`Adding ${needed} Mann particles to queue`)
       let centerX = props.width / 2
       let centerY = props.height / 2
       let areaWidth = 1000
@@ -373,7 +361,6 @@ const sketch = (p) => {
       }
     } else if (targetMann < currentMann) {
       let toRemove = currentMann - targetMann
-      console.log(`Removing ${toRemove} Mann particles`)
       for (let i = particles.length - 1; i >= 0 && toRemove > 0; i--) {
         if (particles[i].gender === 'mann') {
           particles.splice(i, 1)
@@ -381,8 +368,6 @@ const sketch = (p) => {
         }
       }
     }
-    
-    console.log(`Transition complete. Queue length: ${particleQueue.length}, Current particles: ${particles.length}`)
   }
 
   function formatNumber(num) {
@@ -539,7 +524,6 @@ watch(() => props.data, (rows) => {
 }, { deep: true })
 
 watch(() => props.dunkelziffer, (newVal, oldVal) => {
-  console.log(`Dunkelziffer prop changed from ${oldVal} to ${newVal}`)
   if (p5Instance && p5Instance.updateDunkelziffer) {
     p5Instance.updateDunkelziffer(newVal)
   }

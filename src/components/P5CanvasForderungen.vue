@@ -130,9 +130,6 @@ const sketch = (p) => {
     window.globalParticles = particles
     
     window.globalResetParticles = () => {
-      console.log('Reset particles from sketch context')
-      console.log('Canvas dimensions:', props.width, 'x', props.height)
-      console.log('Actual canvas size:', p.width, 'x', p.height)
       
       particles = []
       for (let i = 0; i < anzahlKreuze; i++) {
@@ -141,12 +138,10 @@ const sketch = (p) => {
         particles.push(new Particle(px, py))
         
         if (i < 5) {
-          console.log(`Particle ${i}: x=${px.toFixed(1)}, y=${py.toFixed(1)} (range: ${crossSize} to ${p.width - crossSize})`)
         }
       }
       
       window.globalParticles = particles
-      console.log('Particles reset in sketch context, count:', particles.length)
     }
   }
 
@@ -193,14 +188,12 @@ const sketch = (p) => {
 }
 
 onMounted(() => {
-  console.log('P5CanvasForderungen MOUNTED!')
   
   setTimeout(() => {
     const container = document.getElementById(canvasId.value)
     if (container) {
       try {
         p5Instance = new p5(sketch, container)
-        console.log('p5 Instance created:', p5Instance)
       } catch (error) {
         console.error('Error creating p5 instance:', error)
       }
@@ -232,7 +225,6 @@ watch([() => props.width, () => props.height], () => {
 })
 
 watch(() => props.triggerFall, (newVal) => {
-  console.log('Trigger Fall received:', newVal)
   if (newVal && p5Instance) {
     globalFallCrosses = true
     window.globalFallCrosses = true
@@ -244,7 +236,6 @@ watch(() => props.triggerFall, (newVal) => {
 
 watch(() => props.resetCounter, (newVal, oldVal) => {
   if (newVal > oldVal && p5Instance) {
-    console.log('Reset triggered via prop, counter:', newVal)
     
     globalFallCrosses = false
     window.globalFallCrosses = false
@@ -253,28 +244,6 @@ watch(() => props.resetCounter, (newVal, oldVal) => {
       window.globalResetParticles()
     }
     
-    console.log('Reset complete via prop')
   }
 })
 </script>
-
-<style scoped>
-.p5-canvas-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9999;
-  pointer-events: none;
-}
-
-/* Canvas-Element direkt stylen */
-.p5-canvas-container canvas {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  z-index: 9999 !important;
-  pointer-events: none !important;
-}
-</style>

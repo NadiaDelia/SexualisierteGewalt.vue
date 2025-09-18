@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import * as d3 from 'd3'
+import { useSketchDimensions } from '../composables/useSketchDimensions.js'
 import P5CanvasGeschaedigte from '../components/P5CanvasGeschaedigte.vue'
 import P5CanvasBeschuldigte from '../components/P5CanvasBeschuldigte.vue'
 import P5CanvasOrt from '../components/P5CanvasOrt.vue'
@@ -10,15 +11,9 @@ import P5CanvasTitelblatt from '../components/P5CanvasTitelblatt.vue'
 import P5CanvasForderungen from '../components/P5CanvasForderungen.vue'
 
 // Für Forderungen-Sketch
-const widthForderungen = ref(window.innerWidth)
-const heightForderungen = ref(window.innerHeight)
+const { width: widthForderungen, height: heightForderungen } = useSketchDimensions({ useFullscreen: true })
 const triggerFallForderungen = ref(false)
 const resetForderungen = ref(0) // Counter für Reset-Trigger
-
-window.addEventListener('resize', () => {
-  widthForderungen.value = window.innerWidth
-  heightForderungen.value = window.innerHeight
-})
 
 const triggerCrossesFall = () => {
   // Kreuze fallen lassen
@@ -52,64 +47,28 @@ const fontUrl = '/Px-Grotesk-Pan-Bold.otf'
 /** Sketch 1 Geschaedigte **/
 const raw = ref([])
 const activeGeschaedigte = ref('sexuelle_noetigung')
-const widthGeschaedigte = ref(Math.round(window.innerWidth * 0.6))
-const heightGeschaedigte = ref(Math.round(window.innerHeight * 0.8))
-
-window.addEventListener('resize', () => {
-  widthGeschaedigte.value = Math.round(window.innerWidth * 0.6)
-  heightGeschaedigte.value = Math.round(window.innerHeight * 0.8)
-})
+const { width: widthGeschaedigte, height: heightGeschaedigte } = useSketchDimensions()
 
 /** Sketch 2 Beschuldigte**/
 const activeBeschuldigte = ref('sexuelle_noetigung')
-const widthBeschuldigte = ref(Math.round(window.innerWidth * 0.6))
-const heightBeschuldigte = ref(Math.round(window.innerHeight * 0.8))
-
-window.addEventListener('resize', () => {
-  widthBeschuldigte.value = Math.round(window.innerWidth * 0.6)
-  heightBeschuldigte.value = Math.round(window.innerHeight * 0.8)
-})
+const { width: widthBeschuldigte, height: heightBeschuldigte } = useSketchDimensions()
 
 
 //** Für Ort-Sketch**/
 const activeOrt = ref('sexuelle_noetigung')
-const widthOrt = ref(Math.round(window.innerWidth * 0.6))
-const heightOrt = ref(Math.round(window.innerHeight * 0.8))
-
-window.addEventListener('resize', () => {
-  widthOrt.value = Math.round(window.innerWidth * 0.6)
-  heightOrt.value = Math.round(window.innerHeight * 0.8)
-})
+const { width: widthOrt, height: heightOrt } = useSketchDimensions()
 
 //** Für Beziehung-Sketch**/
 const activeBeziehung = ref('sexuelle_noetigung')
-const widthBeziehung = ref(Math.round(window.innerWidth * 0.6))
-const heightBeziehung = ref(Math.round(window.innerHeight * 0.8))
-
-window.addEventListener('resize', () => {
-  widthBeziehung.value = Math.round(window.innerWidth * 0.6)
-  heightBeziehung.value = Math.round(window.innerHeight * 0.8)
-})
+const { width: widthBeziehung, height: heightBeziehung } = useSketchDimensions()
 
 //** Für Titelblatt-Sketch**/
-const widthTitelblatt = ref(window.innerWidth)
-const heightTitelblatt = ref(window.innerHeight)
-
-window.addEventListener('resize', () => {
-  widthTitelblatt.value = window.innerWidth
-  heightTitelblatt.value = window.innerHeight
-})
+const { width: widthTitelblatt, height: heightTitelblatt } = useSketchDimensions({ useFullscreen: true })
 
 //** Für Dunkelziffer-Sketch**/
 const activeDunkelziffer = ref('sexuelle_noetigung')
 const dunkelzifferMode = ref('hell') // 'hell' oder 'dunkel'
-const widthDunkelziffer = ref(window.innerWidth)
-const heightDunkelziffer = ref(window.innerHeight)
-
-window.addEventListener('resize', () => {
-  widthDunkelziffer.value = window.innerWidth
-  heightDunkelziffer.value = window.innerHeight
-})
+const { width: widthDunkelziffer, height: heightDunkelziffer } = useSketchDimensions({ useFullscreen: true })
 
 //** Für Accordion-Liste **/
 const openAccordions = ref({
@@ -448,7 +407,7 @@ onUnmounted(() => {
       <div class="split-right">
         <div style="height: 150vh;"></div>
         <div class="side-text scrollable-text">
-          <h2>Das Zuhause ist kein sicherer Ort.</h2>
+          <h2>Das Zuhause ist kein sicherer Ort</h2>
           <p>
             Die Taten Sexualisierter Gewalt finden überwiegend im privaten Umfeld statt. Ausgenommen sind sexuelle
             Belästigung und Exhibitionismus. Unter privatem Raum werden ausschliesslich die «eigenen vier Wände»
@@ -481,7 +440,7 @@ onUnmounted(() => {
       <div class="split-right">
         <div style="height: 150vh;"></div>
         <div class="side-text scrollable-text">
-          <h2>Täter*innen sind selten fremd.</h2>
+          <h2>Täter*innen sind selten fremd</h2>
           <p>
             Die Visualisierung zeigt anhand der Anzahl Geschädigten die Beziehung zu den Beschuldigten auf. Die sechs
             Kategorien sind: </p>
@@ -535,7 +494,7 @@ onUnmounted(() => {
     <!-- 7. section dunkelziffer text: Erklärungstext als Overlay/Stacking -->
     <section class="text-overlay-section">
       <div class="text-overlay-content">
-        <h2>Das meiste bleibt im Dunkeln.</h2>
+        <h2>Das meiste bleibt im Dunkeln</h2>
         <p>
           Die Polizeiliche Kriminalstatistik zählt ausschliesslich, was polizeilich erfasst wird. Was nicht angezeigt
           wird verbleibt im Dunkeln. Um neben dem Hellfeld auch das Dunkelfeld zu erfassen, werden in der Schweiz
