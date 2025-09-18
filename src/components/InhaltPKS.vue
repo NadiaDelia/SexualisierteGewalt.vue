@@ -14,7 +14,7 @@
         In fünf Visualisierungen betrachten wir zentrale Delikte Sexualisierter Gewalt. Dabei stützen wir uns auf die
         Daten der Kriminalstatistik, welche jeweils die angezeigten Fälle zählt. Zudem wichtig zu wissen: Die
         Statistik registriert nur zwei Geschlechter. Folgende Straftaten stehen im Zentrum: </p>
-      <p>
+      
       <div class="accordion-list">
         <div class="accordion-item">
           <div class="accordion-header" @click="toggleAccordion('sexuellerUebergriff')">
@@ -68,7 +68,6 @@
           </div>
         </div>
       </div>
-      </p>
     </div>
   </section>
 </template>

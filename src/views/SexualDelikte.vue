@@ -104,7 +104,6 @@ const setupIntersectionObservers = () => {
         const id = entry.target.id
         // Für Forderungen nur reagieren wenn Kreuze tatsächlich fallen
         if (id === 'sketch-forderungen') {
-          console.log('🔄 Forderungen section left viewport - resetting')
           if (triggerFallForderungen.value) {
             resetSketchToDefault(id)
           }
@@ -138,7 +137,6 @@ const setupIntersectionObservers = () => {
 }
 
 const resetSketchToDefault = (sketchId) => {
-  console.log(`Resetting ${sketchId} to default`)
 
   switch (sketchId) {
     case 'sketch-geschaedigte':
@@ -159,10 +157,8 @@ const resetSketchToDefault = (sketchId) => {
       break
     case 'sketch-forderungen':
       // Forderungen-Sketch zurücksetzen
-      console.log('🔄 Resetting Forderungen sketch via prop...')
       triggerFallForderungen.value = false
       resetForderungen.value++
-      console.log('✅ Forderungen reset triggered, counter:', resetForderungen.value)
       break
   }
 }
@@ -201,16 +197,13 @@ const filteredDunkelziffer = computed(() =>
 
 // Debug: Überwache Änderungen
 watch(activeOrt, (newVal) => {
-  console.log('activeOrt changed:', newVal)
 })
 
 // Reset Dunkelziffer-Toggle auf "Angezeigt" wenn Straftat geändert wird
 watch(activeDunkelziffer, (newVal) => {
-  console.log('activeDunkelziffer changed:', newVal)
   dunkelzifferMode.value = 'hell'
 })
 
-console.log('filteredOrt', filteredOrt.value)
 function setFilter(key) {
   activeGeschaedigte.value = key
 }
@@ -268,7 +261,6 @@ onUnmounted(() => {
           In fünf Visualisierungen betrachten wir zentrale Delikte Sexualisierter Gewalt. Dabei stützen wir uns auf die
           Daten der Kriminalstatistik, welche jeweils die angezeigten Fälle zählt. Zudem wichtig zu wissen: Die
           Statistik registriert nur zwei Geschlechter. Folgende Straftaten stehen im Zentrum: </p>
-        <p>
         <div class="accordion-list">
           <div class="accordion-item">
             <div class="accordion-header" @click="toggleAccordion('sexuellerUebergriff')">
@@ -321,8 +313,7 @@ onUnmounted(() => {
               <p>Exhibitionistische Handlung vor anderen, in der Regel auf Antrag.</p>
             </div>
           </div>
-        </div>
-        </p>
+  </div>
       </div>
     </section>
 

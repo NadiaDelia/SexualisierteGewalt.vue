@@ -179,11 +179,9 @@ const sketch = (p) => {
       p.pop();
     }
   }
-//Tausender-Trennzeichen
-  function formatNumber(num) {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
-  }
 }
+
+
 
 onMounted(() => {
   p5Instance = new p5(sketch, mountRef.value)
@@ -205,6 +203,7 @@ watch(() => props.data, (rows) => {
 </script>
 
 <template>
+
   <div ref="mountRef"
     :style="`display:block; width:${props.width}px; height:${props.height}px;`"
   ></div>
