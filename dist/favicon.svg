@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Diagonales Kreuz (X) weiss auf schwarz, verkleinert & zentriert -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="X Kreuz Icon">
+	<rect width="256" height="256" fill="#000"/>
+	<!-- Verkleinert: Endpunkte weiter nach innen, dünnerer Strich -->
+	<g stroke="#fff" stroke-width="34" stroke-linecap="square" fill="none">
+		<line x1="70" y1="70" x2="186" y2="186"/>
+		<line x1="186" y1="70" x2="70" y2="186"/>
+	</g>
+</svg>
