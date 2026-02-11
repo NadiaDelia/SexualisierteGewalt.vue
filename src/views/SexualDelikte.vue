@@ -599,23 +599,13 @@ function setFilter(key) {
             :background="'transparent'" :font-family="'PxGroteskPan'" :dunkelziffer="dunkelzifferMode"
             :mouse-radius="80" :repel-radius="100" :attract-power="10" />
         </div>
-        <!-- Info Pop-up -->
-        <div v-if="showInfoDunkelziffer" class="info-popup info-popup-fullscreen">
-          <button class="popup-close" @click="showInfoDunkelziffer = false">×</button>
-          <h3>Dunkelziffer</h3>
-          <p><strong>Darstellung:</strong> Ein Kreuz entspricht einer geschädigten Person</p>
-          <p><strong>Quellen:</strong> PKS 2024 (Hellfeld), Prävalenzstudien (Dunkelfeld)</p>
-          <p><strong>Kontext:</strong> Die Dunkelziffer zeigt, wie viele Straftaten tatsächlich passieren im
-            Vergleich
-            zu den angezeigten Fällen. Nur etwa 10% werden angezeigt.</p>
-        </div>
+        <!-- Info-Popup entfernt, nur noch expanding Button -->
         <div style="height: 50vh;"></div>
       </div>
       <div class="btns fullscreen-buttons">
         <div class="filter-buttons-with-info">
           <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeDunkelziffer === s.key }"
             @click="activeDunkelziffer = s.key">{{ s.label }}</button>
-          <button class="info-btn" @click="showInfoDunkelziffer = !showInfoDunkelziffer">i</button>
         </div>
         <div class="dunkelziffer-toggle-container">
           <button :class="['toggle-btn', { 'active-dunkelziffer': dunkelzifferMode === 'hell' }]"
@@ -623,8 +613,17 @@ function setFilter(key) {
           <button :class="['toggle-btn', { 'active-dunkelziffer': dunkelzifferMode === 'dunkel' }]"
             @click="dunkelzifferMode = 'dunkel'">Tatsächlich</button>
         </div>
-      </div>
-      
+        <div class="info-btn-absolute-wrapper">
+          <button class="info-btn" @click="showInfoDunkelziffer = !showInfoDunkelziffer">i</button>
+          <div v-if="showInfoDunkelziffer" class="info-popup info-popup-dunkelziffer">
+            <button class="popup-close" @click="showInfoDunkelziffer = false">×</button>
+            <h3>Dunkelziffer</h3>
+            <p><strong>Darstellung:</strong> Ein Kreuz entspricht einer geschädigten Person</p>
+            <p><strong>Quellen:</strong> PKS 2024 (Hellfeld), Prävalenzstudien (Dunkelfeld)</p>
+            <p><strong>Kontext:</strong> Die Dunkelziffer zeigt, wie viele Straftaten tatsächlich passieren im Vergleich zu den angezeigten Fällen. Nur etwa 10% werden angezeigt.</p>
+          </div>
+        </div>
+      </div>  
     </div>
 
 
@@ -1000,20 +999,8 @@ function setFilter(key) {
 }
 
 
-/* Standard-Buttons: wie gehabt */
-.fullscreen-buttons {
-  position: relative;
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  justify-content: center;
-  pointer-events: auto;
-  flex-wrap: wrap;
-  margin: 20px 0;
-  width: 100%;
-}
 
-/* Nur in der Dunkelziffer-Section sticky am unteren Rand */
+
 
 /* Wrapper für Filter-Buttons mit Info-Button */
 .filter-buttons-with-info {
@@ -1021,6 +1008,7 @@ function setFilter(key) {
   gap: 5px;
   align-items: center;
   flex-wrap: wrap;
+  position: relative;
 }
 
 /* Sicherstellen, dass alle Buttons in fullscreen-buttons anklickbar bleiben */
@@ -1035,12 +1023,21 @@ function setFilter(key) {
   position: relative;
 }
 
-/* Info Button */
-.info-btn {
+
+
+/* Info Button absolut positioniert für Overlay-Effekt */
+.info-btn-absolute-wrapper {
+  position: relative;
+  margin-left: 15px;
+  display: flex;
+  align-items: flex-end;
+  /* kein z-index, damit Popup unabhängig ist */
+}
+
+.info-btn-absolute-wrapper .info-btn {
   width: 35px;
   height: 35px;
   padding: 0 16px;
-  margin-left: 15px;
   background-color: #fff;
   color: #000;
   border: 2.5px solid #000;
@@ -1049,52 +1046,17 @@ function setFilter(key) {
   font-size: 1em;
   cursor: pointer;
   border-radius: 0;
-  transition: all 0.2s ease;
-  display: inline-flex;
+  transition: all 0.3s cubic-bezier(.4,2,.6,1);
+  display: flex;
   align-items: center;
   justify-content: center;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+  z-index: 10001;
 }
 
-.info-btn:hover {
-  background-color: #000;
-  color: #fff;
-}
-
-/* Info Pop-up */
-.info-popup {
-  position: absolute;
-  bottom: 80px;
-  right: 0;
-  background: #fff;
-  border: 2.5px solid #000;
-  padding: 20px;
-  max-width: 400px;
-  z-index: 100;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.info-popup-fullscreen {
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 120px;
-}
-
-.info-popup h3 {
-  margin-top: 0;
-  margin-bottom: 12px;
-  font-family: 'PxGroteskPan', sans-serif;
-  font-size: 1.2em;
-}
-
-.info-popup p {
-  margin: 8px 0;
-  font-size: 0.9em;
-  line-height: 1.5;
-}
-
-.info-popup strong {
-  font-weight: 700;
-}
+/* Info-Popup für Dunkelziffer wie in Ort-Section, rechtsbündig über dem Button */
 
 .popup-close {
   position: absolute;
