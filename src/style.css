@@ -64,7 +64,7 @@ button.active {
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
-  margin-top: 16px;
+  margin-top: 25px;
 }
 
 .filter-buttons {
@@ -74,26 +74,30 @@ button.active {
 }
 
 .fullscreen-buttons {
+  position: relative !important;
+  pointer-events: auto;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+
+.fullscreen-buttons {
   display: flex !important;
   flex-direction: row !important;
-  gap: 20px !important;
+  gap: 30px !important;
   align-items: center !important;
   background: none !important;
   padding: 0 !important;
-  width: 80vw !important;
-  max-width: 1200px !important;
-  justify-content: center !important;
+  width: 100vw !important;
+  justify-content: space-between;
+
 }
 
 .fullscreen-buttons .filter-buttons {
   gap: 12px;
   align-items: center;
-  flex-wrap: nowrap;
 }
 
-.fullscreen-buttons button {
-  white-space: nowrap;
-}
+
 
 /* Dunkelziffer Toggle Button Container */
 .dunkelziffer-toggle-container {
@@ -142,6 +146,127 @@ button.active {
   color: #000 !important;
 }
 
+
+/* aus Sexuale Delikte kopiert*/
+
+
+
+
+/* Wrapper für Filter-Buttons mit Info-Button */
+.filter-buttons-with-info {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Sicherstellen, dass alle Buttons in fullscreen-buttons anklickbar bleiben */
+/* .fullscreen-buttons button {
+  pointer-events: auto;
+} */
+
+/* Button-Container in Split-Sections - mehr Abstand vom unteren Rand
+.btns {
+  margin-bottom: 60px;
+  /* Abstand vom unteren Rand der sticky-Elemente
+  position: relative;
+}*/
+
+/* Info Button */
+.info-btn {
+  width: 35px;
+  height: 35px;
+  padding: 0 16px;
+  margin-left: 15px;
+  background-color: #fff;
+  color: #000;
+  border: 2.5px solid #000;
+  font-family: 'PxGroteskPan', sans-serif;
+  font-weight: bold;
+  font-size: 1em;
+  cursor: pointer;
+  border-radius: 0;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.info-btn:hover {
+  background-color: #000;
+  color: #fff;
+}
+
+/* Info Pop-up */
+.info-popup {
+  position: absolute;
+  bottom: 80px;
+  right: 0;
+  background: #fff;
+  border: 2.5px solid #000;
+  padding: 20px;
+  max-width: 400px;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.info-popup-fullscreen {
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 120px;
+}
+
+.info-popup h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-family: 'PxGroteskPan', sans-serif;
+  font-size: 1.2em;
+}
+
+.info-popup p {
+  margin: 8px 0;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+.info-popup strong {
+  font-weight: 700;
+}
+
+.popup-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 1.8em;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+}
+
+/* .dunkelziffer-toggle-container {
+  display: flex;
+  gap: 5px;
+  margin-left: 20px;
+}
+
+.active-dunkelziffer {
+  background-color: #fff !important;
+  color: #000 !important;
+} */
+
+
+/*______________________*/
+
+
+
 :root {
   font-family: 'PxGroteskPan', sans-serif;
   line-height: 1;
@@ -188,7 +313,7 @@ h1 {
 h2 {
   font-size: 2.2em;
   line-height: 1.1;
-  margin-bottom: 3px;
+  margin-bottom: 30px;
   color: #000;
 }
 
@@ -344,4 +469,27 @@ section {
   align-items: left;
   margin: 0;
   background: #fff;
+}
+
+/*
+||||||||||| Cursor als Kreis ||||||||||||*/
+/* Kreis definieren */
+.cursor-dot {
+  position: fixed;
+  width: 30px;
+  height: 30px;
+  background: black;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+}
+
+/* Standard Pfeil ausblenden*/
+html,
+body,
+*,
+*::before,
+*::after {
+  cursor: none !important;
 }

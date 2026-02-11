@@ -21,10 +21,24 @@ const sketch = (p) => {
   p.setup = () => {
     p.createCanvas(props.width, props.height)
     
+    // Menü-Bereich definieren (vertikal mittig, rechts)
+    const menuTop = props.height * 0.35
+    const menuBottom = props.height * 0.65
+    const menuRight = props.width - 80
+    
     // Partikel/Kreuze zufällig auf dem Canvas verteilen
     for (let i = 0; i < anzahlKreuze; i++) {
-      let px = p.random(crossSize, props.width - crossSize)
-      let py = p.random(crossSize, props.height - crossSize)
+      let px, py
+      let attempts = 0
+      
+      // Platzierung mit Menü-Ausschluss
+      do {
+        px = p.random(crossSize, props.width - crossSize)
+        py = p.random(crossSize, props.height - crossSize)
+        attempts++
+        // Wenn im Menü-Bereich (vertikal), dann nicht zu weit rechts
+      } while (py > menuTop && py < menuBottom && px > menuRight && attempts < 50)
+      
       particles.push(new Particle(px, py, p))
     }
   }
@@ -95,8 +109,18 @@ const sketch = (p) => {
       }
 
       // Begrenzung: Partikel bleiben auf dem Canvas
+      // Menü-Bereich ausschließen (vertikal mittig, rechts)
+      const menuTop = props.height * 0.25
+      const menuBottom = props.height * 0.75
+      const menuRight = props.width - 80
+      
       this.pos.x = p.constrain(this.pos.x, this.r, props.width - this.r)
       this.pos.y = p.constrain(this.pos.y, this.r, props.height - this.r)
+      
+      // Wenn im Menü-Bereich (vertikal), nicht zu weit rechts
+      if (this.pos.y > menuTop && this.pos.y < menuBottom && this.pos.x > menuRight) {
+        this.pos.x = menuRight
+      }
     }
 
     display(p) {

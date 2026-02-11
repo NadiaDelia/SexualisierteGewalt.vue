@@ -99,8 +99,19 @@ const sketch = (p) => {
         this.pos.add(homeDir)
       }
 
+      // Begrenzung: Partikel bleiben auf dem Canvas
+      // Menü-Bereich ausschließen (vertikal mittig, rechts)
+      const menuTop = p.height * 0.25
+      const menuBottom = p.height * 0.75
+      const menuRight = p.width - 80
+      
       this.pos.x = p.constrain(this.pos.x, this.r, p.width - this.r)
       this.pos.y = p.constrain(this.pos.y, this.r, p.height - this.r)
+      
+      // Wenn im Menü-Bereich (vertikal), nicht zu weit rechts
+      if (this.pos.y > menuTop && this.pos.y < menuBottom && this.pos.x > menuRight) {
+        this.pos.x = menuRight
+      }
     }
 
     display() {
@@ -120,10 +131,23 @@ const sketch = (p) => {
   p.setup = () => {
     p.createCanvas(props.width, props.height)
 
+    // Menü-Bereich definieren (vertikal mittig, rechts)
+    const menuTop = p.height * 0.35
+    const menuBottom = p.height * 0.65
+    const menuRight = p.width - 80
+
     particles = []
     for (let i = 0; i < anzahlKreuze; i++) {
-      let px = p.random(crossSize, p.width - crossSize)
-      let py = p.random(crossSize, p.height - crossSize)
+      let px, py
+      let attempts = 0
+      
+      // Platzierung mit Menü-Ausschluss
+      do {
+        px = p.random(crossSize, p.width - crossSize)
+        py = p.random(crossSize, p.height - crossSize)
+        attempts++
+      } while (py > menuTop && py < menuBottom && px > menuRight && attempts < 50)
+      
       particles.push(new Particle(px, py))
     }
     
@@ -133,8 +157,15 @@ const sketch = (p) => {
       
       particles = []
       for (let i = 0; i < anzahlKreuze; i++) {
-        let px = p.random(crossSize, p.width - crossSize)
-        let py = p.random(crossSize, p.height - crossSize)
+        let px, py
+        let attempts = 0
+        
+        do {
+          px = p.random(crossSize, p.width - crossSize)
+          py = p.random(crossSize, p.height - crossSize)
+          attempts++
+        } while (py > menuTop && py < menuBottom && px > menuRight && attempts < 50)
+        
         particles.push(new Particle(px, py))
         
         if (i < 5) {

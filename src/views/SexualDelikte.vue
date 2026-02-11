@@ -1,7 +1,20 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+/* ------------------------------------------------------------------
+   IMPORTS
+------------------------------------------------------------------ */
+import {
+  ref,
+  computed,
+  watch,
+  onMounted,
+  onBeforeUnmount,
+  onUnmounted,
+  nextTick
+} from 'vue'
+
 import * as d3 from 'd3'
 import { useSketchDimensions } from '../composables/useSketchDimensions.js'
+
 import P5CanvasGeschaedigte from '../components/P5CanvasGeschaedigte.vue'
 import P5CanvasBeschuldigte from '../components/P5CanvasBeschuldigte.vue'
 import P5CanvasOrt from '../components/P5CanvasOrt.vue'
@@ -10,67 +23,125 @@ import P5CanvasDunkelziffer from '../components/P5CanvasDunkelziffer.vue'
 import P5CanvasTitelblatt from '../components/P5CanvasTitelblatt.vue'
 import P5CanvasForderungen from '../components/P5CanvasForderungen.vue'
 
-// Für Forderungen-Sketch
-const { width: widthForderungen, height: heightForderungen } = useSketchDimensions({ useFullscreen: true })
-const triggerFallForderungen = ref(false)
-const resetForderungen = ref(0) // Counter für Reset-Trigger
+/* ------------------------------------------------------------------
+   STICKY NAVIGATION
+------------------------------------------------------------------ */
+const activeSection = ref('')
+const showNav = ref(true) // Immer sichtbar
 
+const navItems = [
+  { id: 'intro', label: 'PKS' },
+  { id: 'geschaedigte', label: 'Geschädigte' },
+  { id: 'beschuldigte', label: 'Beschuldigte' },
+  { id: 'ort', label: 'Ort' },
+  { id: 'beziehung', label: 'Beziehung' },
+  { id: 'dunkelziffer', label: 'Dunkelziffer' },
+  { id: 'forderungen', label: 'Forderungen' }
+]
+
+const scrollToSection = (sectionId) => {
+  const mainScroll = document.querySelector('.main-scroll')
+  const section = document.getElementById(`section-${sectionId}`)
+
+  if (section && mainScroll) {
+    const rect = section.getBoundingClientRect()
+    const scrollTop = mainScroll.scrollTop
+    const offset = rect.top
+
+    mainScroll.scrollTo({
+      top: scrollTop + offset,
+      behavior: 'smooth'
+    })
+  }
+}
+
+onMounted(() => {
+  const mainScroll = document.querySelector('.main-scroll')
+  if (!mainScroll) return
+
+  // Scroll Event für active section tracking
+  mainScroll.addEventListener('scroll', () => {
+    const sections = mainScroll.querySelectorAll('[id^="section-"]')
+    const viewportHeight = mainScroll.clientHeight
+
+    sections.forEach(section => {
+      const rect = section.getBoundingClientRect()
+      if (rect.top < viewportHeight / 2 && rect.bottom > viewportHeight / 2) {
+        activeSection.value = section.id.replace('section-', '')
+      }
+    })
+  })
+
+  // Click außerhalb Pop-up zum Schließen
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.info-popup') && !e.target.closest('.info-btn')) {
+      showInfoGeschaedigte.value = false
+      showInfoBeschuldigte.value = false
+      showInfoOrt.value = false
+      showInfoBeziehung.value = false
+      showInfoDunkelziffer.value = false
+    }
+  })
+})
+
+/* ------------------------------------------------------------------
+   SKETCH DIMENSIONS & STATES
+------------------------------------------------------------------ */
+const { width: widthForderungen, height: heightForderungen } =
+  useSketchDimensions({ useFullscreen: true })
+
+const triggerFallForderungen = ref(false)
+const resetForderungen = ref(0)
+
+/* ------------------------------------------------------------------
+   FORDERUNGEN ACTION
+------------------------------------------------------------------ */
 const triggerCrossesFall = () => {
-  // Kreuze fallen lassen
   triggerFallForderungen.value = true
 
-  // Nach 3 Sekunden neuen Tab mit brava-ngo.ch öffnen
   setTimeout(() => {
     window.open('https://www.brava-ngo.ch/', '_blank')
   }, 3000)
 }
 
-
-
-
-// Mapping wie in deinem alten Sketch
+/* ------------------------------------------------------------------
+   CONSTANTS & DATA
+------------------------------------------------------------------ */
 const STRAFTATEN = [
   { key: 'sexuelle_noetigung', label: 'Sexuelle Nötigung' },
   { key: 'vergewaltigung', label: 'Vergewaltigung' },
   { key: 'missbrauch', label: 'Sexueller Missbrauch' },
   { key: 'belaestigung', label: 'Sexuelle Belästigung' },
-  { key: 'exhibitionismus', label: 'Exhibitionismus' },
+  { key: 'exhibitionismus', label: 'Exhibitionismus' }
 ]
 
-// CSV- & Font-Dateien (liegen in src/assets/)
 const csvUrl = new URL('../assets/data_sg.csv', import.meta.url).href
-// Direkt-URL aus dem public-Ordner:
 const fontUrl = '/Px-Grotesk-Pan-Bold.otf'
 
-// const fontUrl = null // keine Schrift importieren
-
-/** Sketch 1 Geschaedigte **/
+/* ------------------------------------------------------------------
+   REFS & FILTER STATES
+------------------------------------------------------------------ */
 const raw = ref([])
+
 const activeGeschaedigte = ref('sexuelle_noetigung')
-const { width: widthGeschaedigte, height: heightGeschaedigte } = useSketchDimensions()
-
-/** Sketch 2 Beschuldigte**/
 const activeBeschuldigte = ref('sexuelle_noetigung')
-const { width: widthBeschuldigte, height: heightBeschuldigte } = useSketchDimensions()
-
-
-//** Für Ort-Sketch**/
 const activeOrt = ref('sexuelle_noetigung')
-const { width: widthOrt, height: heightOrt } = useSketchDimensions()
-
-//** Für Beziehung-Sketch**/
 const activeBeziehung = ref('sexuelle_noetigung')
-const { width: widthBeziehung, height: heightBeziehung } = useSketchDimensions()
-
-//** Für Titelblatt-Sketch**/
-const { width: widthTitelblatt, height: heightTitelblatt } = useSketchDimensions({ useFullscreen: true })
-
-//** Für Dunkelziffer-Sketch**/
 const activeDunkelziffer = ref('sexuelle_noetigung')
-const dunkelzifferMode = ref('hell') // 'hell' oder 'dunkel'
-const { width: widthDunkelziffer, height: heightDunkelziffer } = useSketchDimensions({ useFullscreen: true })
+const dunkelzifferMode = ref('hell')
 
-//** Für Accordion-Liste **/
+/* ------------------------------------------------------------------
+   INFO POPUP STATE
+------------------------------------------------------------------ */
+const showInfoGeschaedigte = ref(false)
+const showInfoBeschuldigte = ref(false)
+const showInfoOrt = ref(false)
+const showInfoBeziehung = ref(false)
+const showInfoDunkelziffer = ref(false)
+
+/* ------------------------------------------------------------------
+   ACCORDION STATE
+------------------------------------------------------------------ */
 const openAccordions = ref({
   sexuellerUebergriff: false,
   vergewaltigung: false,
@@ -84,61 +155,68 @@ const toggleAccordion = (key) => {
 }
 
 
+/* ------------------------------------------------------------------
+   SKETCH DIMENSIONS
+------------------------------------------------------------------ */
+const { width: widthGeschaedigte, height: heightGeschaedigte } = useSketchDimensions()
+const { width: widthBeschuldigte, height: heightBeschuldigte } = useSketchDimensions()
+const { width: widthOrt, height: heightOrt } = useSketchDimensions()
+const { width: widthBeziehung, height: heightBeziehung } = useSketchDimensions()
+const { width: widthTitelblatt, height: heightTitelblatt } =
+  useSketchDimensions({ useFullscreen: true })
+const { width: widthDunkelziffer, height: heightDunkelziffer } =
+  useSketchDimensions({ useFullscreen: true })
 
-// CSV laden
+/* ------------------------------------------------------------------
+   CSV LOAD + INTERSECTION OBSERVER (RESET LOGIC)
+------------------------------------------------------------------ */
+let intersectionObserver = null
+
 onMounted(async () => {
-  const csv = await d3.csv(csvUrl, d3.autoType)
-  raw.value = csv
-
-  // Intersection Observer für Auto-Reset
+  raw.value = await d3.csv(csvUrl, d3.autoType)
   setupIntersectionObservers()
 })
 
-// Intersection Observer Logik - Reset auf 'sexuelle_noetigung' wenn Sketch aus Viewport verschwindet
-let intersectionObserver = null
-
 const setupIntersectionObservers = () => {
-  intersectionObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) {
-        const id = entry.target.id
-        // Für Forderungen nur reagieren wenn Kreuze tatsächlich fallen
-        if (id === 'sketch-forderungen') {
-          if (triggerFallForderungen.value) {
+  intersectionObserver = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) {
+          const id = entry.target.id
+
+          if (id === 'sketch-forderungen') {
+            if (triggerFallForderungen.value) {
+              resetSketchToDefault(id)
+            }
+          } else {
             resetSketchToDefault(id)
           }
-        } else {
-          resetSketchToDefault(id)
         }
-      }
-    })
-  }, {
-    threshold: 0.1,
-    rootMargin: '-100px'
-  })
+      })
+    },
+    {
+      threshold: 0.1,
+      rootMargin: '-100px'
+    }
+  )
 
-  // Beobachte alle Sketch-Container
-  // Diese IDs müssen im Template gesetzt werden
   const sketchIds = [
     'sketch-geschaedigte',
     'sketch-beschuldigte',
     'sketch-ort',
     'sketch-beziehung',
     'sketch-dunkelziffer',
-    'sketch-forderungen' // Forderungen-Sektion hinzugefügt
+    'sketch-forderungen'
   ]
 
   sketchIds.forEach(id => {
-    const element = document.getElementById(id)
-    if (element) {
-      intersectionObserver.observe(element)
-    }
+    const el = document.getElementById(id)
+    if (el) intersectionObserver.observe(el)
   })
 }
 
-const resetSketchToDefault = (sketchId) => {
-
-  switch (sketchId) {
+const resetSketchToDefault = (id) => {
+  switch (id) {
     case 'sketch-geschaedigte':
       activeGeschaedigte.value = 'sexuelle_noetigung'
       break
@@ -153,88 +231,100 @@ const resetSketchToDefault = (sketchId) => {
       break
     case 'sketch-dunkelziffer':
       activeDunkelziffer.value = 'sexuelle_noetigung'
-      dunkelzifferMode.value = 'hell' // Optional: auch Modus zurücksetzen
+      dunkelzifferMode.value = 'hell'
       break
     case 'sketch-forderungen':
-      // Forderungen-Sketch zurücksetzen
       triggerFallForderungen.value = false
       resetForderungen.value++
       break
   }
 }
 
+/* ------------------------------------------------------------------
+   TEXT ERSCHEINT ERST NACH VERLASSEN DER VISUALISIERUNG
+------------------------------------------------------------------ */
+const showText = ref(false)
+let textObserver = null
+
+onMounted(async () => {
+  await nextTick()
+
+  const el = document.getElementById('sketch-section')
+  if (!el) return
+
+  textObserver = new IntersectionObserver(
+    entries => {
+      showText.value = !entries[0].isIntersecting
+    },
+    { threshold: 0 }
+  )
+
+  textObserver.observe(el)
+})
+
+/* ------------------------------------------------------------------
+   CLEANUP
+------------------------------------------------------------------ */
+onUnmounted(() => {
+  if (textObserver) textObserver.disconnect()
+})
+
 onBeforeUnmount(() => {
-  if (intersectionObserver) {
-    intersectionObserver.disconnect()
-  }
+  if (intersectionObserver) intersectionObserver.disconnect()
 })
 
-// Filterdaten berechnen
-//Geschaedigte
+/* ------------------------------------------------------------------
+   COMPUTED FILTERS
+------------------------------------------------------------------ */
 const filteredGeschaedigte = computed(() =>
-  activeGeschaedigte.value ? raw.value.filter(d => d.straftat === activeGeschaedigte.value) : raw.value
+  raw.value.filter(d => d.straftat === activeGeschaedigte.value)
 )
 
-//Beschuldigte
 const filteredBeschuldigte = computed(() =>
-  activeBeschuldigte.value ? raw.value.filter(d => d.straftat === activeBeschuldigte.value) : raw.value
+  raw.value.filter(d => d.straftat === activeBeschuldigte.value)
 )
 
-//Ort
 const filteredOrt = computed(() =>
-  activeOrt.value ? raw.value.filter(d => d.straftat === activeOrt.value) : raw.value
+  raw.value.filter(d => d.straftat === activeOrt.value)
 )
 
-//Beziehung
 const filteredBeziehung = computed(() =>
-  activeBeziehung.value ? raw.value.filter(d => d.straftat === activeBeziehung.value) : raw.value
+  raw.value.filter(d => d.straftat === activeBeziehung.value)
 )
 
-//Dunkelziffer
 const filteredDunkelziffer = computed(() =>
-  activeDunkelziffer.value ? raw.value.filter(d => d.straftat === activeDunkelziffer.value) : raw.value
+  raw.value.filter(d => d.straftat === activeDunkelziffer.value)
 )
 
-// Debug: Überwache Änderungen
-watch(activeOrt, (newVal) => {
-})
-
-// Reset Dunkelziffer-Toggle auf "Angezeigt" wenn Straftat geändert wird
-watch(activeDunkelziffer, (newVal) => {
+/* ------------------------------------------------------------------
+   WATCHERS
+------------------------------------------------------------------ */
+watch(activeDunkelziffer, () => {
   dunkelzifferMode.value = 'hell'
 })
 
+/* ------------------------------------------------------------------
+   HELPERS
+------------------------------------------------------------------ */
 function setFilter(key) {
   activeGeschaedigte.value = key
 }
-
-// Text erscheint erst, wenn Sketch nicht mehr sichtbar ist
-import { onUnmounted, nextTick } from 'vue'
-const showText = ref(false)
-let observer = null
-onMounted(async () => {
-  await nextTick()
-  const sketchEl = document.getElementById('sketch-section')
-  if (sketchEl) {
-    observer = new window.IntersectionObserver((entries) => {
-      if (!entries[0].isIntersecting) {
-        showText.value = true
-      } else {
-        showText.value = false
-      }
-    }, { threshold: 0 })
-    observer.observe(sketchEl)
-  }
-})
-onUnmounted(() => {
-  if (observer) observer.disconnect()
-})
 </script>
 
+
 <template>
+  <!-- Dot Navigation -->
+  <nav class="dot-nav" :class="{ 'nav-hidden': !showNav }">
+    <button v-for="item in navItems" :key="item.id" class="dot-item"
+      :class="{ 'dot-active': activeSection === item.id }" @click="scrollToSection(item.id)" :title="item.label">
+      <span class="dot"></span>
+      <span class="dot-label">{{ item.label }}</span>
+    </button>
+  </nav>
+
   <div class="main-scroll">
     <!-- 1a. Titelbild -->
-    <div class="fullscreen-section">
+    <div class="fullscreen-section" id="section-intro">
       <div class="fullscreen-sketch">
         <h1>Muster<br />und blinde<br />Flecken</h1>
         <h2>Was die Polizeiliche Kriminalstatistik 2024<br />zu Sexualisierter Gewalt aufzeigt – und was nicht</h2>
@@ -313,22 +403,33 @@ onUnmounted(() => {
               <p>Exhibitionistische Handlung vor anderen, in der Regel auf Antrag.</p>
             </div>
           </div>
-  </div>
+        </div>
       </div>
     </section>
 
     <!-- 2. Split-Section: Sketch links sticky, rechts scrollt Text hoch -->
-    <div class="split-section">
+    <div class="split-section" id="section-geschaedigte">
       <div id="sketch-geschaedigte" class="split-left sticky-sketch">
         <h2>Wer ist von Sexualisierter Gewalt betroffen?</h2>
-        <p class="annotation">Ein Kreuz entspricht einer geschädigten Person</p>
         <P5CanvasGeschaedigte :key="activeGeschaedigte + '-' + filteredGeschaedigte.length" :data="filteredGeschaedigte"
           :width="widthGeschaedigte" :height="heightGeschaedigte" :font-family="'PxGroteskPan'" :background="255" />
         <div class="btns">
           <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeGeschaedigte === s.key }"
             @click="activeGeschaedigte = s.key">{{ s.label }}</button>
+          <button class="info-btn" @click="showInfoGeschaedigte = !showInfoGeschaedigte">i</button>
+        </div>
+
+        <!-- Info Pop-up -->
+        <div v-if="showInfoGeschaedigte" class="info-popup">
+          <button class="popup-close" @click="showInfoGeschaedigte = false">×</button>
+          <h3>Geschädigte Personen</h3>
+          <p><strong>Darstellung:</strong> Ein Kreuz entspricht einer geschädigten Person</p>
+          <p><strong>Quelle:</strong> Polizeiliche Kriminalstatistik (PKS) 2024, Bundesamt für Statistik</p>
+          <p><strong>Kontext:</strong> Die Visualisierung zeigt nur angezeigt Fälle. Die Dunkelziffer liegt deutlich
+            höher.</p>
         </div>
       </div>
+
       <div class="split-right">
         <div style="height: 150vh;"></div>
         <div class="side-text scrollable-text">
@@ -350,10 +451,9 @@ onUnmounted(() => {
     </div>
 
     <!-- 3. Split Section: Sketch Beschuldigte sticky + Text (unverändert) -->
-    <div class="split-section">
+    <div class="split-section" id="section-beschuldigte">
       <div class="split-left sticky-sketch" id="sketch-beschuldigte">
         <h2>Wer übt Sexualisierte Gewalt aus?</h2>
-        <p class="annotation">Ein Kreuz entspricht einer beschuldigten Person</p>
         <P5CanvasBeschuldigte :key="activeBeschuldigte + '-' + filteredBeschuldigte.length" :data="filteredBeschuldigte"
           :width="widthBeschuldigte" :height="heightBeschuldigte" :background="255" :font-family="'PxGroteskPan'"
           :show-labels="true" left-field="beschuldigte_f" right-field="beschuldigte_m" left-label="Frauen"
@@ -361,8 +461,20 @@ onUnmounted(() => {
         <div class="btns">
           <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeBeschuldigte === s.key }"
             @click="activeBeschuldigte = s.key">{{ s.label }}</button>
+          <button class="info-btn" @click="showInfoBeschuldigte = !showInfoBeschuldigte">i</button>
+        </div>
+
+        <!-- Info Pop-up -->
+        <div v-if="showInfoBeschuldigte" class="info-popup">
+          <button class="popup-close" @click="showInfoBeschuldigte = false">×</button>
+          <h3>Beschuldigte Personen</h3>
+          <p><strong>Darstellung:</strong> Ein Kreuz entspricht einer beschuldigten Person</p>
+          <p><strong>Quelle:</strong> Polizeiliche Kriminalstatistik (PKS) 2024, Bundesamt für Statistik</p>
+          <p><strong>Kontext:</strong> Eine beschuldigte Person ist nicht automatisch schuldig. Es handelt sich um
+            Verdachtsfälle.</p>
         </div>
       </div>
+
       <div class="split-right">
         <div style="height: 150vh;"></div>
         <div class="side-text scrollable-text">
@@ -384,17 +496,28 @@ onUnmounted(() => {
     </div>
 
     <!-- 4. section ort: Sketch Ort sticky + Text -->
-    <div class="split-section">
+    <div class="split-section" id="section-ort">
       <div class="split-left sticky-sketch" id="sketch-ort">
-        <h2>Wo findet Sexualisierte Gewalt gegen Frauen statt?</h2>
-        <p class="annotation">Ein Kreuz entspricht einer Straftat</p>
+        <h2>Wo findet Sexualisierte Gewalt statt?</h2>
         <P5CanvasOrt :key="activeOrt + '-' + filteredOrt.length" :data="filteredOrt" :width="widthOrt"
           :height="heightOrt" :background="255" :font-family="'PxGroteskPan'" />
         <div class="btns">
           <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeOrt === s.key }"
             @click="activeOrt = s.key">{{ s.label }}</button>
+          <button class="info-btn" @click="showInfoOrt = !showInfoOrt">i</button>
+        </div>
+
+        <!-- Info Pop-up -->
+        <div v-if="showInfoOrt" class="info-popup">
+          <button class="popup-close" @click="showInfoOrt = false">×</button>
+          <h3>Tatort</h3>
+          <p><strong>Darstellung:</strong> Ein Kreuz entspricht einer Straftat</p>
+          <p><strong>Quelle:</strong> Polizeiliche Kriminalstatistik (PKS) 2024, Bundesamt für Statistik</p>
+          <p><strong>Kontext:</strong> Als privater Raum gelten ausschliesslich die eigenen vier Wände. Treppenhaus oder
+            Waschküche gelten bereits als öffentlich.</p>
         </div>
       </div>
+
       <div class="split-right">
         <div style="height: 150vh;"></div>
         <div class="side-text scrollable-text">
@@ -416,18 +539,29 @@ onUnmounted(() => {
     </div>
 
     <!-- 5. section beziehung: Sketch Beziehung sticky + Text -->
-    <div class="split-section">
+    <div class="split-section" id="section-beziehung">
       <div class="split-left sticky-sketch" id="sketch-beziehung">
         <h2>Welche Beziehung haben Beschuldigte und Geschädigte?</h2>
-        <p class="annotation">Ein Kreuz entspricht einer geschädigten Person</p>
         <P5CanvasBeziehung :key="activeBeziehung + '-' + filteredBeziehung.length" :data="filteredBeziehung"
           :width="widthBeziehung" :height="heightBeziehung" :background="255" :font-family="'PxGroteskPan'"
           :mouse-radius="150" :repel-radius="80" :attract-power="1.5" />
         <div class="btns">
           <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeBeziehung === s.key }"
             @click="activeBeziehung = s.key">{{ s.label }}</button>
+          <button class="info-btn" @click="showInfoBeziehung = !showInfoBeziehung">i</button>
+        </div>
+
+        <!-- Info Pop-up -->
+        <div v-if="showInfoBeziehung" class="info-popup">
+          <button class="popup-close" @click="showInfoBeziehung = false">×</button>
+          <h3>Beziehung</h3>
+          <p>Darstellung: Ein Kreuz entspricht einer geschädigten Person</p>
+          <p>Quelle:Polizeiliche Kriminalstatistik (PKS) 2024, Bundesamt für Statistik</p>
+          <p>Kategorien: Partner (inkl. Ex), verwandt, bekannt, Arbeit/Ausbildung, keine Beziehung,
+            andere Beziehung</p>
         </div>
       </div>
+
       <div class="split-right">
         <div style="height: 150vh;"></div>
         <div class="side-text scrollable-text">
@@ -442,7 +576,7 @@ onUnmounted(() => {
             <li>Arbeit (Arbeit und Ausbildung)</li>
             <li>keine Beziehung</li>
             <li>andere Beziehung (Amtsverhältnis, gesetzliche Vertretung, ärztlicher Kontext, ohne Angabe und
-                unaufgeklärte Straftaten)</li>
+              unaufgeklärte Straftaten)</li>
           </ul>
           <p>
             Es bestätigt sich, was die Daten zur Örtlichkeit andeuten. Die Taten Sexualisierter Gewalt finden vor allem
@@ -456,31 +590,43 @@ onUnmounted(() => {
     </div>
 
     <!-- 6. section dunkelziffer: Sketch Dunkelziffer fullscreen -->
-    <div class="fullscreen-section">
+    <div class="fullscreen-section" id="section-dunkelziffer">
       <div class="fullscreen-sketch" id="sketch-dunkelziffer">
         <h2 class="dunkelziffer-title">Angezeigte vs. tatsächliche Sexualisierte Gewalt</h2>
-        <p class="dunkelziffer-annotation">Ein Kreuz entspricht einer geschädigten Person</p>
         <div class="dunkelziffer-canvas-container">
           <P5CanvasDunkelziffer :key="activeDunkelziffer + '-' + filteredDunkelziffer.length"
             :data="filteredDunkelziffer" :width="widthDunkelziffer" :height="heightDunkelziffer"
             :background="'transparent'" :font-family="'PxGroteskPan'" :dunkelziffer="dunkelzifferMode"
             :mouse-radius="80" :repel-radius="100" :attract-power="10" />
         </div>
-        <div class="btns fullscreen-buttons">
-          <div class="filter-buttons">
-            <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeDunkelziffer === s.key }"
-              @click="activeDunkelziffer = s.key">{{ s.label }}</button>
-          </div>
-          <div class="dunkelziffer-toggle-container">
-            <button :class="['toggle-btn', { 'active-dunkelziffer': dunkelzifferMode === 'hell' }]"
-              @click="dunkelzifferMode = 'hell'">Angezeigt</button>
-            <button :class="['toggle-btn', { 'active-dunkelziffer': dunkelzifferMode === 'dunkel' }]"
-              @click="dunkelzifferMode = 'dunkel'">Tatsächlich</button>
-          </div>
+        <!-- Info Pop-up -->
+        <div v-if="showInfoDunkelziffer" class="info-popup info-popup-fullscreen">
+          <button class="popup-close" @click="showInfoDunkelziffer = false">×</button>
+          <h3>Dunkelziffer</h3>
+          <p><strong>Darstellung:</strong> Ein Kreuz entspricht einer geschädigten Person</p>
+          <p><strong>Quellen:</strong> PKS 2024 (Hellfeld), Prävalenzstudien (Dunkelfeld)</p>
+          <p><strong>Kontext:</strong> Die Dunkelziffer zeigt, wie viele Straftaten tatsächlich passieren im
+            Vergleich
+            zu den angezeigten Fällen. Nur etwa 10% werden angezeigt.</p>
         </div>
         <div style="height: 50vh;"></div>
       </div>
+      <div class="btns fullscreen-buttons">
+        <div class="filter-buttons-with-info">
+          <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeDunkelziffer === s.key }"
+            @click="activeDunkelziffer = s.key">{{ s.label }}</button>
+          <button class="info-btn" @click="showInfoDunkelziffer = !showInfoDunkelziffer">i</button>
+        </div>
+        <div class="dunkelziffer-toggle-container">
+          <button :class="['toggle-btn', { 'active-dunkelziffer': dunkelzifferMode === 'hell' }]"
+            @click="dunkelzifferMode = 'hell'">Angezeigt</button>
+          <button :class="['toggle-btn', { 'active-dunkelziffer': dunkelzifferMode === 'dunkel' }]"
+            @click="dunkelzifferMode = 'dunkel'">Tatsächlich</button>
+        </div>
+      </div>
+      
     </div>
+
 
     <!-- 7. section dunkelziffer text: Erklärungstext als Overlay/Stacking -->
     <section class="text-overlay-section">
@@ -511,7 +657,7 @@ onUnmounted(() => {
     </section>
 
     <!-- 8. Finale Forderungen Section mit P5 Canvas im Vordergrund -->
-    <section class="final-text-overlay-section" id="sketch-forderungen">
+    <section class="final-text-overlay-section" id="section-forderungen">
       <div class="forderungen-canvas-container">
         <P5CanvasForderungen :width="widthForderungen" :height="heightForderungen" :background="'transparent'"
           :font-family="'PxGroteskPan'" :trigger-fall="triggerFallForderungen" :reset-counter="resetForderungen" />
@@ -541,6 +687,100 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+/* =========================
+   STICKY NAVIGATION
+   ========================= */
+
+.dot-nav {
+  position: fixed;
+  right: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.dot-nav.nav-hidden {
+  opacity: 0;
+  transform: translateY(-50%) translateX(50px);
+  pointer-events: none;
+}
+
+.dot-item {
+  position: relative;
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  transition: all 0.2s ease;
+}
+
+.dot {
+  width: 28px;
+  height: 5px;
+  border-radius: 0;
+  background: rgba(0, 0, 0, 1);
+  border: none;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.dot-item:hover .dot {
+  background: rgba(0, 0, 0, 1);
+  transform: none;
+}
+
+.dot-item.dot-active .dot {
+  width: 28px;
+  height: 5px;
+  background: #000;
+  border: none;
+}
+
+.dot-item.dot-active .dot::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 5px;
+  height: 28px;
+  background: #000;
+  transition: all 0.3s ease;
+}
+
+.dot-label {
+  position: absolute;
+  right: 45px;
+  white-space: nowrap;
+  background: rgba(0, 0, 0);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 0px;
+  font-family: 'PxGroteskPan', sans-serif;
+  font-size: 0.85em;
+  font-weight: 500;
+  opacity: 0;
+  transform: translateX(10px);
+  transition: all 0.2s ease;
+  pointer-events: none;
+}
+
+.dot-item:hover .dot-label {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.dot-item.dot-active .dot-label {
+  font-weight: 700;
+}
+
 /* =========================
    SCROLL & LAYOUT SYSTEM
    ========================= */
@@ -634,6 +874,7 @@ onUnmounted(() => {
   align-items: stretch;
   scroll-snap-align: start;
   background: #fff;
+  position: relative;
 }
 
 .split-left {
@@ -700,16 +941,19 @@ onUnmounted(() => {
 
 .fullscreen-sketch {
   width: 100vw !important;
-  height: 100vh !important;
+  height: 90vh !important;
   margin: 0 !important;
   padding: 0;
   box-sizing: border-box;
   position: sticky;
   top: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  display: block;
+}
+
+#sketch-dunkelziffer {
+  position: relative;
+  width: 100%;
+  height: 90%;
 }
 
 .dunkelziffer-title {
@@ -755,18 +999,28 @@ onUnmounted(() => {
   /* Canvas selbst nicht klickbar, damit Buttons durchklickbar bleiben */
 }
 
+
+/* Standard-Buttons: wie gehabt */
 .fullscreen-buttons {
-  position: absolute;
-  bottom: -30px;
-  /* Mehr Abstand vom unteren Rand */
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
   display: flex;
   gap: 20px;
   align-items: center;
-  z-index: 10;
+  justify-content: center;
   pointer-events: auto;
-  /* Explizit anklickbar machen */
+  flex-wrap: wrap;
+  margin: 20px 0;
+  width: 100%;
+}
+
+/* Nur in der Dunkelziffer-Section sticky am unteren Rand */
+
+/* Wrapper für Filter-Buttons mit Info-Button */
+.filter-buttons-with-info {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 /* Sicherstellen, dass alle Buttons in fullscreen-buttons anklickbar bleiben */
@@ -778,6 +1032,86 @@ onUnmounted(() => {
 .btns {
   margin-bottom: 60px;
   /* Abstand vom unteren Rand der sticky-Elemente */
+  position: relative;
+}
+
+/* Info Button */
+.info-btn {
+  width: 35px;
+  height: 35px;
+  padding: 0 16px;
+  margin-left: 15px;
+  background-color: #fff;
+  color: #000;
+  border: 2.5px solid #000;
+  font-family: 'PxGroteskPan', sans-serif;
+  font-weight: bold;
+  font-size: 1em;
+  cursor: pointer;
+  border-radius: 0;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.info-btn:hover {
+  background-color: #000;
+  color: #fff;
+}
+
+/* Info Pop-up */
+.info-popup {
+  position: absolute;
+  bottom: 80px;
+  right: 0;
+  background: #fff;
+  border: 2.5px solid #000;
+  padding: 20px;
+  max-width: 400px;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.info-popup-fullscreen {
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 120px;
+}
+
+.info-popup h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-family: 'PxGroteskPan', sans-serif;
+  font-size: 1.2em;
+}
+
+.info-popup p {
+  margin: 8px 0;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+.info-popup strong {
+  font-weight: 700;
+}
+
+.popup-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 1.8em;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
 }
 
 .dunkelziffer-toggle-container {
