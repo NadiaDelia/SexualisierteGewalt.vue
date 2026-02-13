@@ -81,8 +81,16 @@ button.active {
   flex-wrap: wrap;
   margin: 20px 0;
 }
-
+  
 .fullscreen-buttons {
+/* Cursor-Dot als senkrechter Balken bei Links und Buttons */
+a:hover ~ .cursor-dot,
+button:hover ~ .cursor-dot,
+.info-btn:hover ~ .cursor-dot {
+    width: 6px;
+    height: 36px;
+    border-radius: 3px;
+  }
   display: flex !important;
   flex-direction: row !important;
   gap: 30px !important;
@@ -150,10 +158,6 @@ button.active {
 }
 
 
-/* aus Sexuale Delikte kopiert*/
-
-
-
 
 /* Wrapper für Filter-Buttons mit Info-Button */
 .filter-buttons-with-info {
@@ -184,13 +188,20 @@ button.active {
   justify-content: center;
   z-index: 1;
   position: relative;
-}
+  }
+
+  .info-btn.active {
+    background-color: #000;
+    color: #fff;
+  }
+
 
 /* Spezifischer Hover für Info-Button im Dunkelziffer-Bereich */
 .info-btn-absolute-wrapper:hover .info-btn:hover {
   background-color: #000;
   color: #fff;
 }
+
  
 /* Info Pop-up */
 .info-popup {
@@ -470,8 +481,18 @@ section {
   border-radius: 50%;
   pointer-events: none;
   transform: translate(-50%, -50%);
-  z-index: 9999;
+  z-index: 10001 !important;
+   transition: width 0.2s, height 0.2s, border-radius 0.2s;
 }
+
+.cursor-dot.cursor-white {
+  width:27.5px;
+  height:27.5px;
+  background: rgba(255, 255, 255, 1);
+  border: 2.5px solid black;
+}
+
+
 
 /* Standard Pfeil ausblenden*/
 html,

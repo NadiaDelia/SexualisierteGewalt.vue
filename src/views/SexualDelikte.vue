@@ -348,7 +348,7 @@ function setFilter(key) {
         </p>
         <h2 class="h2-spaced">Wir schauen genauer hin</h2>
         <p>
-          In fünf Visualisierungen betrachten wir zentrale Delikte Sexualisierter Gewalt. Dabei stützen wir uns auf die
+          In <a href="www.nadialanfranchi.ch">fünf Visualisierungen</a> betrachten wir zentrale Delikte Sexualisierter Gewalt. Dabei stützen wir uns auf die
           Daten der Kriminalstatistik, welche jeweils die angezeigten Fälle zählt. Zudem wichtig zu wissen: Die
           Statistik registriert nur zwei Geschlechter. Folgende Straftaten stehen im Zentrum: </p>
         <div class="accordion-list">
