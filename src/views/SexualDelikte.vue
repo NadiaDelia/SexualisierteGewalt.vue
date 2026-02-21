@@ -487,8 +487,7 @@ function setFilter(key) {
           <p>
             Wichtig zu wissen: Vor der Sexualstrafrechtsreform kannte der Straftatbestand Vergewaltigung ausschliesslich
             weibliche Betroffene und männliche Täter. Seit 1. Juli 2024 ist das Gesetz geschlechtsneutral definiert.
-            Vergewaltigung umfasst jegliche Penetration gegen den Willen der betroffenen Person oder durch das Ausnutzen
-            eines Schockzustands.
+            Vergewaltigung umfasst jegliche Penetration gegen den Willen der betroffenen Person. Ausserdem ist es neu auch eine Vergewaltigung, wenn Täter_innen eine Schockzustand ausnutzen.
           </p>
         </div>
         <div style="height: 50vh;"></div>

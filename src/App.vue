@@ -10,41 +10,52 @@ function onMouseMove(e) {
   dot.style.top = `${e.clientY}px`
 }
 
-function handleInteractiveHover(e) {
-  if (!dot) return
-  dot.classList.add('cursor-white')
+function isInteractive(target) {
+  // Für Accordion: Nur auf .accordion-header oder .accordion-header * (also auch auf Kind-Elemente wie <span>)
+  if (target.closest && target.closest('.accordion-header')) return true;
+  return target.matches && (
+    target.matches('a, button, .info-btn, .popup-close, .dot-item, .dot')
+  );
 }
 
-function handleInteractiveLeave(e) {
+function handleDelegatedHover(e) {
   if (!dot) return
-  dot.classList.remove('cursor-white')
+  if (isInteractive(e.target)) {
+    dot.classList.add('cursor-white')
+  }
+}
+
+function handleDelegatedLeave(e) {
+  if (!dot) return
+  if (isInteractive(e.target)) {
+    dot.classList.remove('cursor-white')
+  }
+}
+
+function removeCursorWhite() {
+  if (dot) dot.classList.remove('cursor-white')
 }
 
 onMounted(() => {
   dot = document.querySelector('.cursor-dot')
   window.addEventListener('mousemove', onMouseMove)
 
-  // Add hover listeners to links, buttons, .info-btn, and .accordion-header
-  const interactiveSelectors = ['a', 'button', '.info-btn', '.accordion-header']
-  interactiveSelectors.forEach(sel => {
-    document.querySelectorAll(sel).forEach(el => {
-      el.addEventListener('mouseenter', handleInteractiveHover)
-      el.addEventListener('mouseleave', handleInteractiveLeave)
-    })
-  })
+  // Delegated hover for all interactive elements (works for dynamic elements)
+  document.addEventListener('mouseover', handleDelegatedHover)
+  document.addEventListener('mouseout', handleDelegatedLeave)
+
+  // Entferne den Hover-State beim Klick auf ein .popup-close
+  document.addEventListener('click', function(e) {
+    if (e.target && e.target.matches('.popup-close')) {
+      removeCursorWhite();
+    }
+  });
 })
 
 onUnmounted(() => {
   window.removeEventListener('mousemove', onMouseMove)
-
-  // Remove hover listeners
-  const interactiveSelectors = ['a', 'button', '.info-btn', '.accordion-header']
-  interactiveSelectors.forEach(sel => {
-    document.querySelectorAll(sel).forEach(el => {
-      el.removeEventListener('mouseenter', handleInteractiveHover)
-      el.removeEventListener('mouseleave', handleInteractiveLeave)
-    })
-  })
+  document.removeEventListener('mouseover', handleDelegatedHover)
+  document.removeEventListener('mouseout', handleDelegatedLeave)
 })
 </script>
 
