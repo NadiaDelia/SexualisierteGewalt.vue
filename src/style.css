@@ -233,12 +233,12 @@ button:hover ~ .cursor-dot,
   margin-top: 0;
   margin-bottom: 12px;
   font-family: 'PxGroteskPan', sans-serif;
-  font-size: 1.2em;
+  font-size: 1.4em;
 }
 
 .info-popup p {
   margin: 8px 0;
-  font-size: 0.9em;
+  font-size: 1em;
   line-height: 1.5;
 }
 

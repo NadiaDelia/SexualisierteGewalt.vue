@@ -23,6 +23,74 @@ import P5CanvasDunkelziffer from '../components/P5CanvasDunkelziffer.vue'
 import P5CanvasTitelblatt from '../components/P5CanvasTitelblatt.vue'
 import P5CanvasForderungen from '../components/P5CanvasForderungen.vue'
 
+// Formular State
+const form = ref({
+  vorname: '',
+  name: '',
+  email: '',
+  adresse: '',
+  plz: '',
+  ort: '',
+  kommentar: '',
+  newsletter: true
+})
+const errors = ref({});
+const formStatus = ref('');
+const submitted = ref(false);
+
+function validateForm() {
+  errors.value = {};
+  // Pflichtfelder
+  if (!form.value.vorname) errors.value.vorname = '*** Bitte Vorname eingeben.';
+  if (!form.value.name) errors.value.name = '*** Bitte Name eingeben.';
+  if (!form.value.email) {
+    errors.value.email = '*** Bitte E-Mail eingeben.';
+  } else if (!/^\S+@\S+\.\S+$/.test(form.value.email)) {
+    errors.value.email = '*** Bitte gültige E-Mail eingeben.';
+  }
+  if (!form.value.adresse) errors.value.adresse = '*** Bitte Adresse eingeben.';
+  if (!form.value.plz) {
+    errors.value.plz = '*** Bitte Postleitzahl eingeben.';
+  } else if (!/^\d{4}$/.test(form.value.plz)) {
+    errors.value.plz = '*** Bitte gültige Postleitzahl eingeben (4 Ziffern).';
+  }
+  if (!form.value.ort) errors.value.ort = '*** Bitte Ort eingeben.';
+  return Object.keys(errors.value).length === 0;
+}
+
+async function handleFormSubmit() {
+  if (!validateForm()) return;
+  formStatus.value = '';
+  const payload = new URLSearchParams();
+  payload.append('vorname', form.value.vorname);
+  payload.append('name', form.value.name);
+  payload.append('email', form.value.email);
+  payload.append('adresse', form.value.adresse);
+  payload.append('plz', form.value.plz);
+  payload.append('ort', form.value.ort);
+  payload.append('kommentar', form.value.kommentar);
+  payload.append('newsletter', form.value.newsletter ? 'Ja' : 'Nein');
+  try {
+    const res = await fetch('/save_form.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: payload.toString()
+    });
+    if (res.ok) {
+      form.value = { vorname: '', name: '', email: '', adresse: '', plz: '', ort: '', kommentar: '', newsletter: false };
+      triggerCrossesFall();
+      setTimeout(() => {
+        submitted.value = true;
+        formStatus.value = 'Danke für deine Bestellung!';
+      }, 500); //
+    } else {
+      formStatus.value = 'Fehler beim Speichern.';
+    }
+  } catch (e) {
+    formStatus.value = 'Verbindungsfehler.';
+  }
+}
+
 /* ------------------------------------------------------------------
    STICKY NAVIGATION
 ------------------------------------------------------------------ */
@@ -98,10 +166,6 @@ const resetForderungen = ref(0)
 ------------------------------------------------------------------ */
 const triggerCrossesFall = () => {
   triggerFallForderungen.value = true
-
-  setTimeout(() => {
-    window.open('https://www.brava-ngo.ch/', '_blank')
-  }, 3000)
 }
 
 /* ------------------------------------------------------------------
@@ -348,9 +412,11 @@ function setFilter(key) {
         </p>
         <h2 class="h2-spaced">Wir schauen genauer hin</h2>
         <p>
-          In <a href="www.nadialanfranchi.ch">fünf Visualisierungen</a> betrachten wir zentrale Delikte Sexualisierter Gewalt. Dabei stützen wir uns auf die
+          In <a href="www.nadialanfranchi.ch">fünf Visualisierungen</a> betrachten wir zentrale Delikte Sexualisierter
+          Gewalt. Dabei stützen wir uns auf die
           Daten der Kriminalstatistik, welche jeweils die angezeigten Fälle zählt. Zudem wichtig zu wissen: Die
-          Statistik registriert nur zwei Geschlechter. Folgende Straftaten stehen im Zentrum: </p>
+          Statistik registriert nur zwei Geschlechter. Folgende Straftaten stehen im Zentrum:
+        </p>
         <div class="accordion-list">
           <div class="accordion-item">
             <div class="accordion-header" @click="toggleAccordion('sexuellerUebergriff')">
@@ -487,7 +553,8 @@ function setFilter(key) {
           <p>
             Wichtig zu wissen: Vor der Sexualstrafrechtsreform kannte der Straftatbestand Vergewaltigung ausschliesslich
             weibliche Betroffene und männliche Täter. Seit 1. Juli 2024 ist das Gesetz geschlechtsneutral definiert.
-            Vergewaltigung umfasst jegliche Penetration gegen den Willen der betroffenen Person. Ausserdem ist es neu auch eine Vergewaltigung, wenn Täter_innen eine Schockzustand ausnutzen.
+            Vergewaltigung umfasst jegliche Penetration gegen den Willen der betroffenen Person. Ausserdem ist es neu
+            auch eine Vergewaltigung, wenn Täter_innen eine Schockzustand ausnutzen.
           </p>
         </div>
         <div style="height: 50vh;"></div>
@@ -619,10 +686,11 @@ function setFilter(key) {
             <h3>Dunkelziffer</h3>
             <p><strong>Darstellung:</strong> Ein Kreuz entspricht einer geschädigten Person</p>
             <p><strong>Quellen:</strong> PKS 2024 (Hellfeld), Prävalenzstudien (Dunkelfeld)</p>
-            <p><strong>Kontext:</strong> Die Dunkelziffer zeigt, wie viele Straftaten tatsächlich passieren im Vergleich zu den angezeigten Fällen. Nur etwa 10% werden angezeigt.</p>
+            <p><strong>Kontext:</strong> Die Dunkelziffer zeigt, wie viele Straftaten tatsächlich passieren im Vergleich
+              zu den angezeigten Fällen. Nur etwa 10% werden angezeigt.</p>
           </div>
         </div>
-      </div>  
+      </div>
     </div>
 
 
@@ -677,12 +745,75 @@ function setFilter(key) {
           Fordere sie auf, Sexualisierte Gewalt konsequent zu bekämpfen. Oder unterstütze unsere Arbeit mit einer
           Spende.
         </p>
-        <button class="fall-button" @click="triggerCrossesFall">Jetzt mitmachen!</button>
+
+
+        <div class="bestellung-form-success-wrapper">
+          <div v-if="!submitted">
+            <form class="kontakt-form" @submit.prevent="handleFormSubmit">
+              <div class="form-row">
+                <div class="form-field">
+                  <label for="email">E-Mail*</label>
+                  <input id="email" name="email" v-model="form.email" autocomplete="off" />
+                  <span v-if="errors.email" class="form-error">{{ errors.email }}</span>
+                </div>
+              </div>
+              <div class="form-row two-cols">
+                <div class="form-field">
+                  <label for="vorname">Vorname*</label>
+                  <input id="vorname" name="vorname" v-model="form.vorname" autocomplete="off" />
+                  <span v-if="errors.vorname" class="form-error">{{ errors.vorname }}</span>
+                </div>
+                <div class="form-field">
+                  <label for="name">Name*</label>
+                  <input id="name" name="name" v-model="form.name" autocomplete="off" />
+                  <span v-if="errors.name" class="form-error">{{ errors.name }}</span>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label for="adresse">Adresse*</label>
+                  <input id="adresse" name="adresse" v-model="form.adresse" autocomplete="off" />
+                  <span v-if="errors.adresse" class="form-error">{{ errors.adresse }}</span>
+                </div>
+              </div>
+              <div class="form-row two-cols">
+                <div class="form-field">
+                  <label for="plz">Postleitzahl*</label>
+                  <input id="plz" name="plz" v-model="form.plz" autocomplete="off" />
+                  <span v-if="errors.plz" class="form-error">{{ errors.plz }}</span>
+                </div>
+                <div class="form-field">
+                  <label for="ort">Ort*</label>
+                  <input id="ort" name="ort" v-model="form.ort" autocomplete="off" />
+                  <span v-if="errors.ort" class="form-error">{{ errors.ort }}</span>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label for="kommentar">Kommentar</label>
+                  <textarea id="kommentar" name="kommentar" rows="4" v-model="form.kommentar"></textarea>
+                </div>
+              </div>
+              <label class="checkbox-field" for="newsletter">
+                <input id="newsletter" type="checkbox" name="newsletter" v-model="form.newsletter" />
+                Updates erhalten und auf dem Laufenden bleiben. Eine Abmeldung ist jederzeit möglich.
+              </label>
+              <button type="submit" class="fall-button" style="margin-top:18px; display: block;">
+                Bestellen
+              </button>
+            </form>
+          </div>
+          <div v-else class="bestellung-success-message">
+            <span>Danke für deine Bestellung!</span>
+          </div>
+        </div>
       </div>
     </section>
   </div>
-
 </template>
+
+
+
 
 <style scoped>
 /* =========================
@@ -1045,7 +1176,7 @@ function setFilter(key) {
   font-size: 1em;
   cursor: pointer;
   border-radius: 0;
-  transition: all 0.3s cubic-bezier(.4,2,.6,1);
+  transition: all 0.3s cubic-bezier(.4, 2, .6, 1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1164,7 +1295,130 @@ function setFilter(key) {
   pointer-events: auto;
 }
 
-/* Fall Button für Forderungen Section */
+/* –––––––––– FORMULAR –––––––––––*/
+
+.kontakt-form {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  z-index: 20;
+}
+
+.form-row {
+  width: 100%;
+}
+
+.form-row.two-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field label {
+  font-size: 1rem;
+}
+
+.form-field input,
+.form-field textarea {
+  width: 100%;
+  border: 3px solid #000;
+  background: transparent;
+  color: #000;
+  padding: 8px 10px;
+  font-family: 'PxGroteskPan', sans-serif;
+  font-size: 1.4rem;
+  border-radius: 0;
+  box-sizing: border-box;
+}
+
+.form-field textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+/* Fehlermeldungen schlicht unter dem Feld */
+.form-error {
+  color: #000 !important;
+  font-size: 1em !important;
+  margin-top: 4px !important;
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+  display: block !important;
+  text-align: left !important;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  position: static !important;
+  z-index: auto !important;
+}
+
+/* Erfolgsmeldung nach Bestellung */
+.bestellung-success-message {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  font-size: 2.2em;
+  font-weight: bold;
+  color: #000;
+  background: none;
+  padding: 0px 0;
+  margin-top: 60px;
+  border-radius: 0;
+}
+
+.checkbox-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+}
+
+.checkbox-field input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  background: transparent;
+  border-radius: 0;
+  border: 3px solid #000;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.checkbox-field input[type='checkbox']:checked::after {
+  content: '';
+  display: block;
+  width: 15px;
+  height: 15px;
+  background: #000;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+@media (max-width: 768px) {
+  .form-row.two-cols {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Verhindert das Springen nach dem Absenden des Formulars */
+.bestellung-form-success-wrapper {
+  min-height: 580px;
+  position: relative;
+}
+
+/* Fall Button für Bestell-Formular */
 .fall-button {
   margin-top: 30px;
   padding: 12px 24px;
@@ -1181,10 +1435,16 @@ function setFilter(key) {
   z-index: 20;
   /* Höher als Canvas, damit Button klickbar bleibt */
   pointer-events: auto;
-  /* Button explizit klickbar machen */
 }
 
+
+
 .fall-button:hover {
+  background-color: #000;
+  color: #fff;
+}
+
+.fall-button.submitted {
   background-color: #fff;
   color: #000;
 }
