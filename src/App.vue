@@ -1,7 +1,11 @@
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
-import SexualDelikte from './views/SexualDelikte.vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
+import SexualDelikte from './views/SexualDelikte.vue'
+import FooterBrava from './components/FooterBrava.vue'
+
+
+const showFooter = ref(false)
 let dot = null
 
 function onMouseMove(e) {
@@ -50,13 +54,27 @@ onMounted(() => {
       removeCursorWhite();
     }
   });
+
+  // Scroll-Event für Footer Sichtbarkeit
+  window.addEventListener('scroll', checkScroll)
+  checkScroll()
 })
+
 
 onUnmounted(() => {
   window.removeEventListener('mousemove', onMouseMove)
   document.removeEventListener('mouseover', handleDelegatedHover)
   document.removeEventListener('mouseout', handleDelegatedLeave)
+  window.removeEventListener('scroll', checkScroll)
 })
+
+function checkScroll() {
+  const scrollY = window.scrollY || window.pageYOffset;
+  const viewportHeight = window.innerHeight;
+  const fullHeight = document.documentElement.scrollHeight;
+  // Zeige Footer, wenn User fast ganz unten ist (10px Toleranz)
+  showFooter.value = scrollY + viewportHeight >= fullHeight - 10;
+}
 </script>
 
 <template>
@@ -65,4 +83,6 @@ onUnmounted(() => {
 
   <!-- Deine bestehende App -->
   <SexualDelikte />
+  <router-view />
+  <FooterBrava v-if="showFooter" />
 </template>

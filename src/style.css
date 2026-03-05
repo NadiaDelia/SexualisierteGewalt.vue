@@ -1,5 +1,3 @@
-
-
 /* =========================
    GLOBAL BASE STYLES
    ========================= */
@@ -302,6 +300,8 @@ body {
   /* damit Text lesbar bleibt */
   margin: 0;
 }
+
+/* Schwarzer Bereich unter Footer, nur am unteren Rand */
 
 h1 {
   font-size: 12em;
