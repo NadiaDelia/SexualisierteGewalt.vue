@@ -1,4 +1,25 @@
 <script setup>
+// Hamburger-Menü State (nur Mobile)
+import { ref as vueRef, computed as vueComputed, onMounted as vueOnMounted, onUnmounted as vueOnUnmounted } from 'vue'
+const menuOpen = vueRef(false)
+const showHamburger = vueRef(false)
+
+function updateShowHamburger() {
+  showHamburger.value = typeof window !== 'undefined' ? window.innerWidth <= 768 : false
+}
+
+vueOnMounted(() => {
+  updateShowHamburger()
+  window.addEventListener('resize', updateShowHamburger)
+})
+vueOnUnmounted(() => {
+  window.removeEventListener('resize', updateShowHamburger)
+})
+
+function handleHamburgerNav(sectionId) {
+  menuOpen.value = false
+  scrollToSection(sectionId)
+}
 
 
 // Footer Sichtbarkeit (main-scroll scroll)
@@ -411,7 +432,7 @@ function setFilter(key) {
 
 
 <template>
-  <!-- Dot Navigation -->
+  <!-- Dot Navigation (nur Desktop/Tablet) -->
   <nav class="dot-nav" :class="{ 'nav-hidden': !showNav }">
     <button v-for="item in navItems" :key="item.id" class="dot-item"
       :class="{ 'dot-active': activeSection === item.id }" @click="scrollToSection(item.id)" :title="item.label">
@@ -419,6 +440,21 @@ function setFilter(key) {
       <span class="dot-label">{{ item.label }}</span>
     </button>
   </nav>
+
+  <!-- Hamburger-Menü (nur Mobile) -->
+  <div class="hamburger-menu" v-if="showHamburger">
+    <button class="hamburger-btn" :class="{ open: menuOpen }" @click="menuOpen = !menuOpen" :aria-expanded="menuOpen">
+      <span class="hamburger-icon"></span>
+    </button>
+    <div class="hamburger-overlay" v-if="menuOpen">
+      <nav class="hamburger-nav">
+        <button v-for="item in navItems" :key="item.id" class="hamburger-link" @click="handleHamburgerNav(item.id)">
+          {{ item.label }}
+        </button>
+      </nav>
+    </div>
+  </div>
+
 
   <div class="main-scroll">
     <!-- 1a. Titelbild -->
@@ -482,23 +518,7 @@ function setFilter(key) {
       </div>
 
       <div class="split-right">
-        <div style="height: 150vh;"></div>
-        <div class="side-text scrollable-text">
-          <h2>Es trifft vor allem Frauen</h2>
-          <p>
-            Die Visualisierung zeigt, wie viele Personen 2025 für die jeweiligen Straftaten Anzeige erstattet haben.
-          </p>
-          <p>
-            Frauen stellen bei allen Delikten die überwiegende Mehrheit der Betroffenen. Der Anteil liegt zwischen 84
-            Prozent (sexuelle Nötigung) und 98 Prozent (Vergewaltigung).
-          </p>
-          <p>
-            Diese Struktur ist seit Jahren stabil: Frauen machen konstant die deutliche Mehrheit der Betroffenen aus.
-            Einziger Ausreisser und hier nicht dargestellt: Sexuelle Handlungen mit Kindern. Hier liegt der Anteil
-            Jungen bei rund einem Viertel der Betroffenen.
-          </p>
-        </div>
-        <div style="height: 50vh;"></div>
+
       </div>
     </div>
 
@@ -511,6 +531,7 @@ function setFilter(key) {
           :show-labels="true" left-field="beschuldigte_f" right-field="beschuldigte_m" left-label="Frauen"
           right-label="Männer" :mouse-radius="150" :repel-radius="80" :attract-power="1.5" />
         <div class="btns">
+
           <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeBeschuldigte === s.key }"
             @click="activeBeschuldigte = s.key">{{ s.label }}</button>
           <button class="info-btn" @click="showInfoBeschuldigte = !showInfoBeschuldigte">i</button>
@@ -986,6 +1007,143 @@ function setFilter(key) {
 
 /* font-weight removed, now global */
 
+/* =========================
+   HAMBURGER-MENÜ (nur Mobile)
+   ========================= */
+@media (max-width: 768px) {
+  .hamburger-menu {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    left: auto;
+    z-index: 20000;
+    display: block;
+  }
+
+  .hamburger-btn {
+    width: 50px;
+    height: 50px;
+    background: #fff;
+    border: none;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 20001;
+    position: relative;
+    padding: 0;
+    transition: background 0.7s cubic-bezier(.4, 2, .6, 1), border 0.7s cubic-bezier(.4, 2, .6, 1);
+  }
+
+  .hamburger-btn.open {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+
+  /* Hamburger offen : nur ein Kreuz (X) anzeigen */
+  .hamburger-btn.open .hamburger-icon {
+    background: transparent;
+  }
+
+  .hamburger-btn.open .hamburger-icon::before {
+    background: #fff;
+    transform: rotate(45deg) translate(0px, 0px);
+    top: 0;
+  }
+
+  .hamburger-btn.open .hamburger-icon::after {
+    background: #fff;
+    transform: rotate(-45deg) translate(0px, -0px);
+    top: 0;
+  }
+
+  .hamburger-icon {
+    width: 35px;
+    height: 4.2px;
+    background: #000;
+    position: relative;
+    display: block;
+    transition: background 0.7s cubic-bezier(.4, 2, .6, 1);
+
+  }
+
+  .hamburger-icon::before,
+  .hamburger-icon::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 35px;
+    height: 4.2px;
+    background: #000;
+    transition: 0.3s;  
+  }
+
+  .hamburger-icon::before {
+    top: -12px;
+  }
+
+  .hamburger-icon::after {
+    top: 12px;
+  }
+
+  .hamburger-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 1);
+    z-index: 20000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .hamburger-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    align-items: flex-start;
+    justify-content: flex-start;
+    height: 100%;
+    padding-top: 4.4em;
+  }
+
+  .hamburger-link {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 2.2em;
+    font-family: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 5px 16px;
+    transition: color 0.2s;
+    text-align: left;
+  }
+
+  .hamburger-link:active,
+  .hamburger-link:focus {
+    background: #fff;
+    color: #000;
+    outline: none;
+  }
+}
+
+/* --- MOBILE: Dot-Navigation ausblenden, Hamburger kommt später --- */
+@media (max-width: 768px) {
+  .dot-nav {
+    display: none !important;
+  }
+}
+
+
+
+
+/* Nächster Schritt: Hamburger-Menü für Mobile ergänzen */
 
 /* =========================
    SCROLL & LAYOUT SYSTEM
@@ -1438,60 +1596,6 @@ BUTTONS
   position: absolute;
   top: 0px;
   left: 0px;
-}
-
-@media (max-width: 768px) {
-  .form-row.two-cols {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Verhindert das Springen nach dem Absenden des Formulars */
-.bestellung-form-success-wrapper {
-  min-height: 580px;
-  position: relative;
-}
-
-/* Fall Button für Bestell-Formular */
-.fall-button {
-  margin-top: 30px;
-  padding: 12px 24px;
-  background-color: transparent;
-  color: #000;
-  border: 3px solid #000;
-  cursor: pointer;
-  border-radius: 0;
-  transition: all 0.3s ease;
-  position: relative;
-  z-index: 20;
-  /* Hinter den Kreuzen */
-  pointer-events: auto;
-}
-
-
-
-.fall-button:hover {
-  background-color: #000;
-  color: #fff;
-}
-
-.fall-button.submitted {
-  background-color: #fff;
-  color: #000;
-}
-
-/* =========================
-   FOOTER ANIMATION
-   ========================= */
-.footer-brava {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 9999;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.7s cubic-bezier(.4, 2, .6, 1);
 }
 
 .footer-brava.footer-visible {
