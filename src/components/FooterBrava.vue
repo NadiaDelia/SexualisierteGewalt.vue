@@ -8,7 +8,7 @@
             <div class="footer-col footer-center">
                 <div class="footer-gross"><a class="footer-link"
                         href="https://www.brava-ngo.ch/de/unterstuetzen/jetzt-spenden" target="_blank"
-                        rel="noopener noreferrer">Brava unterstützen!</a></div>
+                        rel="noopener noreferrer">Brava unterstützen</a></div>
             </div>
             <div class="footer-col footer-right">
                 <div class="footer-gross">Brava folgen</div>
@@ -97,7 +97,7 @@ export default {
 }
 
 .footer-klein {
-    font-size: 1.1em;
+    font-size: 1em;
     color: #fff;
     font-weight: 500;
     margin-top: auto;

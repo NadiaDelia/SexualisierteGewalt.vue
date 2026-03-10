@@ -441,7 +441,7 @@ function setFilter(key) {
           Die Polizei sammelt kontinuierlich Kennziffern zu angezeigten Straftaten, auch zu Sexualisierter Gewalt. Sie
           werden jährlich in der Polizeilichen Kriminalstatistik der Schweiz veröffentlicht.
         </p>
-        <p>Und die Zahlen sind wichtig: Sie zeigen Entwicklungen, Muster, Häufungen. Sie machen sichtbar, wer Gewalt
+        <p>Diese Zahlen sind wichtig: Sie zeigen Entwicklungen, Muster, Häufungen. Sie machen sichtbar, wer Gewalt
           ausübt, wer betroffen ist und wo Taten passieren. Und sie lassen erkennen, wieviel Gewalt unentdeckt bleibt.
         </p>
         <p>
@@ -738,7 +738,7 @@ function setFilter(key) {
         <p>Für die interaktiven Grafiken haben wir uns auf die fünf häufigsten Delikte konzentriert. Sexuelle Handlungen
           mit Kindern haben wir nicht berücksichtigt, da diese eine gesonderte Analyse und besondere
           Schutzmassnahmen erfordern. Vertiefte Informationen hierzu bietet <a
-            href="https://www.kinderschutz.ch/themen/sexualisierte-gewalt" target="_blank">Kinderschutz Schweiz</a></p>
+            href="https://www.kinderschutz.ch/themen/sexualisierte-gewalt" target="_blank">Kinderschutz Schweiz</a>.</p>
 
         <p>Folgende Straftaten haben wir analysiert:<br /></p>
 
@@ -749,8 +749,8 @@ function setFilter(key) {
               <span>Sexueller Übergriff und sexuelle Nötigung</span>
             </div>
             <div class="accordion-content" :class="{ 'open': openAccordions.sexuellerUebergriff }">
-              <p>Sexueller Übergriff: Sexuelle Handlung gegen den Willen oder Ausnutzen eines Schockzustands.<br />
-                Sexuelle Nötigung: Zu sexueller Handlung zwingen (Drohung, Gewalt, psychischer Druck,
+              <p>Sexueller Übergriff: Sexuelle Handlung gegen den Willen oder Ausnutzen eines Schockzustands.</p>
+              <p>Sexuelle Nötigung: Zu sexueller Handlung zwingen (Drohung, Gewalt, psychischer Druck,
                 Widerstandsunfähigkeit).</p>
             </div>
           </div>
@@ -973,9 +973,6 @@ function setFilter(key) {
   color: #fff;
   padding: 6px 12px;
   border-radius: 0px;
-  font-family: 'PxGroteskPan', sans-serif;
-  font-size: 0.85em;
-  font-weight: 500;
   opacity: 0;
   transform: translateX(10px);
   transition: all 0.2s ease;
@@ -987,9 +984,8 @@ function setFilter(key) {
   transform: translateX(0);
 }
 
-.dot-item.dot-active .dot-label {
-  font-weight: 700;
-}
+/* font-weight removed, now global */
+
 
 /* =========================
    SCROLL & LAYOUT SYSTEM
@@ -1014,20 +1010,35 @@ function setFilter(key) {
 }
 
 /* Finale Sektion - reduzierte Höhe */
-.final-text-overlay-section {
-  min-height: 100vh !important;
-  padding-bottom: 300px !important;
+/* Spezifischer: Nur finale Section innerhalb von .main-scroll */
+.main-scroll>.final-text-overlay-section {
+  min-height: 100vh;
+  padding-bottom: 300px;
   /* Überschreibt die 150vh von oben */
 }
 
+
 /* =========================
-   FULLSCREEN SECTIONS
+   FULLSCREEN SECTIONS (bereinigt)
    ========================= */
 
-/* Erste Section - gleiche Struktur wie Dunkelziffer, erweitert für Overlay */
 
-.fullscreen-section:first-of-type {
-  min-height: 100vh !important;
+/* Spezifischer: Nur fullscreen-section direkt in .main-scroll */
+.main-scroll>.fullscreen-section {
+  min-height: 350vh;
+  /* Erweitert für längeren Text-Overlay */
+  position: relative;
+  scroll-snap-align: start;
+  z-index: 1;
+}
+
+/* Nur die Dunkelziffer-Fullscreen-Section kleiner machen, nicht das Titelblatt */
+.main-scroll>#section-dunkelziffer.fullscreen-section {
+  min-height: 60vh;
+}
+
+.main-scroll>.fullscreen-section:first-of-type {
+  min-height: 100vh;
 }
 
 .fullscreen-section:first-of-type .fullscreen-sketch {
@@ -1043,6 +1054,30 @@ function setFilter(key) {
 
 .fullscreen-section:first-of-type .fullscreen-sketch h2 {
   margin-top: 0;
+}
+
+/*
+  !important ist für height: 90vh zwingend notwendig!
+  Grund: P5.js-Komponenten, dynamische oder Inline-Styles (z.B. durch Canvas-Frameworks oder Vue) überschreiben sonst die Höhe.
+  Ohne !important wird die Höhe von .fullscreen-sketch nicht zuverlässig gesetzt, wodurch die Buttons (z.B. Filterbuttons bei Dunkelziffer) in den Canvas rutschen und das Layout zerreißt.
+  Höhere Spezifität reicht nicht aus, da Inline-Styles und Framework-Styles Vorrang haben.
+  Nur so bleibt die Section stabil, Sticky-Layout und Buttons funktionieren wie gewünscht.
+*/
+.fullscreen-sketch {
+  width: 100vw;
+  height: 90vh !important;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  position: sticky;
+  top: 0;
+  display: block;
+}
+
+#sketch-dunkelziffer {
+  position: relative;
+  width: 100%;
+  height: 90%;
 }
 
 .titelblatt-canvas-container {
@@ -1067,14 +1102,46 @@ function setFilter(key) {
   padding: 24px;
   opacity: 0.95;
   z-index: 2;
-  font-size: 1.2em;
   border: 3px solid #fff;
   pointer-events: none;
 }
 
-/* =========================
-   SPLIT SECTIONS LAYOUT
-   ========================= */
+.dunkelziffer-title {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-68%);
+  z-index: 1;
+  color: #000;
+  text-align: left;
+  margin: 0;
+  pointer-events: none;
+}
+
+.dunkelziffer-annotation {
+  position: absolute;
+  top: 75px;
+  left: 18.4%;
+  z-index: 1;
+  margin: 0;
+  pointer-events: none;
+}
+
+.dunkelziffer-canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 15;
+  /* Höher als Buttons, damit Kreuze über alles erscheinen */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  /* Canvas selbst nicht klickbar, damit Buttons durchklickbar bleiben */
+}
+
 
 .split-section {
   min-height: 100vh;
@@ -1136,88 +1203,8 @@ function setFilter(key) {
 }
 
 /* =========================
-   FULLSCREEN SECTIONS
-   ========================= */
-
-/* Fullscreen Dunkelziffer Section - erweitert für Text-Overlay */
-.fullscreen-section {
-  min-height: 350vh !important;
-  /* Erweitert für längeren Text-Overlay */
-  position: relative;
-  scroll-snap-align: start;
-  z-index: 1;
-}
-
-/* Nur die Dunkelziffer-Fullscreen-Section kleiner machen, nicht das Titelblatt */
-#section-dunkelziffer.fullscreen-section {
-  min-height: 60vh !important;
-}
-
-.fullscreen-sketch {
-  width: 100vw !important;
-  height: 90vh !important;
-  margin: 0 !important;
-  padding: 0;
-  box-sizing: border-box;
-  position: sticky;
-  top: 0;
-  display: block;
-}
-
-#sketch-dunkelziffer {
-  position: relative;
-  width: 100%;
-  height: 90%;
-}
-
-.dunkelziffer-title {
-  position: absolute;
-  top: 30px;
-  left: 50%;
-  transform: translateX(-68%);
-  z-index: 1;
-  color: #000;
-  text-align: left;
-  margin: 0;
-  pointer-events: none;
-}
-
-.dunkelziffer-annotation {
-  position: absolute;
-  top: 75px;
-  left: 18.4%;
-  z-index: 1;
-  color: #000;
-  ;
-  text-align: left;
-  margin: 0;
-  pointer-events: none;
-  font-family: PxGroteskPan, sans-serif;
-  font-weight: 700;
-  font-size: 1em;
-  line-height: 1.3;
-}
-
-.dunkelziffer-canvas-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 15;
-  /* Höher als Buttons, damit Kreuze über alles erscheinen */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  /* Canvas selbst nicht klickbar, damit Buttons durchklickbar bleiben */
-}
-
-
-
-
-
-
+BUTTONS
+========================= */
 
 /* Wrapper für Filter-Buttons mit Info-Button */
 .filter-buttons-with-info {
@@ -1258,9 +1245,6 @@ function setFilter(key) {
   background-color: #fff;
   color: #000;
   border: 2.5px solid #000;
-  font-family: 'PxGroteskPan', sans-serif;
-  font-weight: bold;
-  font-size: 1em;
   cursor: pointer;
   border-radius: 0;
   transition: all 0.3s cubic-bezier(.4, 2, .6, 1);
@@ -1293,16 +1277,6 @@ function setFilter(key) {
   color: #000;
 }
 
-.dunkelziffer-toggle-container {
-  display: flex;
-  gap: 5px;
-  margin-left: 20px;
-}
-
-.active-dunkelziffer {
-  background-color: #fff !important;
-  color: #000 !important;
-}
 
 /* =========================
    TEXT OVERLAY SECTIONS
@@ -1316,8 +1290,8 @@ function setFilter(key) {
   display: flex;
   align-items: center;
   justify-content: center;
-  scroll-snap-align: start !important;
-  scroll-snap-stop: always !important;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
   margin: 0;
   position: relative;
   z-index: 5;
@@ -1331,9 +1305,9 @@ function setFilter(key) {
 
 /* Speziell: Weniger Weißraum vor Dunkelziffer-Text (zweite .text-overlay-section) */
 .text-overlay-section:nth-of-type(2) {
-  min-height: 60vh !important;
-  margin-top: 18vh !important;
-  padding-top: 0 !important;
+  min-height: 60vh;
+  margin-top: 18vh;
+  padding-top: 0;
 }
 
 .text-overlay-content {
@@ -1413,9 +1387,6 @@ function setFilter(key) {
   gap: 6px;
 }
 
-.form-field label {
-  font-size: 1rem;
-}
 
 .form-field input,
 .form-field textarea {
@@ -1424,8 +1395,6 @@ function setFilter(key) {
   background: transparent;
   color: #000;
   padding: 8px 10px;
-  font-family: 'PxGroteskPan', sans-serif;
-  font-size: 1.4rem;
   border-radius: 0;
   box-sizing: border-box;
 }
@@ -1436,34 +1405,8 @@ function setFilter(key) {
 }
 
 /* Fehlermeldungen schlicht unter dem Feld */
-.form-error {
-  color: #000 !important;
-  font-size: 1em !important;
-  margin-top: 4px !important;
-  margin-bottom: 0 !important;
-  padding: 0 !important;
-  display: block !important;
-  text-align: left !important;
-  background: none !important;
-  border: none !important;
-  box-shadow: none !important;
-  position: static !important;
-  z-index: auto !important;
-}
 
 /* Erfolgsmeldung nach Bestellung */
-.bestellung-success-message {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  font-size: 2.2em;
-  font-weight: bold;
-  color: #000;
-  background: none;
-  padding: 0px 0;
-  margin-top: 60px;
-  border-radius: 0;
-}
 
 .checkbox-field {
   display: inline-flex;
@@ -1516,9 +1459,6 @@ function setFilter(key) {
   background-color: transparent;
   color: #000;
   border: 3px solid #000;
-  font-family: 'PxGroteskPan', sans-serif;
-  font-weight: bold;
-  font-size: 1.4em;
   cursor: pointer;
   border-radius: 0;
   transition: all 0.3s ease;
