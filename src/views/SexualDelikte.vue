@@ -1,8 +1,10 @@
 <script setup>
+
 // Hamburger-Menü State (nur Mobile)
 import { ref as vueRef, computed as vueComputed, onMounted as vueOnMounted, onUnmounted as vueOnUnmounted } from 'vue'
 const menuOpen = vueRef(false)
 const showHamburger = vueRef(false)
+
 
 function updateShowHamburger() {
   showHamburger.value = typeof window !== 'undefined' ? window.innerWidth <= 768 : false
@@ -76,6 +78,7 @@ import P5CanvasTitelblatt from '../components/P5CanvasTitelblatt.vue'
 import P5CanvasForderungen from '../components/P5CanvasForderungen.vue'
 
 import FooterBrava from '../components/FooterBrava.vue'
+import FilterBottomSheet from '../components/FilterBottomSheet.vue'
 
 // Formular State
 const form = ref({
@@ -249,6 +252,56 @@ const activeBeziehung = ref('sexuelle_noetigung')
 const activeDunkelziffer = ref('sexuelle_noetigung')
 const dunkelzifferMode = ref('hell')
 
+
+/* ------------------------------------------------------------------
+  FILTER BOTTOM SHEET (Mobile)
+------------------------------------------------------------------ */
+const showFilterSheet = ref(false)
+const isSketchVisible = ref(false)
+
+// Info-Overlay für Mobile
+const showMobileInfo = ref(false)
+
+let sketchObserver = null
+
+onMounted(() => {
+  const mainScroll = document.querySelector('.main-scroll')
+  if (!mainScroll) return
+
+  // IDs der Sketch-Container
+  const sketchIds = [
+    'sketch-geschaedigte',
+    'sketch-beschuldigte',
+    'sketch-ort',
+    'sketch-beziehung',
+    'sketch-dunkelziffer'
+  ]
+
+  const targets = sketchIds
+    .map(id => document.getElementById(id))
+    .filter(Boolean)
+
+  sketchObserver = new IntersectionObserver(
+    (entries) => {
+      // Mindestens ein Sketch sichtbar?
+      isSketchVisible.value = entries.some(entry => entry.isIntersecting)
+    },
+    {
+      root: mainScroll,
+      threshold: 0.3 // Passe an, wie viel sichtbar sein muss (z.B. 0.3 = 30%)
+    }
+  )
+
+  targets.forEach(target => sketchObserver.observe(target))
+})
+
+onUnmounted(() => {
+  if (sketchObserver) {
+    sketchObserver.disconnect()
+    sketchObserver = null
+  }
+})
+
 /* ------------------------------------------------------------------
    INFO POPUP STATE
 ------------------------------------------------------------------ */
@@ -281,6 +334,13 @@ const { width: widthGeschaedigte, height: heightGeschaedigte } = useSketchDimens
 const { width: widthBeschuldigte, height: heightBeschuldigte } = useSketchDimensions()
 const { width: widthOrt, height: heightOrt } = useSketchDimensions()
 const { width: widthBeziehung, height: heightBeziehung } = useSketchDimensions()
+import { ref as vueRef2, computed as vueComputed2 } from 'vue'
+const isMobile = vueRef2(typeof window !== 'undefined' ? window.innerWidth <= 768 : false)
+if (typeof window !== 'undefined') {
+  window.addEventListener('resize', () => {
+    isMobile.value = window.innerWidth <= 768
+  })
+}
 const { width: widthTitelblatt, height: heightTitelblatt } =
   useSketchDimensions({ useFullscreen: true })
 const { width: widthDunkelziffer, height: heightDunkelziffer } =
@@ -432,6 +492,7 @@ function setFilter(key) {
 
 
 <template>
+
   <!-- Dot Navigation (nur Desktop/Tablet) -->
   <nav class="dot-nav" :class="{ 'nav-hidden': !showNav }">
     <button v-for="item in navItems" :key="item.id" class="dot-item"
@@ -455,16 +516,27 @@ function setFilter(key) {
     </div>
   </div>
 
+  <!-- Filter-Button (nur Mobile & wenn P5 sichtbar) -->
+  <button v-if="showHamburger && isSketchVisible && !menuOpen" class="filter-btn-mobile" @click="showFilterSheet = true"
+    aria-label="Filter öffnen">
+    {{STRAFTATEN.find(s => s.key === activeGeschaedigte)?.label || 'Straftat auswählen'}}
+    <svg width="24" height="24" viewBox="0 0 24 24"
+      style="margin-left:0.4em; vertical-align:middle; display:inline-block;">
+      <polyline points="5,8 12,16 19,8" fill="none" stroke="#fff" stroke-width="3" />
+    </svg>
+  </button>
+
 
   <div class="main-scroll">
     <!-- 1a. Titelbild -->
     <div class="fullscreen-section" id="section-intro">
       <div class="fullscreen-sketch">
         <h1>Muster<br />und blinde<br />Flecken</h1>
-        <h2>Was die Polizeiliche Kriminalstatistik 2025<br />zu Sexualisierter Gewalt aufzeigt – und was nicht</h2>
+        <h2>Was die Polizeiliche Kriminalstatistik 2025<br />zu Sexualisierter <br class="mobile-only" />Gewalt aufzeigt
+          – <br class="mobile-only" />und was nicht</h2>
         <div class="titelblatt-canvas-container">
           <P5CanvasTitelblatt :width="widthTitelblatt" :height="heightTitelblatt" :background="'transparent'"
-            :font-family="'PxGroteskPan'" />
+            :isMobile="isMobile" :font-family="'PxGroteskPan'" />
         </div>
       </div>
     </div>
@@ -490,6 +562,7 @@ function setFilter(key) {
           <li><a href="#section-ort">Wo findet Sexualisierte Gewalt statt?</a></li>
           <!-- <li><a href="#section-beziehung">Welche Beziehung haben Tatpersonen und Betroffene?</a></li> -->
           <li><a href="#section-dunkelziffer">Wie hoch ist die Dunkelziffer?</a></li>
+          <li><a href="#section-pks">Über die Visualisierungen</a></li>
         </ul>
       </div>
     </section>
@@ -498,9 +571,10 @@ function setFilter(key) {
     <div class="split-section" id="section-geschaedigte">
       <div id="sketch-geschaedigte" class="split-left sticky-sketch">
         <h2>Wer ist von Sexualisierter Gewalt betroffen?</h2>
-        <P5CanvasGeschaedigte :key="activeGeschaedigte + '-' + filteredGeschaedigte.length" :data="filteredGeschaedigte"
-          :width="widthGeschaedigte" :height="heightGeschaedigte" :font-family="'PxGroteskPan'" :background="255" />
-        <div class="btns">
+        <P5CanvasGeschaedigte   :key="activeGeschaedigte + '-' + filteredGeschaedigte.length" :data="filteredGeschaedigte"
+          :width="widthGeschaedigte" :height="heightGeschaedigte" :font-family="'PxGroteskPan'" :background="255"
+          :isMobile="isMobile" />
+        <div class="btns" v-if="!showHamburger">
           <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeGeschaedigte === s.key }"
             @click="activeGeschaedigte = s.key">{{ s.label }}</button>
           <button class="info-btn" @click="showInfoGeschaedigte = !showInfoGeschaedigte">i</button>
@@ -518,38 +592,7 @@ function setFilter(key) {
       </div>
 
       <div class="split-right">
-
-      </div>
-    </div>
-
-    <!-- 3. Split Section: Sketch Beschuldigte sticky + Text (unverändert) -->
-    <div class="split-section" id="section-beschuldigte">
-      <div class="split-left sticky-sketch" id="sketch-beschuldigte">
-        <h2>Wer übt Sexualisierte Gewalt aus?</h2>
-        <P5CanvasBeschuldigte :key="activeBeschuldigte + '-' + filteredBeschuldigte.length" :data="filteredBeschuldigte"
-          :width="widthBeschuldigte" :height="heightBeschuldigte" :background="255" :font-family="'PxGroteskPan'"
-          :show-labels="true" left-field="beschuldigte_f" right-field="beschuldigte_m" left-label="Frauen"
-          right-label="Männer" :mouse-radius="150" :repel-radius="80" :attract-power="1.5" />
-        <div class="btns">
-
-          <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeBeschuldigte === s.key }"
-            @click="activeBeschuldigte = s.key">{{ s.label }}</button>
-          <button class="info-btn" @click="showInfoBeschuldigte = !showInfoBeschuldigte">i</button>
-        </div>
-
-        <!-- Info Pop-up -->
-        <div v-if="showInfoBeschuldigte" class="info-popup">
-          <button class="popup-close" @click="showInfoBeschuldigte = false">×</button>
-          <h3>Anmerkungen</h3>
-          <p>Darstellung: Ein Kreuz entspricht einer beschuldigten Person.</p>
-          <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a
-              href="#section-pks">«Über die Visualisierungen»</a>.</p>
-          <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
-        </div>
-      </div>
-
-      <div class="split-right">
-        <div style="height: 150vh;"></div>
+        <div v-if="!isMobile" style="height: 150vh;"></div>
         <div class="side-text scrollable-text">
           <h2>Nicht alle Männer aber fast immer ein Mann</h2>
           <p>
@@ -564,7 +607,53 @@ function setFilter(key) {
             auch eine Vergewaltigung, wenn Täter_innen einen Schockzustand ausnutzen.
           </p>
         </div>
-        <div style="height: 50vh;"></div>
+        <div v-if="!isMobile"style="height: 50vh;"></div>
+      </div>
+    </div>
+
+    <!-- 3. Split Section: Sketch Beschuldigte sticky + Text (unverändert) -->
+    <div class="split-section" id="section-beschuldigte">
+      <div class="split-left sticky-sketch" id="sketch-beschuldigte">
+        <h2>Wer übt Sexualisierte Gewalt aus?</h2>
+        <P5CanvasBeschuldigte :key="activeBeschuldigte + '-' + filteredBeschuldigte.length" :data="filteredBeschuldigte"
+          :width="widthBeschuldigte" :height="heightBeschuldigte" :background="255" :font-family="'PxGroteskPan'"
+          :show-labels="true" left-field="beschuldigte_f" right-field="beschuldigte_m" left-label="Frauen"
+          right-label="Männer" :mouse-radius="150" :repel-radius="80" :attract-power="1.5" />
+        <div class="btns" v-if="!showHamburger">
+          <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeBeschuldigte === s.key }"
+            @click="activeBeschuldigte = s.key">{{ s.label }}</button>
+          <button class="info-btn" @click="showInfoBeschuldigte = !showInfoBeschuldigte">i</button>
+        </div>
+
+        <!-- Info Pop-up -->
+        <div v-if="showInfoBeschuldigte" class="info-popup">
+          <button class="popup-close" @click="showInfoBeschuldigte = false">×</button>
+          <h3>Anmerkungen</h3>
+          <p>Darstellung: Ein Kreuz entspricht einer beschuldigten Person.</p>
+          <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a
+              href="#section-pks">«Über
+              die Visualisierungen»</a>.</p>
+          <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
+        </div>
+      </div>
+
+      <div class="split-right">
+        <div v-if="!isMobile"style="height: 150vh;"></div>
+        <div class="side-text scrollable-text">
+          <h2>Nicht alle Männer aber fast immer ein Mann</h2>
+          <p>
+            Die Darstellung weist das Geschlecht der Beschuldigten für die einzelnen Straftaten aus. Das Verhältnis ist
+            noch eindeutiger als bei den Betroffenen Sexualisierter Gewalt. Zwischen 96 Prozent (sexuelle Nötigung) und
+            annähernd 100 Prozent (Vergewaltigung) der Beschuldigten sind Männer.
+          </p>
+          <p>
+            Wichtig zu wissen: Vor der Sexualstrafrechtsreform kannte der Straftatbestand Vergewaltigung ausschliesslich
+            weibliche Betroffene und männliche Täter. Seit 1. Juli 2024 ist das Gesetz geschlechtsneutral definiert.
+            Vergewaltigung umfasst jegliche Penetration gegen den Willen der betroffenen Person. Ausserdem ist es neu
+            auch eine Vergewaltigung, wenn Täter_innen einen Schockzustand ausnutzen.
+          </p>
+        </div>
+        <div v-if="!isMobile" style="height: 50vh;"></div>
       </div>
     </div>
 
@@ -574,7 +663,7 @@ function setFilter(key) {
         <h2>Wo findet Sexualisierte Gewalt statt?</h2>
         <P5CanvasOrt :key="activeOrt + '-' + filteredOrt.length" :data="filteredOrt" :width="widthOrt"
           :height="heightOrt" :background="255" :font-family="'PxGroteskPan'" />
-        <div class="btns">
+        <div class="btns" v-if="!showHamburger">
           <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeOrt === s.key }"
             @click="activeOrt = s.key">{{ s.label }}</button>
           <button class="info-btn" @click="showInfoOrt = !showInfoOrt">i</button>
@@ -588,13 +677,14 @@ function setFilter(key) {
           <p>Hinweis: Als privater Raum gelten ausschliesslich die eigenen vier Wände. Treppenhaus oder Waschküche
             gelten bereits als öffentlich. Delikte, bei denen kein Ort angegeben wurde, sind nicht dargestellt.</p>
           <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a
-              href="#section-pks">«Über die Visualisierungen»</a>.</p>
+              href="#section-pks">«Über
+              die Visualisierungen»</a>.</p>
           <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
         </div>
       </div>
 
       <div class="split-right">
-        <div style="height: 150vh;"></div>
+        <div v-if="!isMobile" style="height: 150vh;"></div>
         <div class="side-text scrollable-text">
           <h2>Das Zuhause ist kein sicherer Ort</h2>
           <p>
@@ -607,7 +697,7 @@ function setFilter(key) {
             zeichnen.
           </p>
         </div>
-        <div style="height: 50vh;"></div>
+        <div v-if="!isMobile" style="height: 50vh;"></div>
       </div>
     </div>
 
@@ -622,7 +712,7 @@ function setFilter(key) {
         <P5CanvasBeziehung :key="activeBeziehung + '-' + filteredBeziehung.length" :data="filteredBeziehung"
           :width="widthBeziehung" :height="heightBeziehung" :background="255" :font-family="'PxGroteskPan'"
           :mouse-radius="150" :repel-radius="80" :attract-power="1.5" />
-        <div class="btns">
+        <div class="btns" v-if="!showHamburger">
           <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeBeziehung === s.key }"
             @click="activeBeziehung = s.key">{{ s.label }}</button>
           <button class="info-btn" @click="showInfoBeziehung = !showInfoBeziehung">i</button>
@@ -639,7 +729,7 @@ function setFilter(key) {
       </div>
 
       <div class="split-right">
-        <div style="height: 150vh;"></div>
+        <div v-if="!isMobile" style="height: 150vh;"></div>
         <div class="side-text scrollable-text">
           <h2>Täter*innen sind selten fremd</h2>
           <p>
@@ -661,7 +751,7 @@ function setFilter(key) {
             bei der Arbeit oder in der Ausbildungsstätte.
           </p>
         </div>
-        <div style="height: 50vh;"></div>
+        <div v-if="!isMobile" style="height: 50vh;"></div>
       </div>
     </div> -->
 
@@ -676,9 +766,9 @@ function setFilter(key) {
             :mouse-radius="80" :repel-radius="100" :attract-power="10" />
         </div>
         <!-- Info-Popup entfernt, nur noch expanding Button -->
-        <div style="height: 50vh;"></div>
+        <div v-if="!isMobile" style="height: 50vh;"></div>
       </div>
-      <div class="btns fullscreen-buttons">
+      <div class="btns fullscreen-buttons" v-if="!showHamburger">
         <div class="filter-buttons-with-info">
           <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeDunkelziffer === s.key }"
             @click="activeDunkelziffer = s.key">{{ s.label }}</button>
@@ -753,7 +843,7 @@ function setFilter(key) {
         <!-- Hier kannst du deinen Text über pks oder weitere Inhalte einfügen -->
         <h2>Über die Visualisierungen</h2>
         <p>In vier Visualisierungen betrachten wir zentrale Delikte Sexualisierter Gewalt. Unter dem Begriff der
-          sexualisierten Gewalt verstehen wir Straftatbestände, welche Gewalt und
+          Sexualisierten Gewalt verstehen wir Straftatbestände, welche Gewalt und
           sexualisierte Handlungen beinhalten. Diese werden ohne ausdrückliches Einverständnis und gegen den Willen
           der betroffenen Person angedroht, aufgedrängt oder aufgezwungen.</p>
         <p>Für die interaktiven Grafiken haben wir uns auf die fünf häufigsten Delikte konzentriert. Sexuelle Handlungen
@@ -818,11 +908,11 @@ function setFilter(key) {
         </div>
         <h2>Datenquellen</h2>
         <p>Die Visualisierungen basieren auf den Daten der Polizeilichen Kriminalstatistik 2025, welche vom Bundesamt
-          für
-          Statistik herausgegeben wird.
-          Die Statistik zählt alle angezeigten bzw. polizeilich registrierten Fälle.</p>
+          für Statistik herausgegeben wird. Die Statistik zählt alle angezeigten bzw. polizeilich registrierten Fälle.
+          Wichtig zu wissen: Die
+          Statistik registriert nur zwei Geschlechter.</p>
         <p>
-          Die Kriminalstatistik zählt also ausschliesslich, was polizeilich erfasst wird. Was nicht angezeigt wird,
+          Die Kriminalstatistik zählt ausschliesslich, was polizeilich erfasst wird. Was nicht angezeigt wird,
           verbleibt im Dunkeln. Um neben dem Hellfeld auch das Dunkelfeld zu erfassen, werden in der Schweiz regelmässig
           Prävalenzstudien durchgeführt. Eine repräsentative Stichprobe in der Schweizer Bevölkerung wird befragt, ob
           sie eine Straftat erlebt hat, unabhängig davon, ob sie diese auch zur Anzeige gebracht hat. Die aktuellste
@@ -843,8 +933,8 @@ function setFilter(key) {
       <div class="text-overlay-content">
         <h2>Jetzt Kartenset bestellen</h2>
         <p>
-          Bestelle jetzt ein Set mit drei Postkarten und schreibe Freund*innen, Politiker*innen und Behörden an. Fordere
-          sie auf, Sexualisierte Gewalt konsequent zu bekämpfen.
+          Bestelle jetzt ein Set mit drei Postkarten und mache sichtbar, was oft verborgen bleibt. Schreibe Menschen in
+          deinem Umfeld und fordere konsequentes und kollektives Handeln gegen sexualisierte Gewalt.
         </p>
         <div class="bestellung-form-success-wrapper">
           <div v-if="!submitted">
@@ -897,7 +987,8 @@ function setFilter(key) {
                 <input id="newsletter" type="checkbox" name="newsletter" v-model="form.newsletter" />
                 Updates erhalten und auf dem Laufenden bleiben. Eine Abmeldung ist jederzeit möglich.
               </label>
-              <button type="submit" class="fall-button" style="margin-top:18px; display: block;">
+              <button type="submit" class="fall-button"
+                style="margin-top:20px; display: block; border: 3px solid #000;">
                 Bestellen
               </button>
             </form>
@@ -911,6 +1002,36 @@ function setFilter(key) {
 
     <!-- FooterBrava nur anzeigen, wenn ganz unten -->
     <FooterBrava v-if="showFooter" class="footer-brava" :class="{ 'footer-visible': showFooter }" />
+
+    <!-- Filter-Bottom-Sheet für Mobile -->
+    <FilterBottomSheet :show="showFilterSheet" @close="showFilterSheet = false">
+      <div class="filter-sheet-list">
+        <button v-for="s in STRAFTATEN" :key="s.key"
+          :class="['filter-sheet-btn', { active: activeGeschaedigte === s.key }]"
+          @click="activeGeschaedigte = s.key; showFilterSheet = false">
+          <span class="filter-sheet-btn-label">{{ s.label }}</span>
+        </button>
+        <!-- Info-Button im gleichen Stil -->
+        <button class="filter-sheet-btn" @click="showMobileInfo = true">
+          <span class="filter-sheet-btn-label">Info</span>
+        </button>
+        <!-- <button class="filter-sheet-info-btn" @click="showInfoGeschaedigte = !showInfoGeschaedigte">Info</button> -->
+        <!-- <button class="info-btn" @click="showMobileInfo = true">i</button> -->
+      </div>
+    </FilterBottomSheet>
+
+    <!-- Info-Overlay nur für Mobile -->
+    <div v-if="showMobileInfo && showHamburger" class="mobile-info-overlay">
+      <button class="close-btn" @click="showMobileInfo = false">×</button>
+      <div class="mobile-info-content">
+        <h3>Anmerkungen</h3>
+        <p>Darstellung: Ein Kreuz entspricht einer geschädigten bzw. betroffenen Person.</p>
+        <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a href="#section-pks">«Über
+            die Visualisierungen»</a>.</p>
+        <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -918,6 +1039,127 @@ function setFilter(key) {
 
 
 <style scoped>
+/* =========================
+   FILTER-BUTTON (nur Mobile)
+   ========================= */
+
+/* Zusätzlicher Fix: Alle Buttons in der Filter-Liste immer eckig */
+
+
+.filter-btn-mobile {
+  position: fixed;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  width: auto;
+  z-index: 30000;
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 16px 0;
+  font-size: 1.1em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  display: block;
+  text-align: center;
+}
+
+
+.filter-btn-mobile:active {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+/* FilterBottomSheet mobile Filter-Liste */
+.filter-sheet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  padding: 0px 0 0px 0;
+  align-items: stretch;
+}
+
+
+.filter-sheet-btn {
+  background: #fff;
+  color: #000;
+  border: none;
+  padding: 10px 0;
+  font-size: 1.1em;
+  font-family: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  width: 100vw;
+  margin-left: -24px;
+  margin-right: -24px;
+  border-radius: 0 !important;
+  box-sizing: border-box;
+  z-index: 30001;
+}
+
+.filter-sheet-btn-label {
+  display: block;
+  padding: 0 24px;
+}
+
+.filter-sheet-btn.active {
+  background: #000 !important;
+  color: #fff;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+
+
+.mobile-info-overlay {
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  color: #000;
+  z-index: 40000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2.5em 1.2em 1.2em 1.2em;
+}
+
+.mobile-info-content {
+  max-width: 500px;
+  width: 100%;
+  padding-top: 5em;
+}
+
+.mobile-info-overlay h3 {
+  font-size: 2.2em;
+  margin-top: 0;
+  margin-bottom: 0.7em;
+}
+
+.mobile-info-overlay p {
+  font-size: 1.4em;
+  margin: 0.7em 0;
+}
+
+.close-btn {
+  position: absolute;
+  top: 0.2em;
+  right: 0.2em;
+  background: none;
+  border: none;
+  font-size: 2.5em;
+  color: #000;
+  cursor: pointer;
+}
+
+
+
 /* =========================
    STICKY NAVIGATION
    ========================= */
@@ -1010,135 +1252,137 @@ function setFilter(key) {
 /* =========================
    HAMBURGER-MENÜ (nur Mobile)
    ========================= */
+
+.hamburger-menu {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  left: auto;
+  z-index: 20000;
+  display: block;
+}
+
+.hamburger-btn {
+  width: 50px;
+  height: 50px;
+  background: #fff;
+  border: none;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 36000;
+  position: relative;
+  padding: 0;
+  transition: background 0.7s cubic-bezier(.4, 2, .6, 1), border 0.7s cubic-bezier(.4, 2, .6, 1);
+}
+
+.hamburger-btn.open {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+/* Hamburger offen : nur ein Kreuz (X) anzeigen */
+.hamburger-btn.open .hamburger-icon {
+  background: transparent;
+}
+
+.hamburger-btn.open .hamburger-icon::before {
+  background: #fff;
+  transform: rotate(45deg) translate(0px, 0px);
+  top: 0;
+}
+
+.hamburger-btn.open .hamburger-icon::after {
+  background: #fff;
+  transform: rotate(-45deg) translate(0px, -0px);
+  top: 0;
+}
+
+.hamburger-icon {
+  width: 35px;
+  height: 4.2px;
+  background: #000;
+  position: relative;
+  display: block;
+  transition: background 0.7s cubic-bezier(.4, 2, .6, 1);
+
+}
+
+.hamburger-icon::before,
+.hamburger-icon::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 35px;
+  height: 4.2px;
+  background: #000;
+  transition: 0.3s;
+}
+
+.hamburger-icon::before {
+  top: -12px;
+}
+
+.hamburger-icon::after {
+  top: 12px;
+}
+
+.hamburger-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 1);
+  z-index: 35000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.hamburger-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  align-items: flex-start;
+  justify-content: flex-start;
+  height: 100%;
+  padding-top: 4.4em;
+}
+
+.hamburger-link {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 2.2em;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 5px 30px;
+  transition: color 0.2s;
+  text-align: left;
+}
+
 @media (max-width: 768px) {
-  .hamburger-menu {
-    position: fixed;
-    top: 18px;
-    right: 18px;
-    left: auto;
-    z-index: 20000;
-    display: block;
-  }
-
-  .hamburger-btn {
-    width: 50px;
-    height: 50px;
-    background: #fff;
-    border: none;
-    border-radius: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 20001;
-    position: relative;
-    padding: 0;
-    transition: background 0.7s cubic-bezier(.4, 2, .6, 1), border 0.7s cubic-bezier(.4, 2, .6, 1);
-  }
-
-  .hamburger-btn.open {
-    background: transparent;
-    border: none;
-    box-shadow: none;
-  }
-
-  /* Hamburger offen : nur ein Kreuz (X) anzeigen */
-  .hamburger-btn.open .hamburger-icon {
-    background: transparent;
-  }
-
-  .hamburger-btn.open .hamburger-icon::before {
-    background: #fff;
-    transform: rotate(45deg) translate(0px, 0px);
-    top: 0;
-  }
-
-  .hamburger-btn.open .hamburger-icon::after {
-    background: #fff;
-    transform: rotate(-45deg) translate(0px, -0px);
-    top: 0;
-  }
-
-  .hamburger-icon {
-    width: 35px;
-    height: 4.2px;
-    background: #000;
-    position: relative;
-    display: block;
-    transition: background 0.7s cubic-bezier(.4, 2, .6, 1);
-
-  }
-
-  .hamburger-icon::before,
-  .hamburger-icon::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    width: 35px;
-    height: 4.2px;
-    background: #000;
-    transition: 0.3s;  
-  }
-
-  .hamburger-icon::before {
-    top: -12px;
-  }
-
-  .hamburger-icon::after {
-    top: 12px;
-  }
-
-  .hamburger-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 1);
-    z-index: 20000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-  }
-
-  .hamburger-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5em;
-    align-items: flex-start;
-    justify-content: flex-start;
-    height: 100%;
-    padding-top: 4.4em;
-  }
-
   .hamburger-link {
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 2.2em;
-    font-family: inherit;
-    font-weight: 700;
-    cursor: pointer;
-    padding: 5px 16px;
-    transition: color 0.2s;
-    text-align: left;
-  }
-
-  .hamburger-link:active,
-  .hamburger-link:focus {
-    background: #fff;
-    color: #000;
-    outline: none;
+    font-size: 1.6em;
+    padding: 5px 20px;
   }
 }
+.hamburger-link:active,
+.hamburger-link:focus {
+  background: #fff;
+  color: #000;
+  outline: none;
+}
+
 
 /* --- MOBILE: Dot-Navigation ausblenden, Hamburger kommt später --- */
-@media (max-width: 768px) {
-  .dot-nav {
-    display: none !important;
-  }
-}
+
 
 
 
@@ -1204,6 +1448,14 @@ function setFilter(key) {
   align-items: flex-start;
   padding-left: 60px;
   padding-top: 40px;
+}
+
+
+@media (max-width: 768px) {
+  .fullscreen-section:first-of-type .fullscreen-sketch {
+    padding-left: 20px;
+    padding-top: 10px;
+  }
 }
 
 .fullscreen-section:first-of-type .fullscreen-sketch h1 {
@@ -1613,6 +1865,88 @@ BUTTONS
   100% {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+
+
+
+@media (max-width: 768px) {
+
+  /* Alle Sections auf Mobile: volle Breite, keine Splits */
+  .split-section,
+  .fullscreen-section,
+  .text-overlay-section,
+  .final-text-overlay-section {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-sizing: border-box;
+  }
+
+  .split-left,
+  .split-right,
+  .sticky-sketch {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 0 24px 0 !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
+    position: static !important;
+    z-index: auto !important;
+    height: auto !important;
+    margin-left: 0px !important;
+
+  }
+
+  .btns {
+    margin-bottom: 20px !important;
+  }
+
+
+  @media (max-width: 768px) {
+    .split-section,
+    .fullscreen-section,
+    .text-overlay-section,
+    .final-text-overlay-section {
+      min-height: 100vh !important;
+      margin-top: 5em !important;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .text-overlay-content {
+      max-width: 100vw !important;
+      padding: 0 !important;
+    }
+
+  }
+}
+
+@media (max-width: 768px) {
+
+  .split-section,
+  .fullscreen-section,
+  .text-overlay-section,
+  .final-text-overlay-section {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+    box-sizing: border-box;
+    flex-direction: column !important;
+  }
+
+  .text-overlay-content {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .dot-nav {
+    display: none !important;
   }
 }
 </style>

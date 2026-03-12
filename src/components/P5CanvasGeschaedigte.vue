@@ -3,18 +3,35 @@ import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import p5 from 'p5'
 
 // Props-Interface: Definiert welche Daten von der Parent-Komponente übergeben werden können
+
 const props = defineProps({
-  data: { type: Array, default: () => [] },                    // CSV-Daten für die Visualisierung
-  width: { type: Number, default: 800 },                       // Canvas-Breite in Pixel
-  height: { type: Number, default: 600 },                      // Canvas-Höhe in Pixel
-  background: { type: [Number, Array, String], default: 0 },   // Hintergrundfarbe (p5.js Format)
-  fontFamily: { type: String, default: 'PxGroteskPan' },       // Schriftart für Text-Rendering
+  data: { type: Array, default: () => [] },
+  width: { type: Number, default: 800 },
+  height: { type: Number, default: 600 },
+  background: { type: [Number, Array, String], default: 0 },
+  fontFamily: { type: String, default: 'PxGroteskPan' },
+  isMobile: { type: Boolean, default: false }
 })
 
 // Vue Template Ref: Verbindung zum DOM-Element für p5.js Canvas-Mounting
+
 let mountRef = ref(null)
-// p5.js Instance: Wird beim Mounting erstellt, beim Unmounting wieder entfernt
 let p5Instance = null
+
+// Responsive width/height logic
+const getResponsiveWidth = () => {
+  if (props.isMobile) {
+    // 20px Margin links und rechts, nie breiter als 100vw-40px
+    return Math.max(0, window.innerWidth - 40)
+  }
+  return props.width
+}
+const getResponsiveHeight = () => {
+  if (props.isMobile) {
+    return Math.max(320, Math.min(window.innerHeight * 0.6, 600))
+  }
+  return props.height
+}
 
 const sketch = (p) => {
   let particles = [];
@@ -24,33 +41,70 @@ const sketch = (p) => {
   let geschaedigteMaenner = 0;
   let visibleFrauen = 0;
   let visibleMaenner = 0;
-  let crossSize = 14;
-  let crossStrokeWeight = 6;
+
+  // Responsive cross size
+  let crossSize = props.isMobile ? 10 : 14; // Mobile: 10px, Desktop: 14px
+  let crossStrokeWeight = props.isMobile ? 4 : 6; // Mobile: 4px, Desktop: 6px
+
 
   p.setup = () => {
-    p.createCanvas(props.width, props.height)
+    p.createCanvas(getResponsiveWidth(), getResponsiveHeight())
     p.frameRate(60)
-    applyData(props.data) // Initiale Daten anwenden, damit die Visualisierung sofort startet
+    applyData(props.data)
+  }
+
+  p.windowResized = () => {
+    p.resizeCanvas(getResponsiveWidth(), getResponsiveHeight())
+    applyData(props.data)
   }
 
   p.draw = () => {
-  p.background(props.background)
-  if (props.fontFamily) p.textFont(props.fontFamily)
-  p.textSize(90)
-  p.textAlign(p.LEFT, p.BOTTOM)
-  p.fill(0)
+    p.background(props.background)
+    if (props.fontFamily) p.textFont(props.fontFamily)
+    // Dynamische Schriftgröße: Desktop und Mobile unterschiedlich
+    const dynamicTextSize = props.isMobile
+      ? Math.max(20, Math.min(p.width * 0.14, 90)) // Mobile: max 110px, min 22px, 22% Breite
+      : Math.max(18, Math.min(p.width * 0.13, 90)) // Desktop: max 90px
+    p.textSize(dynamicTextSize)
+    p.textAlign(p.LEFT, p.BOTTOM)
+    p.fill(0)
 
-    // Labels
-    p.text('Frauen', p.width * 0.04, p.height * 0.65)
-    p.text('Männer', p.width * 0.54, p.height * 0.65)
-
-    // Zahlen während Animation (hochzählen)
-    if (particleQueue.length > 0) {
-      p.text(formatNumber(visibleFrauen), p.width * 0.04, p.height * 0.54)
-      p.text(formatNumber(visibleMaenner), p.width * 0.54, p.height * 0.54)
+    if (props.isMobile) {
+      p.textAlign(p.LEFT, p.CENTER);
+      // Frauen oben, Männer unten, jeweils Zahl und Label als Block linksbündig, aber Block zentriert
+      const half = p.height / 2;
+      const frauenYNum = half * 0.4;
+      const frauenYLabel = half * 0.6;
+      const maennerYNum = half + half * 0.4;
+      const maennerYLabel = half + half * 0.6;
+      const maennerYLabelClamped = Math.min(maennerYLabel, p.height - dynamicTextSize * 0.5);
+      // Werte vorbereiten
+      const frauenLabel = 'Frauen';
+      const maennerLabel = 'Männer';
+      const frauenNum = particleQueue.length > 0 ? formatNumber(visibleFrauen) : formatNumber(geschaedigteFrauen);
+      const maennerNum = particleQueue.length > 0 ? formatNumber(visibleMaenner) : formatNumber(geschaedigteMaenner);
+      // Breite bestimmen
+      const frauenBlockWidth = Math.max(p.textWidth(frauenLabel), p.textWidth(frauenNum));
+      const maennerBlockWidth = Math.max(p.textWidth(maennerLabel), p.textWidth(maennerNum));
+      const frauenX = p.width / 2 - frauenBlockWidth / 2;
+      const maennerX = p.width / 2 - maennerBlockWidth / 2;
+      // Zeichnen
+      p.text(frauenNum, frauenX, frauenYNum);
+      p.text(frauenLabel, frauenX, frauenYLabel);
+      p.text(maennerNum, maennerX, maennerYNum);
+      p.text(maennerLabel, maennerX, maennerYLabelClamped);
     } else {
-      p.text(formatNumber(geschaedigteFrauen), p.width * 0.04, p.height * 0.54)
-      p.text(formatNumber(geschaedigteMaenner), p.width * 0.54, p.height * 0.54)
+      // Desktop: wie gehabt
+      p.textAlign(p.LEFT, p.CENTER);
+      p.text('Frauen', p.width * 0.04, p.height * 0.65);
+      p.text('Männer', p.width * 0.54, p.height * 0.65);
+      if (particleQueue.length > 0) {
+        p.text(formatNumber(visibleFrauen), p.width * 0.04, p.height * 0.54);
+        p.text(formatNumber(visibleMaenner), p.width * 0.54, p.height * 0.54);
+      } else {
+        p.text(formatNumber(geschaedigteFrauen), p.width * 0.04, p.height * 0.54);
+        p.text(formatNumber(geschaedigteMaenner), p.width * 0.54, p.height * 0.54);
+      }
     }
 
     // Partikel animieren
@@ -94,15 +148,27 @@ const sketch = (p) => {
     particles = [];
     for (let i = 0; i < selectedData.length; i++) {
       geschaedigteFrauen += Number(selectedData[i].geschaedigte_f) || 0;
+      geschaedigteMaenner += Number(selectedData[i].geschaedigte_m) || 0;
       for (let j = 0; j < (Number(selectedData[i].geschaedigte_f) || 0); j++) {
-        let px = p.random(crossSize, p.width * 0.5 - crossSize);
-        let py = p.random(crossSize, p.height - crossSize);
+        let px, py;
+        if (props.isMobile) {
+          px = p.random(crossSize, p.width - crossSize);
+          py = p.random(crossSize, p.height / 2 - crossSize);
+        } else {
+          px = p.random(crossSize, p.width * 0.5 - crossSize);
+          py = p.random(crossSize, p.height - crossSize);
+        }
         particleQueue.push({ x: px, y: py, data: selectedData[i], gender: 'frau' });
       }
-      geschaedigteMaenner += Number(selectedData[i].geschaedigte_m) || 0;
       for (let j = 0; j < (Number(selectedData[i].geschaedigte_m) || 0); j++) {
-        let px = p.random(p.width * 0.50 + crossSize, p.width - crossSize);
-        let py = p.random(crossSize, p.height - crossSize);
+        let px, py;
+        if (props.isMobile) {
+          px = p.random(crossSize, p.width - crossSize);
+          py = p.random(p.height / 2 + crossSize, p.height - crossSize);
+        } else {
+          px = p.random(p.width * 0.50 + crossSize, p.width - crossSize);
+          py = p.random(crossSize, p.height - crossSize);
+        }
         particleQueue.push({ x: px, y: py, data: selectedData[i], gender: 'mann' });
       }
     }
@@ -155,15 +221,25 @@ const sketch = (p) => {
         homeDir.mult(0.04);
         this.pos.add(homeDir);
       }
-      if (this.gender === 'frau') {
-        this.pos.x = p.constrain(this.pos.x, this.r, p.width * 0.5 - this.r);
-      } else if (this.gender === 'mann') {
-        this.pos.x = p.constrain(this.pos.x, p.width * 0.5 + this.r, p.width - this.r);
-      }
-      if (this.pos.y < this.r) {
-        this.pos.y = this.r;
-      } else if (this.pos.y > p.height - this.r) {
-        this.pos.y = p.height - this.r;
+      if (props.isMobile) {
+        if (this.gender === 'frau') {
+          this.pos.x = p.constrain(this.pos.x, this.r, p.width - this.r);
+          this.pos.y = p.constrain(this.pos.y, this.r, p.height / 2 - this.r);
+        } else if (this.gender === 'mann') {
+          this.pos.x = p.constrain(this.pos.x, this.r, p.width - this.r);
+          this.pos.y = p.constrain(this.pos.y, p.height / 2 + this.r, p.height - this.r);
+        }
+      } else {
+        if (this.gender === 'frau') {
+          this.pos.x = p.constrain(this.pos.x, this.r, p.width * 0.5 - this.r);
+        } else if (this.gender === 'mann') {
+          this.pos.x = p.constrain(this.pos.x, p.width * 0.5 + this.r, p.width - this.r);
+        }
+        if (this.pos.y < this.r) {
+          this.pos.y = this.r;
+        } else if (this.pos.y > p.height - this.r) {
+          this.pos.y = p.height - this.r;
+        }
       }
     }
     display(p) {
@@ -180,6 +256,7 @@ const sketch = (p) => {
     }
   }
 }
+
 
 
 
@@ -202,9 +279,13 @@ watch(() => props.data, (rows) => {
 }, { deep: true })
 </script>
 
-<template>
 
+<template>
   <div ref="mountRef"
-    :style="`display:block; width:${props.width}px; height:${props.height}px;`"
+    :style="
+      props.isMobile
+        ? `display:block; width:calc(100vw - 40px); height:${getResponsiveHeight()}px; max-width:100vw; margin:0 auto;`
+        : `display:block; width:${getResponsiveWidth()}px; height:${getResponsiveHeight()}px; max-width:100%; margin:0 auto;`
+    "
   ></div>
 </template>

@@ -6,7 +6,8 @@ const props = defineProps({
   width: { type: Number, default: window.innerWidth },
   height: { type: Number, default: window.innerHeight },
   background: { type: [Number, String], default: 0 },
-  fontFamily: { type: String, default: 'PxGroteskPan' }
+  fontFamily: { type: String, default: 'PxGroteskPan' },
+  isMobile: { type: Boolean, default: false }
 })
 
 const mountRef = ref(null)
@@ -14,31 +15,43 @@ let p5Instance = null
 
 const sketch = (p) => {
   let particles = []
-  let crossSize = 20
-  let crossStrokeWeight = 10
-  let anzahlKreuze = 500
+  let crossSize = props.isMobile ? 16 : 20
+  let crossStrokeWeight = props.isMobile ? 8 : 10
+  let anzahlKreuze = props.isMobile ? 150 : 500
 
   p.setup = () => {
-    p.createCanvas(props.width, props.height)
-    
+    // Responsive: Portrait für Mobile, Landscape für Desktop
+    let w = props.width
+    let h = props.height
+    if (props.isMobile) {
+      w = window.innerWidth
+      h = window.innerHeight
+    }
+    p.createCanvas(w, h)
+
     // Menü-Bereich definieren (vertikal mittig, rechts)
-    const menuTop = props.height * 0.35
-    const menuBottom = props.height * 0.65
-    const menuRight = props.width - 80
-    
+    const menuTop = h * 0.35
+    const menuBottom = h * 0.65
+    const menuRight = w - 80
+
     // Partikel/Kreuze zufällig auf dem Canvas verteilen
     for (let i = 0; i < anzahlKreuze; i++) {
       let px, py
       let attempts = 0
-      
-      // Platzierung mit Menü-Ausschluss
-      do {
-        px = p.random(crossSize, props.width - crossSize)
-        py = p.random(crossSize, props.height - crossSize)
-        attempts++
-        // Wenn im Menü-Bereich (vertikal), dann nicht zu weit rechts
-      } while (py > menuTop && py < menuBottom && px > menuRight && attempts < 50)
-      
+
+      if (props.isMobile) {
+        // Auf Mobile: keine Menü-Ausschluss-Logik
+        px = p.random(0, w)
+        py = p.random(0, h)
+      } else {
+        // Desktop: Menü-Bereich ausschließen
+        do {
+          px = p.random(0, w)
+          py = p.random(0, h)
+          attempts++
+        } while (py > menuTop && py < menuBottom && px > menuRight && attempts < 50)
+      }
+
       particles.push(new Particle(px, py, p))
     }
   }
@@ -57,7 +70,13 @@ const sketch = (p) => {
   }
 
   p.windowResized = () => {
-    p.resizeCanvas(props.width, props.height)
+    let w = props.width
+    let h = props.height
+    if (props.isMobile) {
+      w = window.innerWidth
+      h = window.innerHeight
+    }
+    p.resizeCanvas(w, h)
   }
 
   class Particle {
@@ -109,17 +128,19 @@ const sketch = (p) => {
       }
 
       // Begrenzung: Partikel bleiben auf dem Canvas
-      // Menü-Bereich ausschließen (vertikal mittig, rechts)
+      // Menü-Bereich ausschließen (vertikal mittig, rechts) – nur Desktop
       const menuTop = props.height * 0.25
       const menuBottom = props.height * 0.75
       const menuRight = props.width - 80
-      
+
       this.pos.x = p.constrain(this.pos.x, this.r, props.width - this.r)
       this.pos.y = p.constrain(this.pos.y, this.r, props.height - this.r)
-      
-      // Wenn im Menü-Bereich (vertikal), nicht zu weit rechts
-      if (this.pos.y > menuTop && this.pos.y < menuBottom && this.pos.x > menuRight) {
-        this.pos.x = menuRight
+
+      if (!props.isMobile) {
+        // Wenn im Menü-Bereich (vertikal), nicht zu weit rechts (nur Desktop)
+        if (this.pos.y > menuTop && this.pos.y < menuBottom && this.pos.x > menuRight) {
+          this.pos.x = menuRight
+        }
       }
     }
 
