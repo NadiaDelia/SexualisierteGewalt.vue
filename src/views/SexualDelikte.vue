@@ -532,8 +532,9 @@ function setFilter(key) {
     <div class="fullscreen-section" id="section-intro">
       <div class="fullscreen-sketch">
         <h1>Muster<br />und blinde<br />Flecken</h1>
-        <h2>Was die Polizeiliche Kriminalstatistik 2025<br />zu Sexualisierter <br class="mobile-only" />Gewalt aufzeigt
-          – <br class="mobile-only" />und was nicht</h2>
+        <h2 class="titelblatt-headline">Was die Polizeiliche Kriminalstatistik 2025 zu<br />Sexualisierter Gewalt <br
+            class="mobile-only" />aufzeigt
+          – und was nicht</h2>
         <div class="titelblatt-canvas-container">
           <P5CanvasTitelblatt :width="widthTitelblatt" :height="heightTitelblatt" :background="'transparent'"
             :isMobile="isMobile" :font-family="'PxGroteskPan'" />
@@ -571,7 +572,7 @@ function setFilter(key) {
     <div class="split-section" id="section-geschaedigte">
       <div id="sketch-geschaedigte" class="split-left sticky-sketch">
         <h2>Wer ist von Sexualisierter Gewalt betroffen?</h2>
-        <P5CanvasGeschaedigte   :key="activeGeschaedigte + '-' + filteredGeschaedigte.length" :data="filteredGeschaedigte"
+        <P5CanvasGeschaedigte :key="activeGeschaedigte + '-' + filteredGeschaedigte.length" :data="filteredGeschaedigte"
           :width="widthGeschaedigte" :height="heightGeschaedigte" :font-family="'PxGroteskPan'" :background="255"
           :isMobile="isMobile" />
         <div class="btns" v-if="!showHamburger">
@@ -607,7 +608,7 @@ function setFilter(key) {
             auch eine Vergewaltigung, wenn Täter_innen einen Schockzustand ausnutzen.
           </p>
         </div>
-        <div v-if="!isMobile"style="height: 50vh;"></div>
+        <div v-if="!isMobile" style="height: 50vh;"></div>
       </div>
     </div>
 
@@ -638,7 +639,7 @@ function setFilter(key) {
       </div>
 
       <div class="split-right">
-        <div v-if="!isMobile"style="height: 150vh;"></div>
+        <div v-if="!isMobile" style="height: 150vh;"></div>
         <div class="side-text scrollable-text">
           <h2>Nicht alle Männer aber fast immer ein Mann</h2>
           <p>
@@ -803,10 +804,9 @@ function setFilter(key) {
       <div class="text-overlay-content">
         <h2>Das meiste bleibt im Dunkeln</h2>
         <p>
-          Die Dunkelziffern für Sexualisierte Gewalt bewegen sich zwischen 88 Prozent (Vergewaltigung und sexuelle
-          Nötigung) und 93 Prozent (sexuelle Belästigung). Das heisst, nur rund eine von zehn Personen geht zur Polizei.
-          Damit sind Straftaten im Bereich Sexualisierte Gewalt jene mit der geringsten Anzeigerate. Zum Vergleich:
-          Autodiebstahl hat eine Dunkelziffer von 18 Prozent.
+          Die Dunkelziffern für Sexualisierte Gewalt bewegen sich zwischen 88% (Vergewaltigung) und 93% (sexuelle Belästigung). Das heisst, nur rund eine von zehn Personen geht zur Polizei.
+          Straftaten im Bereich Sexualisierte Gewalt haben damit die geringste Anzeigerate. Zum Vergleich:
+          Autodiebstahl hat eine Dunkelziffer von 18%.
         </p>
         <h2 class="h2-spaced">Warum ist das so?</h2>
         <p>
@@ -987,8 +987,7 @@ function setFilter(key) {
                 <input id="newsletter" type="checkbox" name="newsletter" v-model="form.newsletter" />
                 Updates erhalten und auf dem Laufenden bleiben. Eine Abmeldung ist jederzeit möglich.
               </label>
-              <button type="submit" class="fall-button"
-                style="margin-top:20px; display: block; border: 3px solid #000;">
+              <button type="submit" class="fall-button">
                 Bestellen
               </button>
             </form>
@@ -1137,13 +1136,13 @@ function setFilter(key) {
 }
 
 .mobile-info-overlay h3 {
-  font-size: 2.2em;
+  font-size: 1.6em;
   margin-top: 0;
   margin-bottom: 0.7em;
 }
 
 .mobile-info-overlay p {
-  font-size: 1.4em;
+  font-size: 1.1em;
   margin: 0.7em 0;
 }
 
@@ -1265,7 +1264,7 @@ function setFilter(key) {
 .hamburger-btn {
   width: 50px;
   height: 50px;
-  background: #fff;
+  background: none;
   border: none;
   border-radius: 0;
   display: flex;
@@ -1373,6 +1372,7 @@ function setFilter(key) {
     padding: 5px 20px;
   }
 }
+
 .hamburger-link:active,
 .hamburger-link:focus {
   background: #fff;
@@ -1453,8 +1453,13 @@ function setFilter(key) {
 
 @media (max-width: 768px) {
   .fullscreen-section:first-of-type .fullscreen-sketch {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
     padding-left: 20px;
-    padding-top: 10px;
+    padding-top: 0;
+    height: 100vh !important;
   }
 }
 
@@ -1809,6 +1814,26 @@ BUTTONS
   box-sizing: border-box;
 }
 
+@media (max-width: 768px) {
+  .form-field input,
+.form-field textarea {
+    border: 2px solid #000;
+    padding: 5px 8px;
+  }
+  .form-field textarea {
+    min-height: 70px;
+  }
+  .kontakt-form {
+    gap: 8px;
+  }
+  .form-field {
+    gap: 3px;
+  }
+  .form-row.two-cols {
+    gap: 8px;
+  }
+}
+
 .form-field textarea {
   resize: vertical;
   min-height: 110px;
@@ -1910,6 +1935,7 @@ BUTTONS
 
 
   @media (max-width: 768px) {
+
     .split-section,
     .fullscreen-section,
     .text-overlay-section,
@@ -1947,6 +1973,48 @@ BUTTONS
 
   .dot-nav {
     display: none !important;
+  }
+
+  /* Mobile: split-section selbst kein Snap-Punkt – die Kinder übernehmen das */
+  .split-section {
+    scroll-snap-align: none !important;
+    scroll-snap-stop: normal !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Sketch-Teil: eigene 100vh Slide */
+  .split-left,
+  .sticky-sketch {
+    height: 100vh !important;
+    min-height: 100vh !important;
+    scroll-snap-align: start !important;
+    scroll-snap-stop: always !important;
+    overflow: hidden !important;
+  }
+
+  /* Text-Teil: eigene 100vh Slide */
+  .split-right {
+    height: 100vh !important;
+    min-height: 100vh !important;
+    scroll-snap-align: start !important;
+    scroll-snap-stop: always !important;
+    overflow-y: auto !important;
+  }
+
+  /* scrollable-text: kein sticky auf Mobile */
+  .scrollable-text {
+    position: static !important;
+    top: auto !important;
+    min-height: auto !important;
+    height: auto !important;
+  }
+
+  /* side-text: kein Padding auf Mobile */
+  .side-text {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
   }
 }
 </style>

@@ -28,7 +28,7 @@ const getResponsiveWidth = () => {
 }
 const getResponsiveHeight = () => {
   if (props.isMobile) {
-    return Math.max(320, Math.min(window.innerHeight * 0.6, 600))
+    return Math.max(320, Math.min(window.innerHeight * 0.7, 700)) // Min 320px, max 70vh oder 700px
   }
   return props.height
 }
