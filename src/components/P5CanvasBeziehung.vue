@@ -8,6 +8,7 @@ const props = defineProps({
   height: { type: Number, default: 600 },
   background: { type: [Number, Array, String], default: 255 },
   fontFamily: { type: String, default: 'PxGroteskPan' },
+  isMobile: { type: Boolean, default: false },
 })
 
 let mountRef = ref(null)
@@ -40,8 +41,11 @@ const sketch = (p) => {
     arbeit: 0, keine: 0, andere: 0
   }
 
-  let crossSize = 14
-  let crossStrokeWeight = 6
+  let crossSize = props.isMobile ? 10 : 14
+  let crossStrokeWeight = props.isMobile ? 4 : 6
+  const attractPower = props.isMobile ? 2.0 : 1.5
+  const homePower    = props.isMobile ? 0.07 : 0.04
+  const repelPower   = props.isMobile ? 2.0 : 2.0
 
   p.setup = () => {
     p.createCanvas(props.width, props.height)
@@ -180,11 +184,11 @@ const sketch = (p) => {
       if (distToMouse < 150) {
         let attractionForce = p5.Vector.sub(mouse, this.pos)
         attractionForce.normalize()
-        attractionForce.mult(1.5)
+        attractionForce.mult(attractPower)
         totalForce.add(attractionForce)
       } else {
         let homeForce = p5.Vector.sub(this.home, this.pos)
-        homeForce.mult(0.04)
+        homeForce.mult(homePower)
         totalForce.add(homeForce)
       }
 
@@ -195,7 +199,7 @@ const sketch = (p) => {
             if (distance < 80 && distance > 0) {
               let repelForce = p5.Vector.sub(this.pos, other.pos)
               repelForce.normalize()
-              repelForce.mult(3.0 / distance)
+              repelForce.mult(repelPower / distance)
               totalForce.add(repelForce)
             }
           }

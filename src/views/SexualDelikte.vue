@@ -849,7 +849,7 @@ function setFilter(key) {
           Sexualisierten Gewalt verstehen wir Straftatbestände, welche Gewalt und
           sexualisierte Handlungen beinhalten. Diese werden ohne ausdrückliches Einverständnis und gegen den Willen
           der betroffenen Person angedroht, aufgedrängt oder aufgezwungen.</p>
-        <p>Für die interaktiven Grafiken haben wir uns auf die fünf häufigsten Delikte konzentriert. Sexuelle Handlungen
+        <p>Für die interaktiven Grafiken haben wir uns auf die häufigsten Delikte konzentriert. Sexuelle Handlungen
           mit Kindern haben wir nicht berücksichtigt, da diese eine gesonderte Analyse und besondere Schutzmassnahmen erfordern.
           <!-- Vertiefte Informationen hierzu bietet <a
             href="https://www.kinderschutz.ch/themen/sexualisierte-gewalt" target="_blank">Kinderschutz Schweiz</a>.-->

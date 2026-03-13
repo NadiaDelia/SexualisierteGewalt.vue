@@ -31,7 +31,16 @@
    background: none;
 }
 
+/* Vertikales Scrollen hat Vorrang vor Canvas-Events. */
+
 @media (max-width: 768px) {
+  canvas {
+    touch-action: pan-y !important;
+    user-select: none; /* Verhindert Textauswahl auf Touch-Geräten */
+    -webkit-user-select: none; /* Verhindert Textauswahl auf iOS und Chrome*/
+    -webkit-touch-callout: none; /* deaktiviert das Kontextmenü auf iOS und Chrome*/
+  }
+
   .info-btn {
     width: 30px;
     height: 30px;
