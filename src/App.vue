@@ -83,6 +83,5 @@ function checkScroll() {
 
   <!-- Deine bestehende App -->
   <SexualDelikte />
-  <router-view />
   <FooterBrava v-if="showFooter" />
 </template>

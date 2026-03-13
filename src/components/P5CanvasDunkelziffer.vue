@@ -14,6 +14,7 @@ const props = defineProps({
 
 const mountRef = ref(null)
 let p5Instance = null
+let observer = null
 
 const sketch = (p) => {
   let particles = []
@@ -625,10 +626,20 @@ const sketch = (p) => {
 }
 
 onMounted(() => {
-  p5Instance = new p5(sketch, mountRef.value)
+  observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) {
+      if (!p5Instance) p5Instance = new p5(sketch, mountRef.value)
+      else p5Instance.loop()
+    } else {
+      p5Instance?.noLoop()
+    }
+  }, { threshold: 0 })
+  if (mountRef.value) observer.observe(mountRef.value)
 })
 
 onBeforeUnmount(() => {
+  observer?.disconnect()
+  observer = null
   if (p5Instance) {
     p5Instance.remove()
     p5Instance = null

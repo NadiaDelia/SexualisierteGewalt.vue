@@ -39,6 +39,7 @@ const canvasId = ref(`p5-canvas-falling-crosses-${Math.random().toString(36).sub
 
 let p5Instance = null
 let globalFallCrosses = false
+let observer = null
 
 // p5.js Sketch definieren
 const sketch = (p) => {
@@ -219,20 +220,27 @@ const sketch = (p) => {
 }
 
 onMounted(() => {
-  
   setTimeout(() => {
     const container = document.getElementById(canvasId.value)
-    if (container) {
-      try {
-        p5Instance = new p5(sketch, container)
-      } catch (error) {
-        console.error('Error creating p5 instance:', error)
+    if (!container) return
+    observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        if (!p5Instance) {
+          try { p5Instance = new p5(sketch, container) } catch (e) { console.error(e) }
+        } else {
+          p5Instance.loop()
+        }
+      } else {
+        p5Instance?.noLoop()
       }
-    }
+    }, { threshold: 0 })
+    observer.observe(container)
   }, 100)
 })
 
 onBeforeUnmount(() => {
+  observer?.disconnect()
+  observer = null
   if (p5Instance) {
     try {
       p5Instance.remove()
@@ -241,12 +249,8 @@ onBeforeUnmount(() => {
       console.error('Error cleaning up p5 instance:', error)
     }
   }
-  if (window.globalParticles) {
-    delete window.globalParticles
-  }
-  if (window.globalResetParticles) {
-    delete window.globalResetParticles
-  }
+  if (window.globalParticles) { delete window.globalParticles }
+  if (window.globalResetParticles) { delete window.globalResetParticles }
 })
 
 watch([() => props.width, () => props.height], () => {
