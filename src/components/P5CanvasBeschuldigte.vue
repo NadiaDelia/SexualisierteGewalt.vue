@@ -39,13 +39,13 @@ const sketch = (p) => {
   let visibleMaenner = 0;
   let crossSize = props.isMobile ? 10 : 14;
   let crossStrokeWeight = props.isMobile ? 4 : 6;
-  const attractPower = props.isMobile ? 2.0 : 1.5;
-  const homePower    = props.isMobile ? 0.07 : 0.04;
-  const repelPower   = props.isMobile ? 2.0 : 2.0;
+  const attractPower = props.isMobile ? 1.5 : 1.5; // Die Kreuze werden stärker von der Maus angezogen bei höherem Wert
+  const homePower    = props.isMobile ? 0.07 : 0.04; // Die Kreuze kehren stärker zu ihrem Ursprungsort zurück bei höherem Wert
+  const repelPower   = props.isMobile ? 1.0 : 2.0; // Die Kreuze stossen sich stärker gegenseitig ab bei höherem Wert
 
   p.setup = () => {
     p.createCanvas(getResponsiveWidth(), getResponsiveHeight());
-    p.frameRate(60);
+    p.frameRate(props.isMobile ? 30 : 60);
     applyData(props.data);
   };
 
@@ -66,8 +66,9 @@ const sketch = (p) => {
     p.fill(255);
 
     // Partikel zeichnen
+    const mouseVec = p.createVector(p.mouseX, p.mouseY);
     for (let i = 0; i < particles.length; i++) {
-      particles[i].update(p);
+      particles[i].update(p, mouseVec);
       particles[i].display(p);
     }
 
@@ -180,14 +181,13 @@ const sketch = (p) => {
       this.initialDelay = 50 + Math.floor(p.random(20));
       this.gender = gender;
     }
-    update(p) {
+    update(p, mouse) {
       if (this.growing) {
         if (this.initialDelay > 0) {
           this.initialDelay--;
           return;
         }
       }
-      let mouse = p.createVector(p.mouseX, p.mouseY);
       let distToMouse = p5.Vector.dist(this.pos, mouse);
       let totalForce = p.createVector(0, 0);
       if (distToMouse < 150) {
@@ -200,7 +200,7 @@ const sketch = (p) => {
         homeForce.mult(homePower);
         totalForce.add(homeForce);
       }
-      if (distToMouse < 150) {
+      if (distToMouse < 150 && !props.isMobile) {
         for (let other of particles) {
           if (other !== this) {
             let distance = p5.Vector.dist(this.pos, other.pos);

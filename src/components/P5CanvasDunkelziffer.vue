@@ -26,13 +26,15 @@ const sketch = (p) => {
 
   let crossSize = props.isMobile ? 10 : 14
   let crossStrokeWeight = props.isMobile ? 4 : 6
+  let fpsCheckDone = false
+  let fpsCheckFrame = 0
 
   const getAreaWidth = () => props.isMobile ? props.width * 0.88 : Math.min(props.width * 0.85, 1000)
   const getAreaHeight = () => props.isMobile ? props.height * 0.72 : Math.min(props.height * 0.9, 800)
 
   p.setup = () => {
     p.createCanvas(props.width, props.height)
-    p.frameRate(60)
+    p.frameRate(props.isMobile ? 30 : 60)
     selectedData = props.data || []
     currentDunkelziffer = props.dunkelziffer // Initialisiere mit dem Prop-Wert
     applyData()
@@ -241,6 +243,13 @@ const sketch = (p) => {
         p.text(frauenText, frauenX, blockCenterY + zahlSize + 10)
         p.text(maennerText, maennerX, blockCenterY + zahlSize + 10)
       }
+    if (!fpsCheckDone) {
+      fpsCheckFrame++
+      if (fpsCheckFrame === 120) {
+        if (p.frameRate() < 40) p.frameRate(30)
+        fpsCheckDone = true
+      }
+    }
   }
 
   // Public API für reactive Updates / Resize

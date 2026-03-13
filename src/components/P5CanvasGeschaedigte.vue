@@ -45,11 +45,13 @@ const sketch = (p) => {
   // Responsive cross size
   let crossSize = props.isMobile ? 10 : 14; // Mobile: 10px, Desktop: 14px
   let crossStrokeWeight = props.isMobile ? 4 : 6; // Mobile: 4px, Desktop: 6px
+  let fpsCheckDone = false;
+  let fpsCheckFrame = 0;
 
 
   p.setup = () => {
     p.createCanvas(getResponsiveWidth(), getResponsiveHeight())
-    p.frameRate(60)
+    p.frameRate(props.isMobile ? 30 : 60)
     applyData(props.data)
   }
 
@@ -108,8 +110,9 @@ const sketch = (p) => {
     }
 
     // Partikel animieren
+    const mouseVec = p.createVector(p.mouseX, p.mouseY)
     for (let i = 0; i < particles.length; i++) {
-      particles[i].update(p)
+      particles[i].update(p, mouseVec)
       particles[i].display(p)
     }
 
@@ -129,6 +132,13 @@ const sketch = (p) => {
         let pt = particleQueue.splice(mannIdx, 1)[0];
         particles.push(new Particle(pt.x, pt.y, pt.data, pt.gender, p));
         visibleMaenner++;
+      }
+    }
+    if (!fpsCheckDone) {
+      fpsCheckFrame++;
+      if (fpsCheckFrame === 120) {
+        if (p.frameRate() < 40) p.frameRate(30);
+        fpsCheckDone = true;
       }
     }
   }
@@ -192,14 +202,13 @@ const sketch = (p) => {
       this.data = data;
       this.gender = gender;
     }
-    update(p) {
+    update(p, mouse) {
       if (this.growing) {
         if (this.initialDelay > 0) {
           this.initialDelay--;
           return;
         }
       }
-      let mouse = p.createVector(p.mouseX, p.mouseY);
       let distToMouse = p5.Vector.dist(this.pos, mouse);
       if (distToMouse < 80 && !this.perturbed) {
         let dir = p5.Vector.sub(this.pos, mouse);

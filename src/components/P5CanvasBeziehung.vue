@@ -43,13 +43,15 @@ const sketch = (p) => {
 
   let crossSize = props.isMobile ? 10 : 14
   let crossStrokeWeight = props.isMobile ? 4 : 6
-  const attractPower = props.isMobile ? 2.0 : 1.5
+  const attractPower = props.isMobile ? 1.5 : 1.5
   const homePower    = props.isMobile ? 0.07 : 0.04
-  const repelPower   = props.isMobile ? 2.0 : 2.0
+  const repelPower   = props.isMobile ? 1.0 : 2.0
+  let fpsCheckDone = false
+  let fpsCheckFrame = 0
 
   p.setup = () => {
     p.createCanvas(props.width, props.height)
-    p.frameRate(60)
+    p.frameRate(props.isMobile ? 30 : 60)
     selectedData = props.data || []
     applyData()
   }
@@ -62,8 +64,9 @@ const sketch = (p) => {
     p.fill(255)
 
     // Partikel zeichnen
+    const mouseVec = p.createVector(p.mouseX, p.mouseY)
     for (let i = 0; i < particles.length; i++) {
-      particles[i].update(p)
+      particles[i].update(p, mouseVec)
       particles[i].display(p)
     }
 
@@ -83,6 +86,13 @@ const sketch = (p) => {
     })
 
     drawLabelsAndNumbers(p)
+    if (!fpsCheckDone) {
+      fpsCheckFrame++
+      if (fpsCheckFrame === 120) {
+        if (p.frameRate() < 40) p.frameRate(30)
+        fpsCheckDone = true
+      }
+    }
   }
 
   // Public API für reactive Updates / Resize
@@ -171,13 +181,12 @@ const sketch = (p) => {
       this.beziehung = beziehung
     }
 
-    update(p) {
+    update(p, mouse) {
       if (this.initialDelay > 0) {
         this.initialDelay--
         return
       }
 
-      let mouse = p.createVector(p.mouseX, p.mouseY)
       let distToMouse = p5.Vector.dist(this.pos, mouse)
       let totalForce = p.createVector(0, 0)
 
@@ -192,7 +201,7 @@ const sketch = (p) => {
         totalForce.add(homeForce)
       }
 
-      if (distToMouse < 150) {
+      if (distToMouse < 150 && !props.isMobile) {
         for (let other of particles) {
           if (other !== this) {
             let distance = p5.Vector.dist(this.pos, other.pos)
