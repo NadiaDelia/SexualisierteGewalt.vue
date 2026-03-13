@@ -8,10 +8,25 @@ const props = defineProps({
   height: { type: Number, default: 600 },
   background: { type: [Number, Array, String], default: 0 },
   fontFamily: { type: String, default: 'PxGroteskPan' },
+  isMobile: { type: Boolean, default: false }
 })
 
 const mountRef = ref(null)
 let p5Instance = null
+
+// Responsive width/height logic
+const getResponsiveWidth = () => {
+  if (props.isMobile) {
+    return Math.max(0, window.innerWidth - 40)
+  }
+  return props.width
+}
+const getResponsiveHeight = () => {
+  if (props.isMobile) {
+    return Math.max(320, Math.min(window.innerHeight * 0.7, 700))
+  }
+  return props.height
+}
 
 const sketch = (p) => {
   // --- Variablen aus deinem Sketch ---
@@ -22,22 +37,28 @@ const sketch = (p) => {
   let beschuldigteMaenner = 0;
   let visibleFrauen = 0;
   let visibleMaenner = 0;
-  let crossSize = 14;
-  let crossStrokeWeight = 6;
+  let crossSize = props.isMobile ? 10 : 14;
+  let crossStrokeWeight = props.isMobile ? 4 : 6;
 
-  // --- Setup ---
   p.setup = () => {
-    p.createCanvas(props.width, props.height);
+    p.createCanvas(getResponsiveWidth(), getResponsiveHeight());
     p.frameRate(60);
-    selectedData = props.data || [];
-    applyData(selectedData);
+    applyData(props.data);
   };
+
+  p.windowResized = () => {
+    p.resizeCanvas(getResponsiveWidth(), getResponsiveHeight())
+    applyData(props.data)
+  }
 
   // --- Draw ---
   p.draw = () => {
     p.background(props.background);
-    p.textFont('PxGroteskPan');
-    p.textSize(90);
+    if (props.fontFamily) p.textFont(props.fontFamily);
+    const dynamicTextSize = props.isMobile
+      ? Math.max(20, Math.min(p.width * 0.14, 90))
+      : Math.max(18, Math.min(p.width * 0.13, 90))
+    p.textSize(dynamicTextSize);
     p.textAlign(p.LEFT, p.BOTTOM);
     p.fill(255);
 
@@ -48,51 +69,62 @@ const sketch = (p) => {
     }
 
     // Kreuze für Frauen und Männer gleichzeitig erscheinen lassen
-    let frauenQueue = particleQueue.filter(pt => pt.gender === 'frau');
-    let maennerQueue = particleQueue.filter(pt => pt.gender === 'mann');
     let addPerFrame = 5;
     for (let i = 0; i < addPerFrame; i++) {
-      if (frauenQueue.length > 0) {
-        let idx = particleQueue.findIndex(pt => pt.gender === 'frau');
-        if (idx !== -1) {
-          let pt = particleQueue.splice(idx, 1)[0];
-          particles.push(new Particle(pt.x, pt.y, pt.data, pt.gender, p));
-          visibleFrauen++;
-        }
+      let frauIdx = particleQueue.findIndex(pt => pt.gender === 'frau');
+      if (frauIdx !== -1) {
+        let pt = particleQueue.splice(frauIdx, 1)[0];
+        particles.push(new Particle(pt.x, pt.y, pt.data, pt.gender, p));
+        visibleFrauen++;
       }
-      if (maennerQueue.length > 0) {
-        let idx = particleQueue.findIndex(pt => pt.gender === 'mann');
-        if (idx !== -1) {
-          let pt = particleQueue.splice(idx, 1)[0];
-          particles.push(new Particle(pt.x, pt.y, pt.data, pt.gender, p));
-          visibleMaenner++;
-        }
+      let mannIdx = particleQueue.findIndex(pt => pt.gender === 'mann');
+      if (mannIdx !== -1) {
+        let pt = particleQueue.splice(mannIdx, 1)[0];
+        particles.push(new Particle(pt.x, pt.y, pt.data, pt.gender, p));
+        visibleMaenner++;
       }
     }
 
-    // Labels
-    p.text("Frauen", p.width * 0.04, p.height * 0.65);
-    p.text("Männer", p.width * 0.54, p.height * 0.65);
-
-    // Zahlen, wenn Animation fertig
-    if (particleQueue.length > 0) {
-      p.text(formatNumber(visibleFrauen), p.width * 0.04, p.height * 0.54);
-      p.text(formatNumber(visibleMaenner), p.width * 0.54, p.height * 0.54);
+    // Text über Kreuzen zeichnen
+    if (props.isMobile) {
+      p.textAlign(p.LEFT, p.CENTER);
+      const half = p.height / 2;
+      const frauenYNum = half * 0.4;
+      const frauenYLabel = half * 0.6;
+      const maennerYNum = half + half * 0.4;
+      const maennerYLabel = half + half * 0.6;
+      const maennerYLabelClamped = Math.min(maennerYLabel, p.height - dynamicTextSize * 0.5);
+      const frauenLabel = 'Frauen';
+      const maennerLabel = 'Männer';
+      const frauenNum = particleQueue.length > 0 ? formatNumber(visibleFrauen) : formatNumber(beschuldigteFrauen);
+      const maennerNum = particleQueue.length > 0 ? formatNumber(visibleMaenner) : formatNumber(beschuldigteMaenner);
+      const frauenBlockWidth = Math.max(p.textWidth(frauenLabel), p.textWidth(frauenNum));
+      const maennerBlockWidth = Math.max(p.textWidth(maennerLabel), p.textWidth(maennerNum));
+      const frauenX = p.width / 2 - frauenBlockWidth / 2;
+      const maennerX = p.width / 2 - maennerBlockWidth / 2;
+      p.text(frauenNum, frauenX, frauenYNum);
+      p.text(frauenLabel, frauenX, frauenYLabel);
+      p.text(maennerNum, maennerX, maennerYNum);
+      p.text(maennerLabel, maennerX, maennerYLabelClamped);
     } else {
-      p.text(formatNumber(beschuldigteFrauen), p.width * 0.04, p.height * 0.54);
-      p.text(formatNumber(beschuldigteMaenner), p.width * 0.54, p.height * 0.54);
+      p.textAlign(p.LEFT, p.CENTER);
+      p.text("Frauen", p.width * 0.04, p.height * 0.65);
+      p.text("Männer", p.width * 0.54, p.height * 0.65);
+      if (particleQueue.length > 0) {
+        p.text(formatNumber(visibleFrauen), p.width * 0.04, p.height * 0.54);
+        p.text(formatNumber(visibleMaenner), p.width * 0.54, p.height * 0.54);
+      } else {
+        p.text(formatNumber(beschuldigteFrauen), p.width * 0.04, p.height * 0.54);
+        p.text(formatNumber(beschuldigteMaenner), p.width * 0.54, p.height * 0.54);
+      }
     }
   };
 
-  // Public API für reactive Updates / Resize
-  p.updateData = (rows) => {
-    selectedData = rows || [];
-    applyData(selectedData);
-  };
+  // Public API
+  p.updateData = (rows) => applyData(rows);
   p.resizeTo = (w, h) => p.resizeCanvas(w, h);
 
   // --- Partikel-Update ---
-  // Ursprünglich: updateParticlesForCurrentSelection → umbenannt zu applyData für klareren Zweck
   function applyData(rows) {
     beschuldigteFrauen = 0;
     beschuldigteMaenner = 0;
@@ -100,19 +132,30 @@ const sketch = (p) => {
     visibleMaenner = 0;
     particleQueue = [];
     particles = [];
+    selectedData = rows || [];
     for (let i = 0; i < selectedData.length; i++) {
-      // Frauen links
-      beschuldigteFrauen += selectedData[i].beschuldigte_f || 0;
-      for (let j = 0; j < (selectedData[i].beschuldigte_f || 0); j++) {
-        let px = p.random(crossSize, p.width * 0.50 - crossSize);
-        let py = p.random(crossSize, p.height - crossSize);
+      beschuldigteFrauen += Number(selectedData[i].beschuldigte_f) || 0;
+      for (let j = 0; j < (Number(selectedData[i].beschuldigte_f) || 0); j++) {
+        let px, py;
+        if (props.isMobile) {
+          px = p.random(crossSize, p.width - crossSize);
+          py = p.random(crossSize, p.height / 2 - crossSize);
+        } else {
+          px = p.random(crossSize, p.width * 0.50 - crossSize);
+          py = p.random(crossSize, p.height - crossSize);
+        }
         particleQueue.push({ x: px, y: py, data: selectedData[i], gender: 'frau' });
       }
-      // Männer rechts
-      beschuldigteMaenner += selectedData[i].beschuldigte_m || 0;
-      for (let j = 0; j < (selectedData[i].beschuldigte_m || 0); j++) {
-        let px = p.random(p.width * 0.50 + crossSize, p.width - crossSize);
-        let py = p.random(crossSize, p.height - crossSize);
+      beschuldigteMaenner += Number(selectedData[i].beschuldigte_m) || 0;
+      for (let j = 0; j < (Number(selectedData[i].beschuldigte_m) || 0); j++) {
+        let px, py;
+        if (props.isMobile) {
+          px = p.random(crossSize, p.width - crossSize);
+          py = p.random(p.height / 2 + crossSize, p.height - crossSize);
+        } else {
+          px = p.random(p.width * 0.50 + crossSize, p.width - crossSize);
+          py = p.random(crossSize, p.height - crossSize);
+        }
         particleQueue.push({ x: px, y: py, data: selectedData[i], gender: 'mann' });
       }
     }
@@ -168,16 +211,26 @@ const sketch = (p) => {
         }
       }
       this.pos.add(totalForce);
-      // Grenzlogik für Frauen (linke Seite)
-      if (this.gender === 'frau') {
-        this.pos.x = p.constrain(this.pos.x, this.r, p.width * 0.5 - this.r);
-      } else if (this.gender === 'mann') {
-        this.pos.x = p.constrain(this.pos.x, p.width * 0.5 + this.r, p.width - this.r);
-      }
-      if (this.pos.y < this.r) {
-        this.pos.y = this.r;
-      } else if (this.pos.y > p.height - this.r) {
-        this.pos.y = p.height - this.r;
+      // Grenzlogik
+      if (props.isMobile) {
+        if (this.gender === 'frau') {
+          this.pos.x = p.constrain(this.pos.x, this.r, p.width - this.r);
+          this.pos.y = p.constrain(this.pos.y, this.r, p.height / 2 - this.r);
+        } else if (this.gender === 'mann') {
+          this.pos.x = p.constrain(this.pos.x, this.r, p.width - this.r);
+          this.pos.y = p.constrain(this.pos.y, p.height / 2 + this.r, p.height - this.r);
+        }
+      } else {
+        if (this.gender === 'frau') {
+          this.pos.x = p.constrain(this.pos.x, this.r, p.width * 0.5 - this.r);
+        } else if (this.gender === 'mann') {
+          this.pos.x = p.constrain(this.pos.x, p.width * 0.5 + this.r, p.width - this.r);
+        }
+        if (this.pos.y < this.r) {
+          this.pos.y = this.r;
+        } else if (this.pos.y > p.height - this.r) {
+          this.pos.y = p.height - this.r;
+        }
       }
     }
     display(p) {
@@ -198,54 +251,27 @@ const sketch = (p) => {
 
 
 onMounted(() => {
-  // Container leeren, falls noch alte Canvas vorhanden
-  if (mountRef.value) {
-    while (mountRef.value.firstChild) {
-      mountRef.value.removeChild(mountRef.value.firstChild)
-    }
-  }
-  // Nur erzeugen, wenn Daten vorhanden sind
-  if (props.data && props.data.length > 0) {
-    p5Instance = new p5(sketch, mountRef.value)
-  }
+  p5Instance = new p5(sketch, mountRef.value)
 })
-
 
 onBeforeUnmount(() => {
-  if (p5Instance) {
-    p5Instance.remove()
-    p5Instance = null
-  }
-  // Container leeren
-  if (mountRef.value) {
-    while (mountRef.value.firstChild) {
-      mountRef.value.removeChild(mountRef.value.firstChild)
-    }
-  }
+  p5Instance?.remove()
+  p5Instance = null
 })
-
-
 
 watch(() => props.data, (rows) => {
-  // p5-Instanz nur erzeugen, wenn Daten vorhanden sind
-  if (!rows || rows.length === 0) return
-  if (p5Instance) {
-    p5Instance.remove()
-    p5Instance = null
-  }
-  if (mountRef.value) {
-    while (mountRef.value.firstChild) {
-      mountRef.value.removeChild(mountRef.value.firstChild)
-    }
-    p5Instance = new p5(sketch, mountRef.value)
+  if (p5Instance && typeof p5Instance.updateData === 'function') {
+    p5Instance.updateData(rows)
   }
 }, { deep: true })
-
-watch([() => props.width, () => props.height], ([w, h]) => {
-  p5Instance?.resizeTo?.(w, h)
-})
 </script>
 
 <template>
-  <div ref="mountRef" style="display:block; width:100%; height:100%"></div>
+  <div ref="mountRef"
+    :style="
+      props.isMobile
+        ? `display:block; width:calc(100vw - 40px); height:${getResponsiveHeight()}px; max-width:100vw; margin:0 auto;`
+        : `display:block; width:${getResponsiveWidth()}px; height:${getResponsiveHeight()}px; max-width:100%; margin:0 auto;`
+    "
+  ></div>
 </template>

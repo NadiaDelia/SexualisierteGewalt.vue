@@ -165,4 +165,58 @@ export default {
     display: inline-block;
     text-align: left;
 }
+
+@media (max-width: 768px) {
+    .footer-brava,
+    .footer-brava.footer-visible {
+        position: static !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        animation: none !important;
+        transform: none !important;
+        transition: none !important;
+        width: 100%;
+        scroll-snap-align: start;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        padding: 32px 20px 24px 20px;
+        gap: 24px;
+    }
+
+    .footer-col {
+        width: 100%;
+        flex: none;
+    }
+
+    .footer-center {
+        align-items: flex-start;
+        text-align: left;
+        order: 1;
+    }
+
+    .footer-right {
+        align-items: flex-start;
+        text-align: left;
+        order: 2;
+    }
+
+    .footer-left {
+        order: 3;
+    }
+
+    .cross-list li {
+        padding-left: 0;
+    }
+
+    .cross-list li::before {
+        position: static;
+        display: inline-block;
+        vertical-align: middle;
+        margin-left: 0;
+        margin-right: 0.3em;
+        font-size: 1.4em;
+    }
+}
 </style>

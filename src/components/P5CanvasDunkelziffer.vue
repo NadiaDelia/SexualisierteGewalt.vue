@@ -9,6 +9,7 @@ const props = defineProps({
   background: { type: [Number, Array, String], default: 0 },
   fontFamily: { type: String, default: 'PxGroteskPan' },
   dunkelziffer: { type: String, default: 'hell' }, // 'hell' oder 'dunkel'
+  isMobile: { type: Boolean, default: false },
 })
 
 const mountRef = ref(null)
@@ -23,8 +24,11 @@ const sketch = (p) => {
   let visibleMann = 0
   let currentDunkelziffer = 'hell' // Lokale Variable wie in deinem ursprünglichen Code
 
-  const crossSize = 14
-  const crossStrokeWeight = 6
+  let crossSize = props.isMobile ? 10 : 14
+  let crossStrokeWeight = props.isMobile ? 4 : 6
+
+  const getAreaWidth = () => props.isMobile ? props.width * 0.88 : Math.min(props.width * 0.85, 1000)
+  const getAreaHeight = () => props.isMobile ? props.height * 0.72 : Math.min(props.height * 0.9, 800)
 
   p.setup = () => {
     p.createCanvas(props.width, props.height)
@@ -105,21 +109,32 @@ const sketch = (p) => {
 
           let centerX = props.width / 2
           let centerY = props.height / 2
-          let areaWidth = 1000
-          let areaHeight = 800
+          let areaWidth = getAreaWidth()
+          let areaHeight = getAreaHeight()
 
-          let baseMinX = centerX - areaWidth / 2
-          let baseMaxX = centerX
-          let baseMinY = centerY - areaHeight / 2
-          let baseMaxY = centerY + areaHeight / 2
-
-          let expandedMinX = baseMinX - (baseMinX - 0) * expansionFactor
-          let expandedMaxX = baseMaxX
-          let expandedMinY = baseMinY - (baseMinY - 0) * expansionFactor
-          let expandedMaxY = baseMaxY + (props.height - baseMaxY) * expansionFactor
-
-          newX = p.random(expandedMinX, expandedMaxX)
-          newY = p.random(expandedMinY, expandedMaxY)
+          if (props.isMobile) {
+            let baseMinX = centerX - areaWidth / 2
+            let baseMaxX = centerX + areaWidth / 2
+            let baseMinY = centerY - areaHeight / 2
+            let baseMaxY = centerY
+            let expandedMinX = baseMinX - (baseMinX - 0) * expansionFactor
+            let expandedMaxX = baseMaxX + (props.width - baseMaxX) * expansionFactor
+            let expandedMinY = baseMinY - (baseMinY - 0) * expansionFactor
+            let expandedMaxY = baseMaxY
+            newX = p.random(expandedMinX, expandedMaxX)
+            newY = p.random(expandedMinY, expandedMaxY)
+          } else {
+            let baseMinX = centerX - areaWidth / 2
+            let baseMaxX = centerX
+            let baseMinY = centerY - areaHeight / 2
+            let baseMaxY = centerY + areaHeight / 2
+            let expandedMinX = baseMinX - (baseMinX - 0) * expansionFactor
+            let expandedMaxX = baseMaxX
+            let expandedMinY = baseMinY - (baseMinY - 0) * expansionFactor
+            let expandedMaxY = baseMaxY + (props.height - baseMaxY) * expansionFactor
+            newX = p.random(expandedMinX, expandedMaxX)
+            newY = p.random(expandedMinY, expandedMaxY)
+          }
         }
 
         particles.push(new Particle(newX, newY, particle.data, currentDunkelziffer, particle.gender, p))
@@ -141,21 +156,32 @@ const sketch = (p) => {
 
           let centerX = props.width / 2
           let centerY = props.height / 2
-          let areaWidth = 1000
-          let areaHeight = 800
+          let areaWidth = getAreaWidth()
+          let areaHeight = getAreaHeight()
 
-          let baseMinX = centerX
-          let baseMaxX = centerX + areaWidth / 2
-          let baseMinY = centerY - areaHeight / 2
-          let baseMaxY = centerY + areaHeight / 2
-
-          let expandedMinX = baseMinX
-          let expandedMaxX = baseMaxX + (props.width - baseMaxX) * expansionFactor
-          let expandedMinY = baseMinY - (baseMinY - 0) * expansionFactor
-          let expandedMaxY = baseMaxY + (props.height - baseMaxY) * expansionFactor
-
-          newX = p.random(expandedMinX, expandedMaxX)
-          newY = p.random(expandedMinY, expandedMaxY)
+          if (props.isMobile) {
+            let baseMinX = centerX - areaWidth / 2
+            let baseMaxX = centerX + areaWidth / 2
+            let baseMinY = centerY
+            let baseMaxY = centerY + areaHeight / 2
+            let expandedMinX = baseMinX - (baseMinX - 0) * expansionFactor
+            let expandedMaxX = baseMaxX + (props.width - baseMaxX) * expansionFactor
+            let expandedMinY = baseMinY
+            let expandedMaxY = baseMaxY + (props.height - baseMaxY) * expansionFactor
+            newX = p.random(expandedMinX, expandedMaxX)
+            newY = p.random(expandedMinY, expandedMaxY)
+          } else {
+            let baseMinX = centerX
+            let baseMaxX = centerX + areaWidth / 2
+            let baseMinY = centerY - areaHeight / 2
+            let baseMaxY = centerY + areaHeight / 2
+            let expandedMinX = baseMinX
+            let expandedMaxX = baseMaxX + (props.width - baseMaxX) * expansionFactor
+            let expandedMinY = baseMinY - (baseMinY - 0) * expansionFactor
+            let expandedMaxY = baseMaxY + (props.height - baseMaxY) * expansionFactor
+            newX = p.random(expandedMinX, expandedMaxX)
+            newY = p.random(expandedMinY, expandedMaxY)
+          }
         }
 
         particles.push(new Particle(newX, newY, particle.data, currentDunkelziffer, particle.gender, p))
@@ -168,23 +194,46 @@ const sketch = (p) => {
     visibleMann = particles.filter(particle => particle.gender === 'mann').length
 
     // Responsive, vertikal zentrierte Zahlen und Labels
-    let zahlSize = 90
-    let abstand = 40
+    let zahlSize = props.isMobile ? Math.max(20, Math.min(p.width * 0.12, 50)) : 90
+    let abstand = props.isMobile ? 15 : 40
     let frauenText = "Frauen"
     let maennerText = "Männer"
     let frauenBreite = p.textWidth(frauenText)
     let blockHeight = zahlSize + 10 + zahlSize
     let blockCenterY = props.height / 2 - blockHeight / 2
 
-    let frauenX = props.width / 2 - abstand - frauenBreite
-    let maennerX = props.width / 2 + abstand
-
       // Wenn keine Daten zur Dunkelziffer vorhanden sind, Hinweistext anzeigen
       if (visibleFrau === 0 && visibleMann === 0) {
         p.textSize(zahlSize)
         p.textAlign(p.CENTER, p.CENTER)
         p.text('Keine Daten zur Dunkelziffer verfügbar', props.width / 2, props.height / 2)
+      } else if (props.isMobile) {
+        let totalBlockH = zahlSize * 2 + 10
+        let cx = props.width / 2
+        let frauBlockTop, mannBlockTop
+        if (currentDunkelziffer === 'hell') {
+          // Innerhalb der areaHeight zentrieren (obere/untere Teilhäfte des Bereichs)
+          let ah = getAreaHeight()
+          let cy = props.height / 2
+          frauBlockTop = cy - ah / 4 - totalBlockH / 2
+          mannBlockTop = cy + ah / 4 - totalBlockH / 2
+        } else {
+          // Im Dunkelfeld: volle Canvas-Höhe
+          frauBlockTop = props.height / 4 - totalBlockH / 2
+          mannBlockTop = props.height * 3 / 4 - totalBlockH / 2
+        }
+        p.textSize(zahlSize)
+        p.textAlign(p.CENTER, p.TOP)
+        p.text(formatNumber(visibleFrau), cx, frauBlockTop)
+        p.text(frauenText, cx, frauBlockTop + zahlSize + 5)
+        p.text(formatNumber(visibleMann), cx, mannBlockTop)
+        p.text(maennerText, cx, mannBlockTop + zahlSize + 5)
       } else {
+        let frauenBreite = p.textWidth(frauenText)
+        let frauenX = props.width / 2 - abstand - frauenBreite
+        let maennerX = props.width / 2 + abstand
+        let blockHeight = zahlSize + 10 + zahlSize
+        let blockCenterY = props.height / 2 - blockHeight / 2
         p.textSize(zahlSize)
         p.textAlign(p.LEFT, p.TOP)
         p.text(formatNumber(visibleFrau), frauenX, blockCenterY)
@@ -218,39 +267,67 @@ const sketch = (p) => {
 
     for (let i = 0; i < selectedData.length; i++) {
       if (currentDunkelziffer === 'hell') {
-        // Bei "registriert" - getrennte Geschlechterverteilung in 1000x800px Bereich
+        // Bei "registriert" - getrennte Geschlechterverteilung im responsiven Bereich
         let centerX = props.width / 2
         let centerY = props.height / 2
-        let areaWidth = 1000
-        let areaHeight = 800
+        let areaWidth = getAreaWidth()
+        let areaHeight = getAreaHeight()
 
-        // Frauen Hellfeld - linke Hälfte des zentrierten Bereichs
-        for (let j = 0; j < (selectedData[i].geschaedigte_f || 0); j++) {
-          let px = p.random(centerX - areaWidth / 2, centerX)
-          let py = p.random(centerY - areaHeight / 2, centerY + areaHeight / 2)
-          particleQueue.push({ x: px, y: py, data: selectedData[i], gender: 'frau', dunkelziffer: 'hell' })
-        }
-        // Männer Hellfeld - rechte Hälfte des zentrierten Bereichs
-        for (let j = 0; j < (selectedData[i].geschaedigte_m || 0); j++) {
-          let px = p.random(centerX, centerX + areaWidth / 2)
-          let py = p.random(centerY - areaHeight / 2, centerY + areaHeight / 2)
-          particleQueue.push({ x: px, y: py, data: selectedData[i], gender: 'mann', dunkelziffer: 'hell' })
+        if (props.isMobile) {
+          // Frauen Hellfeld - obere Hälfte
+          for (let j = 0; j < (selectedData[i].geschaedigte_f || 0); j++) {
+            let px = p.random(centerX - areaWidth / 2, centerX + areaWidth / 2)
+            let py = p.random(centerY - areaHeight / 2, centerY)
+            particleQueue.push({ x: px, y: py, data: selectedData[i], gender: 'frau', dunkelziffer: 'hell' })
+          }
+          // Männer Hellfeld - untere Hälfte
+          for (let j = 0; j < (selectedData[i].geschaedigte_m || 0); j++) {
+            let px = p.random(centerX - areaWidth / 2, centerX + areaWidth / 2)
+            let py = p.random(centerY, centerY + areaHeight / 2)
+            particleQueue.push({ x: px, y: py, data: selectedData[i], gender: 'mann', dunkelziffer: 'hell' })
+          }
+        } else {
+          // Frauen Hellfeld - linke Hälfte des zentrierten Bereichs
+          for (let j = 0; j < (selectedData[i].geschaedigte_f || 0); j++) {
+            let px = p.random(centerX - areaWidth / 2, centerX)
+            let py = p.random(centerY - areaHeight / 2, centerY + areaHeight / 2)
+            particleQueue.push({ x: px, y: py, data: selectedData[i], gender: 'frau', dunkelziffer: 'hell' })
+          }
+          // Männer Hellfeld - rechte Hälfte des zentrierten Bereichs
+          for (let j = 0; j < (selectedData[i].geschaedigte_m || 0); j++) {
+            let px = p.random(centerX, centerX + areaWidth / 2)
+            let py = p.random(centerY - areaHeight / 2, centerY + areaHeight / 2)
+            particleQueue.push({ x: px, y: py, data: selectedData[i], gender: 'mann', dunkelziffer: 'hell' })
+          }
         }
       } else {
         // Bei "tatsächlich" - expandierende Verteilung über den ganzen Bildschirm
-        let centerX = props.width / 2
-
-        // Frauen Dunkelfeld - linke Bildschirmhälfte
-        for (let j = 0; j < (selectedData[i].geschaedigte_f_dz || 0); j++) {
-          let px = p.random(0, centerX)
-          let py = p.random(0, props.height)
-          particleQueue.push({ x: px, y: py, data: selectedData[i], gender: 'frau', dunkelziffer: 'dunkel' })
-        }
-        // Männer Dunkelfeld - rechte Bildschirmhälfte
-        for (let j = 0; j < (selectedData[i].geschaedigte_m_dz || 0); j++) {
-          let px = p.random(centerX, props.width)
-          let py = p.random(0, props.height)
-          particleQueue.push({ x: px, y: py, data: selectedData[i], gender: 'mann', dunkelziffer: 'dunkel' })
+        if (props.isMobile) {
+          // Mobile: Frauen oben, Männer unten
+          for (let j = 0; j < (selectedData[i].geschaedigte_f_dz || 0); j++) {
+            let px = p.random(0, props.width)
+            let py = p.random(0, props.height / 2)
+            particleQueue.push({ x: px, y: py, data: selectedData[i], gender: 'frau', dunkelziffer: 'dunkel' })
+          }
+          for (let j = 0; j < (selectedData[i].geschaedigte_m_dz || 0); j++) {
+            let px = p.random(0, props.width)
+            let py = p.random(props.height / 2, props.height)
+            particleQueue.push({ x: px, y: py, data: selectedData[i], gender: 'mann', dunkelziffer: 'dunkel' })
+          }
+        } else {
+          let centerX = props.width / 2
+          // Frauen Dunkelfeld - linke Bildschirmhälfte
+          for (let j = 0; j < (selectedData[i].geschaedigte_f_dz || 0); j++) {
+            let px = p.random(0, centerX)
+            let py = p.random(0, props.height)
+            particleQueue.push({ x: px, y: py, data: selectedData[i], gender: 'frau', dunkelziffer: 'dunkel' })
+          }
+          // Männer Dunkelfeld - rechte Bildschirmhälfte
+          for (let j = 0; j < (selectedData[i].geschaedigte_m_dz || 0); j++) {
+            let px = p.random(centerX, props.width)
+            let py = p.random(0, props.height)
+            particleQueue.push({ x: px, y: py, data: selectedData[i], gender: 'mann', dunkelziffer: 'dunkel' })
+          }
         }
       }
     }
@@ -286,32 +363,48 @@ const sketch = (p) => {
       let needed = targetFrau - currentFrau
       let centerX = props.width / 2
       let centerY = props.height / 2
-      let areaWidth = 1000
-      let areaHeight = 800
+      let areaWidth = getAreaWidth()
+      let areaHeight = getAreaHeight()
 
       for (let i = 0; i < needed; i++) {
         let px, py
         if (currentDunkelziffer === 'hell') {
-          px = p.random(centerX - areaWidth / 2, centerX)
-          py = p.random(centerY - areaHeight / 2, centerY + areaHeight / 2)
+          if (props.isMobile) {
+            px = p.random(centerX - areaWidth / 2, centerX + areaWidth / 2)
+            py = p.random(centerY - areaHeight / 2, centerY)
+          } else {
+            px = p.random(centerX - areaWidth / 2, centerX)
+            py = p.random(centerY - areaHeight / 2, centerY + areaHeight / 2)
+          }
         } else {
           let totalFrauenPartikel = targetFrau
           let currentParticleIndex = currentFrau + i
           let progress = currentParticleIndex / Math.max(totalFrauenPartikel - 1, 1)
           let expansionFactor = 0.1 + progress * 0.9
 
-          let baseMinX = centerX - areaWidth / 2
-          let baseMaxX = centerX
-          let baseMinY = centerY - areaHeight / 2
-          let baseMaxY = centerY + areaHeight / 2
-
-          let expandedMinX = baseMinX - (baseMinX - 0) * expansionFactor
-          let expandedMaxX = baseMaxX
-          let expandedMinY = baseMinY - (baseMinY - 0) * expansionFactor
-          let expandedMaxY = baseMaxY + (props.height - baseMaxY) * expansionFactor
-
-          px = p.random(expandedMinX, expandedMaxX)
-          py = p.random(expandedMinY, expandedMaxY)
+          if (props.isMobile) {
+            let baseMinX = centerX - areaWidth / 2
+            let baseMaxX = centerX + areaWidth / 2
+            let baseMinY = centerY - areaHeight / 2
+            let baseMaxY = centerY
+            let expandedMinX = baseMinX - (baseMinX - 0) * expansionFactor
+            let expandedMaxX = baseMaxX + (props.width - baseMaxX) * expansionFactor
+            let expandedMinY = baseMinY - (baseMinY - 0) * expansionFactor
+            let expandedMaxY = baseMaxY
+            px = p.random(expandedMinX, expandedMaxX)
+            py = p.random(expandedMinY, expandedMaxY)
+          } else {
+            let baseMinX = centerX - areaWidth / 2
+            let baseMaxX = centerX
+            let baseMinY = centerY - areaHeight / 2
+            let baseMaxY = centerY + areaHeight / 2
+            let expandedMinX = baseMinX - (baseMinX - 0) * expansionFactor
+            let expandedMaxX = baseMaxX
+            let expandedMinY = baseMinY - (baseMinY - 0) * expansionFactor
+            let expandedMaxY = baseMaxY + (props.height - baseMaxY) * expansionFactor
+            px = p.random(expandedMinX, expandedMaxX)
+            py = p.random(expandedMinY, expandedMaxY)
+          }
         }
         particleQueue.push({ x: px, y: py, data: selectedData[0], gender: 'frau', dunkelziffer: currentDunkelziffer })
       }
@@ -330,32 +423,48 @@ const sketch = (p) => {
       let needed = targetMann - currentMann
       let centerX = props.width / 2
       let centerY = props.height / 2
-      let areaWidth = 1000
-      let areaHeight = 800
+      let areaWidth = getAreaWidth()
+      let areaHeight = getAreaHeight()
 
       for (let i = 0; i < needed; i++) {
         let px, py
         if (currentDunkelziffer === 'hell') {
-          px = p.random(centerX, centerX + areaWidth / 2)
-          py = p.random(centerY - areaHeight / 2, centerY + areaHeight / 2)
+          if (props.isMobile) {
+            px = p.random(centerX - areaWidth / 2, centerX + areaWidth / 2)
+            py = p.random(centerY, centerY + areaHeight / 2)
+          } else {
+            px = p.random(centerX, centerX + areaWidth / 2)
+            py = p.random(centerY - areaHeight / 2, centerY + areaHeight / 2)
+          }
         } else {
           let totalMännerPartikel = targetMann
           let currentParticleIndex = currentMann + i
           let progress = currentParticleIndex / Math.max(totalMännerPartikel - 1, 1)
           let expansionFactor = 0.1 + progress * 0.9
 
-          let baseMinX = centerX
-          let baseMaxX = centerX + areaWidth / 2
-          let baseMinY = centerY - areaHeight / 2
-          let baseMaxY = centerY + areaHeight / 2
-
-          let expandedMinX = baseMinX
-          let expandedMaxX = baseMaxX + (props.width - baseMaxX) * expansionFactor
-          let expandedMinY = baseMinY - (baseMinY - 0) * expansionFactor
-          let expandedMaxY = baseMaxY + (props.height - baseMaxY) * expansionFactor
-
-          px = p.random(expandedMinX, expandedMaxX)
-          py = p.random(expandedMinY, expandedMaxY)
+          if (props.isMobile) {
+            let baseMinX = centerX - areaWidth / 2
+            let baseMaxX = centerX + areaWidth / 2
+            let baseMinY = centerY
+            let baseMaxY = centerY + areaHeight / 2
+            let expandedMinX = baseMinX - (baseMinX - 0) * expansionFactor
+            let expandedMaxX = baseMaxX + (props.width - baseMaxX) * expansionFactor
+            let expandedMinY = baseMinY
+            let expandedMaxY = baseMaxY + (props.height - baseMaxY) * expansionFactor
+            px = p.random(expandedMinX, expandedMaxX)
+            py = p.random(expandedMinY, expandedMaxY)
+          } else {
+            let baseMinX = centerX
+            let baseMaxX = centerX + areaWidth / 2
+            let baseMinY = centerY - areaHeight / 2
+            let baseMaxY = centerY + areaHeight / 2
+            let expandedMinX = baseMinX
+            let expandedMaxX = baseMaxX + (props.width - baseMaxX) * expansionFactor
+            let expandedMinY = baseMinY - (baseMinY - 0) * expansionFactor
+            let expandedMaxY = baseMaxY + (props.height - baseMaxY) * expansionFactor
+            px = p.random(expandedMinX, expandedMaxX)
+            py = p.random(expandedMinY, expandedMaxY)
+          }
         }
         particleQueue.push({ x: px, y: py, data: selectedData[0], gender: 'mann', dunkelziffer: currentDunkelziffer })
       }
@@ -447,26 +556,46 @@ const sketch = (p) => {
       // Grenzlogik basierend auf dem Dunkelziffer-Modus
       let centerX = props.width / 2
       let centerY = props.height / 2
-      let areaWidth = 1000
-      let areaHeight = 800
+      let areaWidth = getAreaWidth()
+      let areaHeight = getAreaHeight()
 
-      if (this.dunkelziffer === 'hell') {
-        // Bei "registriert" - getrennte Geschlechterverteilung im zentrierten Bereich
-        if (this.gender === 'frau') {
-          this.pos.x = p.constrain(this.pos.x, centerX - areaWidth / 2 + this.r, centerX - this.r)
-          this.pos.y = p.constrain(this.pos.y, centerY - areaHeight / 2 + this.r, centerY + areaHeight / 2 - this.r)
-        } else if (this.gender === 'mann') {
-          this.pos.x = p.constrain(this.pos.x, centerX + this.r, centerX + areaWidth / 2 - this.r)
-          this.pos.y = p.constrain(this.pos.y, centerY - areaHeight / 2 + this.r, centerY + areaHeight / 2 - this.r)
+      if (props.isMobile) {
+        if (this.dunkelziffer === 'hell') {
+          if (this.gender === 'frau') {
+            this.pos.x = p.constrain(this.pos.x, centerX - areaWidth / 2 + this.r, centerX + areaWidth / 2 - this.r)
+            this.pos.y = p.constrain(this.pos.y, centerY - areaHeight / 2 + this.r, centerY - this.r)
+          } else if (this.gender === 'mann') {
+            this.pos.x = p.constrain(this.pos.x, centerX - areaWidth / 2 + this.r, centerX + areaWidth / 2 - this.r)
+            this.pos.y = p.constrain(this.pos.y, centerY + this.r, centerY + areaHeight / 2 - this.r)
+          }
+        } else {
+          if (this.gender === 'frau') {
+            this.pos.x = p.constrain(this.pos.x, this.r, props.width - this.r)
+            this.pos.y = p.constrain(this.pos.y, this.r, props.height / 2 - this.r)
+          } else if (this.gender === 'mann') {
+            this.pos.x = p.constrain(this.pos.x, this.r, props.width - this.r)
+            this.pos.y = p.constrain(this.pos.y, props.height / 2 + this.r, props.height - this.r)
+          }
         }
       } else {
-        // Bei "tatsächlich" - expandierende Verteilung über den ganzen Bildschirm
-        if (this.gender === 'frau') {
-          this.pos.x = p.constrain(this.pos.x, this.r, centerX - this.r)
-          this.pos.y = p.constrain(this.pos.y, this.r, props.height - this.r)
-        } else if (this.gender === 'mann') {
-          this.pos.x = p.constrain(this.pos.x, centerX + this.r, props.width - this.r)
-          this.pos.y = p.constrain(this.pos.y, this.r, props.height - this.r)
+        if (this.dunkelziffer === 'hell') {
+          // Bei "registriert" - getrennte Geschlechterverteilung im zentrierten Bereich
+          if (this.gender === 'frau') {
+            this.pos.x = p.constrain(this.pos.x, centerX - areaWidth / 2 + this.r, centerX - this.r)
+            this.pos.y = p.constrain(this.pos.y, centerY - areaHeight / 2 + this.r, centerY + areaHeight / 2 - this.r)
+          } else if (this.gender === 'mann') {
+            this.pos.x = p.constrain(this.pos.x, centerX + this.r, centerX + areaWidth / 2 - this.r)
+            this.pos.y = p.constrain(this.pos.y, centerY - areaHeight / 2 + this.r, centerY + areaHeight / 2 - this.r)
+          }
+        } else {
+          // Bei "tatsächlich" - expandierende Verteilung über den ganzen Bildschirm
+          if (this.gender === 'frau') {
+            this.pos.x = p.constrain(this.pos.x, this.r, centerX - this.r)
+            this.pos.y = p.constrain(this.pos.y, this.r, props.height - this.r)
+          } else if (this.gender === 'mann') {
+            this.pos.x = p.constrain(this.pos.x, centerX + this.r, props.width - this.r)
+            this.pos.y = p.constrain(this.pos.y, this.r, props.height - this.r)
+          }
         }
       }
     }
@@ -487,14 +616,7 @@ const sketch = (p) => {
 }
 
 onMounted(() => {
-  if (mountRef.value) {
-    while (mountRef.value.firstChild) {
-      mountRef.value.removeChild(mountRef.value.firstChild)
-    }
-  }
-  if (props.data && props.data.length > 0) {
-    p5Instance = new p5(sketch, mountRef.value)
-  }
+  p5Instance = new p5(sketch, mountRef.value)
 })
 
 onBeforeUnmount(() => {
@@ -511,16 +633,7 @@ onBeforeUnmount(() => {
 
 watch(() => props.data, (rows) => {
   if (!rows || rows.length === 0) return
-  if (p5Instance) {
-    p5Instance.remove()
-    p5Instance = null
-  }
-  if (mountRef.value) {
-    while (mountRef.value.firstChild) {
-      mountRef.value.removeChild(mountRef.value.firstChild)
-    }
-    p5Instance = new p5(sketch, mountRef.value)
-  }
+  p5Instance?.updateData(rows)
 }, { deep: true })
 
 watch(() => props.dunkelziffer, (newVal, oldVal) => {

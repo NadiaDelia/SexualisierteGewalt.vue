@@ -519,7 +519,7 @@ function setFilter(key) {
   <!-- Filter-Button (nur Mobile & wenn P5 sichtbar) -->
   <button v-if="showHamburger && isSketchVisible && !menuOpen" class="filter-btn-mobile" @click="showFilterSheet = true"
     aria-label="Filter öffnen">
-    {{STRAFTATEN.find(s => s.key === activeGeschaedigte)?.label || 'Straftat auswählen'}}
+    {{STRAFTATEN.find(s => s.key === (activeSection === 'beschuldigte' ? activeBeschuldigte : activeSection === 'ort' ? activeOrt : activeSection === 'beziehung' ? activeBeziehung : activeSection === 'dunkelziffer' ? activeDunkelziffer : activeGeschaedigte))?.label || 'Straftat auswählen'}}
     <svg width="24" height="24" viewBox="0 0 24 24"
       style="margin-left:0.4em; vertical-align:middle; display:inline-block;">
       <polyline points="5,8 12,16 19,8" fill="none" stroke="#fff" stroke-width="3" />
@@ -531,10 +531,12 @@ function setFilter(key) {
     <!-- 1a. Titelbild -->
     <div class="fullscreen-section" id="section-intro">
       <div class="fullscreen-sketch">
-        <h1>Muster<br />und blinde<br />Flecken</h1>
-        <h2 class="titelblatt-headline">Was die Polizeiliche Kriminalstatistik 2025 zu<br />Sexualisierter Gewalt <br
-            class="mobile-only" />aufzeigt
-          – und was nicht</h2>
+        <div class="titelblatt-text">
+          <h1>Muster<br />und blinde<br />Flecken</h1>
+          <h2 class="titelblatt-headline">Was die Polizeiliche Kriminalstatistik 2025 zu<br />Sexualisierter Gewalt <br
+              class="mobile-only" />aufzeigt
+            – und was nicht</h2>
+        </div>
         <div class="titelblatt-canvas-container">
           <P5CanvasTitelblatt :width="widthTitelblatt" :height="heightTitelblatt" :background="'transparent'"
             :isMobile="isMobile" :font-family="'PxGroteskPan'" />
@@ -545,7 +547,7 @@ function setFilter(key) {
     <!-- 1b. section PKS text: Erklärungstext als Overlay/Stacking -->
     <section class="text-overlay-section">
       <div class="text-overlay-content">
-        <h2>Sexualisierte Gewalt – wir schauen genauer hin</h2>
+        <h2>Sexualisierte Gewalt – wir schauen hin</h2>
         <p>
           Die Polizei sammelt kontinuierlich Kennziffern zu angezeigten Straftaten, auch zu Sexualisierter Gewalt. Sie
           werden jährlich in der Polizeilichen Kriminalstatistik der Schweiz veröffentlicht.
@@ -618,6 +620,7 @@ function setFilter(key) {
         <h2>Wer übt Sexualisierte Gewalt aus?</h2>
         <P5CanvasBeschuldigte :key="activeBeschuldigte + '-' + filteredBeschuldigte.length" :data="filteredBeschuldigte"
           :width="widthBeschuldigte" :height="heightBeschuldigte" :background="255" :font-family="'PxGroteskPan'"
+          :isMobile="isMobile"
           :show-labels="true" left-field="beschuldigte_f" right-field="beschuldigte_m" left-label="Frauen"
           right-label="Männer" :mouse-radius="150" :repel-radius="80" :attract-power="1.5" />
         <div class="btns" v-if="!showHamburger">
@@ -663,7 +666,7 @@ function setFilter(key) {
       <div class="split-left sticky-sketch" id="sketch-ort">
         <h2>Wo findet Sexualisierte Gewalt statt?</h2>
         <P5CanvasOrt :key="activeOrt + '-' + filteredOrt.length" :data="filteredOrt" :width="widthOrt"
-          :height="heightOrt" :background="255" :font-family="'PxGroteskPan'" />
+          :height="heightOrt" :background="255" :font-family="'PxGroteskPan'" :isMobile="isMobile" />
         <div class="btns" v-if="!showHamburger">
           <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeOrt === s.key }"
             @click="activeOrt = s.key">{{ s.label }}</button>
@@ -764,7 +767,7 @@ function setFilter(key) {
           <P5CanvasDunkelziffer :key="activeDunkelziffer + '-' + filteredDunkelziffer.length"
             :data="filteredDunkelziffer" :width="widthDunkelziffer" :height="heightDunkelziffer"
             :background="'transparent'" :font-family="'PxGroteskPan'" :dunkelziffer="dunkelzifferMode"
-            :mouse-radius="80" :repel-radius="100" :attract-power="10" />
+            :isMobile="isMobile" :mouse-radius="80" :repel-radius="100" :attract-power="10" />
         </div>
         <!-- Info-Popup entfernt, nur noch expanding Button -->
         <div v-if="!isMobile" style="height: 50vh;"></div>
@@ -847,9 +850,10 @@ function setFilter(key) {
           sexualisierte Handlungen beinhalten. Diese werden ohne ausdrückliches Einverständnis und gegen den Willen
           der betroffenen Person angedroht, aufgedrängt oder aufgezwungen.</p>
         <p>Für die interaktiven Grafiken haben wir uns auf die fünf häufigsten Delikte konzentriert. Sexuelle Handlungen
-          mit Kindern haben wir nicht berücksichtigt, da diese eine gesonderte Analyse und besondere
-          Schutzmassnahmen erfordern. Vertiefte Informationen hierzu bietet <a
-            href="https://www.kinderschutz.ch/themen/sexualisierte-gewalt" target="_blank">Kinderschutz Schweiz</a>.</p>
+          mit Kindern haben wir nicht berücksichtigt, da diese eine gesonderte Analyse und besondere Schutzmassnahmen erfordern.
+          <!-- Vertiefte Informationen hierzu bietet <a
+            href="https://www.kinderschutz.ch/themen/sexualisierte-gewalt" target="_blank">Kinderschutz Schweiz</a>.-->
+            Zudem wichtig zu wissen: Die Statistik registriert nur zwei Geschlechter.</p>
 
         <p>Folgende Straftaten haben wir analysiert:<br /></p>
 
@@ -906,7 +910,7 @@ function setFilter(key) {
             </div>
           </div>
         </div>
-        <h2>Datenquellen</h2>
+        <!-- <h2>Datenquellen</h2>
         <p>Die Visualisierungen basieren auf den Daten der Polizeilichen Kriminalstatistik 2025, welche vom Bundesamt
           für Statistik herausgegeben wird. Die Statistik zählt alle angezeigten bzw. polizeilich registrierten Fälle.
           Wichtig zu wissen: Die
@@ -918,7 +922,7 @@ function setFilter(key) {
           sie eine Straftat erlebt hat, unabhängig davon, ob sie diese auch zur Anzeige gebracht hat. Die aktuellste
           Prävalenzstudie, die wir auch in unserer Analyse verwenden, ist der <a
             href="https://www.unisg.ch/de/universitaet/schools/law/forschung/sk-hsg/resultate-des-swiss-crime-survey-2022/"
-            target="_blank">Crime Survey 2022</a>.</p>
+            target="_blank">Crime Survey 2022</a>.</p> -->
 
       </div>
 
@@ -1000,14 +1004,19 @@ function setFilter(key) {
     </section>
 
     <!-- FooterBrava nur anzeigen, wenn ganz unten -->
-    <FooterBrava v-if="showFooter" class="footer-brava" :class="{ 'footer-visible': showFooter }" />
+    <FooterBrava class="footer-brava" :class="{ 'footer-visible': showFooter }" />
 
     <!-- Filter-Bottom-Sheet für Mobile -->
     <FilterBottomSheet :show="showFilterSheet" @close="showFilterSheet = false">
       <div class="filter-sheet-list">
+        <!-- Angezeigt/Tatsächlich Toggle (nur bei Dunkelziffer) -->
+        <div v-if="activeSection === 'dunkelziffer'" class="dunkelziffer-toggle-mobile">
+          <button :class="['dz-toggle-btn', { active: dunkelzifferMode === 'hell' }]" @click="dunkelzifferMode = 'hell'; showFilterSheet = false">Angezeigt</button>
+          <button :class="['dz-toggle-btn', { active: dunkelzifferMode === 'dunkel' }]" @click="dunkelzifferMode = 'dunkel'; showFilterSheet = false">Tatsächlich</button>
+        </div>
         <button v-for="s in STRAFTATEN" :key="s.key"
-          :class="['filter-sheet-btn', { active: activeGeschaedigte === s.key }]"
-          @click="activeGeschaedigte = s.key; showFilterSheet = false">
+          :class="['filter-sheet-btn', { active: (activeSection === 'beschuldigte' ? activeBeschuldigte : activeSection === 'ort' ? activeOrt : activeSection === 'beziehung' ? activeBeziehung : activeSection === 'dunkelziffer' ? activeDunkelziffer : activeGeschaedigte) === s.key }]"
+          @click="activeSection === 'beschuldigte' ? activeBeschuldigte = s.key : activeSection === 'ort' ? activeOrt = s.key : activeSection === 'beziehung' ? activeBeziehung = s.key : activeSection === 'dunkelziffer' ? activeDunkelziffer = s.key : activeGeschaedigte = s.key; showFilterSheet = false">
           <span class="filter-sheet-btn-label">{{ s.label }}</span>
         </button>
         <!-- Info-Button im gleichen Stil -->
@@ -1024,10 +1033,34 @@ function setFilter(key) {
       <button class="close-btn" @click="showMobileInfo = false">×</button>
       <div class="mobile-info-content">
         <h3>Anmerkungen</h3>
-        <p>Darstellung: Ein Kreuz entspricht einer geschädigten bzw. betroffenen Person.</p>
-        <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a href="#section-pks">«Über
-            die Visualisierungen»</a>.</p>
-        <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
+        <template v-if="activeSection === 'beschuldigte'">
+          <p>Darstellung: Ein Kreuz entspricht einer beschuldigten Person.</p>
+          <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a href="#section-pks">«Über die Visualisierungen»</a>.</p>
+          <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
+        </template>
+        <template v-else-if="activeSection === 'ort'">
+          <p>Darstellung: Ein Kreuz entspricht einer Straftat.</p>
+          <p>Hinweis: Als privater Raum gelten ausschliesslich die eigenen vier Wände. Treppenhaus oder Waschküche gelten bereits als öffentlich. Delikte, bei denen kein Ort angegeben wurde, sind nicht dargestellt.</p>
+          <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a href="#section-pks">«Über die Visualisierungen»</a>.</p>
+          <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
+        </template>
+        <template v-else-if="activeSection === 'beziehung'">
+          <p>Darstellung: Ein Kreuz entspricht einer geschädigten Person.</p>
+          <p>Kategorien: Partner (inkl. Ex), verwandt, bekannt, Arbeit/Ausbildung, keine Beziehung, andere Beziehung.</p>
+          <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a href="#section-pks">«Über die Visualisierungen»</a>.</p>
+          <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
+        </template>
+        <template v-else-if="activeSection === 'dunkelziffer'">
+          <p>Darstellung: Ein Kreuz entspricht einer betroffenen Person.</p>
+          <p>Hinweis: «Angezeigt» stellt das Hellfeld, also die Anzahl polizeilich registrierter Betroffener dar. «Tatsächlich» zeigt die Anzahl Betroffener, wenn sowohl Hellfeld als auch Dunkelfeld berücksichtigt werden.</p>
+          <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a href="#section-pks">«Über die Visualisierungen»</a>.</p>
+          <p>Quellen: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik (Hellfeld). Crime Survey 2022 (Dunkelfeld).</p>
+        </template>
+        <template v-else>
+          <p>Darstellung: Ein Kreuz entspricht einer geschädigten bzw. betroffenen Person.</p>
+          <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a href="#section-pks">«Über die Visualisierungen»</a>.</p>
+          <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
+        </template>
       </div>
     </div>
 
@@ -1071,6 +1104,41 @@ function setFilter(key) {
   background: #000;
   color: #fff;
   border-color: #000;
+}
+
+/* Dunkelziffer Toggle Mobile */
+.dunkelziffer-toggle-mobile {
+  display: flex;
+  flex-direction: row;
+  width: 100vw;
+  margin-left: -24px;
+  margin-right: -24px;
+  border-bottom: 2px solid #000;
+  margin-bottom: 0;
+}
+
+.dz-toggle-btn {
+  flex: 1;
+  background: #fff;
+  color: #000;
+  border: none;
+  padding: 12px 0;
+  font-size: 1.1em;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  border-radius: 0 !important;
+  text-align: center;
+}
+
+.dz-toggle-btn:first-child {
+  border-right: 1px solid #000;
+}
+
+.dz-toggle-btn.active {
+  background: #000;
+  color: #fff;
 }
 
 /* FilterBottomSheet mobile Filter-Liste */
@@ -1402,6 +1470,13 @@ function setFilter(key) {
   scroll-behavior: smooth;
 }
 
+@media (max-width: 768px) {
+  #section-dunkelziffer.fullscreen-section {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
 /* Scroll Snap Behavior - stark */
 .main-scroll>section,
 .main-scroll>.fullscreen-section,
@@ -1439,11 +1514,11 @@ function setFilter(key) {
   min-height: 60vh;
 }
 
-.main-scroll>.fullscreen-section:first-of-type {
+#section-intro {
   min-height: 100vh;
 }
 
-.fullscreen-section:first-of-type .fullscreen-sketch {
+#section-intro .fullscreen-sketch {
   justify-content: flex-start;
   align-items: flex-start;
   padding-left: 60px;
@@ -1452,22 +1527,35 @@ function setFilter(key) {
 
 
 @media (max-width: 768px) {
-  .fullscreen-section:first-of-type .fullscreen-sketch {
+  #section-intro .fullscreen-sketch {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: flex-start;
-    padding-left: 20px;
+    align-items: center;
+    padding-left: 0;
     padding-top: 0;
     height: 100vh !important;
   }
+
+  .titelblatt-text {
+    text-align: left;
+    width: fit-content;
+    max-width: calc(100vw - 40px);
+  }
+
+  #section-intro .fullscreen-sketch h1,
+  #section-intro .fullscreen-sketch h2 {
+    text-align: left;
+    width: fit-content;
+    max-width: calc(100vw - 40px);
+  }
 }
 
-.fullscreen-section:first-of-type .fullscreen-sketch h1 {
+#section-intro .fullscreen-sketch h1 {
   margin-bottom: 20px;
 }
 
-.fullscreen-section:first-of-type .fullscreen-sketch h2 {
+#section-intro .fullscreen-sketch h2 {
   margin-top: 0;
 }
 
@@ -1524,13 +1612,21 @@ function setFilter(key) {
 .dunkelziffer-title {
   position: absolute;
   top: 30px;
-  left: 50%;
-  transform: translateX(-68%);
+  left: 0;
+  right: 0;
   z-index: 1;
   color: #000;
-  text-align: left;
+  text-align: center;
   margin: 0;
   pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .dunkelziffer-title {
+    left: 20px;
+    transform: none;
+    text-align: left;
+  }
 }
 
 .dunkelziffer-annotation {
@@ -1881,6 +1977,14 @@ BUTTONS
   animation: footer-fade-in 1.2s cubic-bezier(.4, 2, .6, 1);
 }
 
+@media (max-width: 768px) {
+  .footer-brava.footer-visible {
+    animation: none !important;
+    transform: none !important;
+    position: static !important;
+  }
+}
+
 @keyframes footer-fade-in {
   0% {
     opacity: 0;
@@ -1969,6 +2073,23 @@ BUTTONS
   .text-overlay-content {
     padding-left: 0 !important;
     padding-right: 0 !important;
+  }
+
+  .text-overlay-section,
+  .final-text-overlay-section {
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    padding-top: 3em !important;
+  }
+
+  .split-section,
+  .fullscreen-section:not(#section-intro) {
+    padding-top: 3em !important;
+  }
+
+  .split-left,
+  .split-right {
+    padding-top: 3em !important;
   }
 
   .dot-nav {

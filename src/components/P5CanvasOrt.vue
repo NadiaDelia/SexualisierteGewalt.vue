@@ -8,10 +8,25 @@ const props = defineProps({
   height: { type: Number, default: 800 },
   background: { type: [Number, Array, String], default: 0 },
   fontFamily: { type: String, default: 'PxGroteskPan' },
+  isMobile: { type: Boolean, default: false }
 })
 
 const mountRef = ref(null)
 let p5Instance = null
+
+// Responsive width/height logic
+const getResponsiveWidth = () => {
+  if (props.isMobile) {
+    return Math.max(0, window.innerWidth - 40)
+  }
+  return props.width
+}
+const getResponsiveHeight = () => {
+  if (props.isMobile) {
+    return Math.max(320, Math.min(window.innerHeight * 0.7, 700))
+  }
+  return props.height
+}
 
 const sketch = (p) => {
   let particles = [];
@@ -19,20 +34,27 @@ const sketch = (p) => {
   let selectedData = [];
   let visiblePrivat = 0;
   let visibleOeffentlich = 0;
-  let crossSize = 14;
-  let crossStrokeWeight = 6;
+  let crossSize = props.isMobile ? 10 : 14;
+  let crossStrokeWeight = props.isMobile ? 4 : 6;
 
   p.setup = () => {
-    p.createCanvas(props.width, props.height);
+    p.createCanvas(getResponsiveWidth(), getResponsiveHeight());
     p.frameRate(60);
-    selectedData = props.data || [];
-    applyData();
+    applyData(props.data);
+  }
+
+  p.windowResized = () => {
+    p.resizeCanvas(getResponsiveWidth(), getResponsiveHeight())
+    applyData(props.data)
   }
 
   p.draw = () => {
     p.background(props.background);
     if (props.fontFamily) p.textFont(props.fontFamily);
-    p.textSize(90);
+    const dynamicTextSize = props.isMobile
+      ? Math.max(20, Math.min(p.width * 0.14, 90))
+      : Math.max(18, Math.min(p.width * 0.13, 90))
+    p.textSize(dynamicTextSize);
     p.textAlign(p.LEFT, p.BOTTOM);
     p.fill(255);
 
@@ -42,61 +64,84 @@ const sketch = (p) => {
       particles[i].display(p);
     }
 
-    // Kreuze für Frauen (privat und öffentlich)
-    let privatQueue = particleQueue.filter(pt => pt.ort === 'privat');
-    let oeffentlichQueue = particleQueue.filter(pt => pt.ort === 'oeffentlich');
+    // Neue Kreuze hinzufügen
     let addPerFrame = 5;
     for (let i = 0; i < addPerFrame; i++) {
-      if (privatQueue.length > 0) {
-        let idx = particleQueue.findIndex(pt => pt.ort === 'privat');
-        if (idx !== -1) {
-          let pt = particleQueue.splice(idx, 1)[0];
-          particles.push(new Particle(pt.x, pt.y, pt.data, pt.ort, p));
-          visiblePrivat++;
-        }
+      let privatIdx = particleQueue.findIndex(pt => pt.ort === 'privat');
+      if (privatIdx !== -1) {
+        let pt = particleQueue.splice(privatIdx, 1)[0];
+        particles.push(new Particle(pt.x, pt.y, pt.data, pt.ort, p));
+        visiblePrivat++;
       }
-      if (oeffentlichQueue.length > 0) {
-        let idx = particleQueue.findIndex(pt => pt.ort === 'oeffentlich');
-        if (idx !== -1) {
-          let pt = particleQueue.splice(idx, 1)[0];
-          particles.push(new Particle(pt.x, pt.y, pt.data, pt.ort, p));
-          visibleOeffentlich++;
-        }
+      let oeffentlichIdx = particleQueue.findIndex(pt => pt.ort === 'oeffentlich');
+      if (oeffentlichIdx !== -1) {
+        let pt = particleQueue.splice(oeffentlichIdx, 1)[0];
+        particles.push(new Particle(pt.x, pt.y, pt.data, pt.ort, p));
+        visibleOeffentlich++;
       }
     }
 
-    // Labels
-    p.text('privat', p.width * 0.04, p.height * 0.65);
-    p.text('öffentlich', p.width * 0.54, p.height * 0.65);
-
-    // Zahlen
-    p.text(formatNumber(visiblePrivat), p.width * 0.04, p.height * 0.54);
-    p.text(formatNumber(visibleOeffentlich), p.width * 0.54, p.height * 0.54);
+    // Text über Kreuzen zeichnen
+    if (props.isMobile) {
+      p.textAlign(p.LEFT, p.CENTER);
+      const half = p.height / 2;
+      const privatYNum = half * 0.4;
+      const privatYLabel = half * 0.6;
+      const oeffentlichYNum = half + half * 0.4;
+      const oeffentlichYLabel = half + half * 0.6;
+      const oeffentlichYLabelClamped = Math.min(oeffentlichYLabel, p.height - dynamicTextSize * 0.5);
+      const privatLabel = 'privat';
+      const oeffentlichLabel = 'öffentlich';
+      const privatNum = formatNumber(visiblePrivat);
+      const oeffentlichNum = formatNumber(visibleOeffentlich);
+      const privatBlockWidth = Math.max(p.textWidth(privatLabel), p.textWidth(privatNum));
+      const oeffentlichBlockWidth = Math.max(p.textWidth(oeffentlichLabel), p.textWidth(oeffentlichNum));
+      const privatX = p.width / 2 - privatBlockWidth / 2;
+      const oeffentlichX = p.width / 2 - oeffentlichBlockWidth / 2;
+      p.text(privatNum, privatX, privatYNum);
+      p.text(privatLabel, privatX, privatYLabel);
+      p.text(oeffentlichNum, oeffentlichX, oeffentlichYNum);
+      p.text(oeffentlichLabel, oeffentlichX, oeffentlichYLabelClamped);
+    } else {
+      p.textAlign(p.LEFT, p.CENTER);
+      p.text('privat', p.width * 0.04, p.height * 0.65);
+      p.text('öffentlich', p.width * 0.54, p.height * 0.65);
+      p.text(formatNumber(visiblePrivat), p.width * 0.04, p.height * 0.54);
+      p.text(formatNumber(visibleOeffentlich), p.width * 0.54, p.height * 0.54);
+    }
   };
 
-  // Public API für reactive Updates / Resize
-  p.updateData = (rows) => {
-    selectedData = rows || [];
-    applyData();
-  };
+  // Public API
+  p.updateData = (rows) => applyData(rows);
   p.resizeTo = (w, h) => p.resizeCanvas(w, h);
 
-  // Ursprünglich: updateParticlesForCurrentSelection → umbenannt zu applyData für klareren Zweck
-  function applyData() {
+  function applyData(rows) {
+    selectedData = rows || [];
     visiblePrivat = 0;
     visibleOeffentlich = 0;
     particleQueue = [];
     particles = [];
     for (let i = 0; i < selectedData.length; i++) {
-      // Nur Frauen-Daten verwenden
       for (let j = 0; j < (selectedData[i].ort_privat_total || 0); j++) {
-        let px = p.random(crossSize, p.width * 0.50 - crossSize);
-        let py = p.random(crossSize, p.height - crossSize);
+        let px, py;
+        if (props.isMobile) {
+          px = p.random(crossSize, p.width - crossSize);
+          py = p.random(crossSize, p.height / 2 - crossSize);
+        } else {
+          px = p.random(crossSize, p.width * 0.50 - crossSize);
+          py = p.random(crossSize, p.height - crossSize);
+        }
         particleQueue.push({ x: px, y: py, data: selectedData[i], ort: 'privat' });
       }
       for (let j = 0; j < (selectedData[i].ort_oeffentlich_total || 0); j++) {
-        let px = p.random(p.width * 0.50 + crossSize, p.width - crossSize);
-        let py = p.random(crossSize, p.height - crossSize);
+        let px, py;
+        if (props.isMobile) {
+          px = p.random(crossSize, p.width - crossSize);
+          py = p.random(p.height / 2 + crossSize, p.height - crossSize);
+        } else {
+          px = p.random(p.width * 0.50 + crossSize, p.width - crossSize);
+          py = p.random(crossSize, p.height - crossSize);
+        }
         particleQueue.push({ x: px, y: py, data: selectedData[i], ort: 'oeffentlich' });
       }
     }
@@ -148,15 +193,25 @@ const sketch = (p) => {
         }
       }
       this.pos.add(totalForce);
-      if (this.ort === 'privat') {
-        this.pos.x = p.constrain(this.pos.x, this.r, p.width * 0.5 - this.r);
-      } else if (this.ort === 'oeffentlich') {
-        this.pos.x = p.constrain(this.pos.x, p.width * 0.5 + this.r, p.width - this.r);
-      }
-      if (this.pos.y < this.r) {
-        this.pos.y = this.r;
-      } else if (this.pos.y > p.height - this.r) {
-        this.pos.y = p.height - this.r;
+      if (props.isMobile) {
+        if (this.ort === 'privat') {
+          this.pos.x = p.constrain(this.pos.x, this.r, p.width - this.r);
+          this.pos.y = p.constrain(this.pos.y, this.r, p.height / 2 - this.r);
+        } else if (this.ort === 'oeffentlich') {
+          this.pos.x = p.constrain(this.pos.x, this.r, p.width - this.r);
+          this.pos.y = p.constrain(this.pos.y, p.height / 2 + this.r, p.height - this.r);
+        }
+      } else {
+        if (this.ort === 'privat') {
+          this.pos.x = p.constrain(this.pos.x, this.r, p.width * 0.5 - this.r);
+        } else if (this.ort === 'oeffentlich') {
+          this.pos.x = p.constrain(this.pos.x, p.width * 0.5 + this.r, p.width - this.r);
+        }
+        if (this.pos.y < this.r) {
+          this.pos.y = this.r;
+        } else if (this.pos.y > p.height - this.r) {
+          this.pos.y = p.height - this.r;
+        }
       }
     }
     display(p) {
@@ -180,49 +235,29 @@ const sketch = (p) => {
 };
 
 onMounted(() => {
-  if (mountRef.value) {
-    while (mountRef.value.firstChild) {
-      mountRef.value.removeChild(mountRef.value.firstChild)
-    }
-  }
-  if (props.data && props.data.length > 0) {
-    p5Instance = new p5(sketch, mountRef.value)
-  }
+  p5Instance = new p5(sketch, mountRef.value)
 })
 
 onBeforeUnmount(() => {
-  if (p5Instance) {
-    p5Instance.remove()
-    p5Instance = null
-  }
-  if (mountRef.value) {
-    while (mountRef.value.firstChild) {
-      mountRef.value.removeChild(mountRef.value.firstChild)
-    }
-  }
+  p5Instance?.remove()
+  p5Instance = null
 })
 
 watch(() => props.data, (rows) => {
-  if (!rows || rows.length === 0) return
-  if (p5Instance) {
-    p5Instance.remove()
-    p5Instance = null
-  }
-  if (mountRef.value) {
-    while (mountRef.value.firstChild) {
-      mountRef.value.removeChild(mountRef.value.firstChild)
-    }
-    p5Instance = new p5(sketch, mountRef.value)
+  if (p5Instance && typeof p5Instance.updateData === 'function') {
+    p5Instance.updateData(rows)
   }
 }, { deep: true })
-
-watch([() => props.width, () => props.height], ([w, h]) => {
-  p5Instance?.resizeTo?.(w, h)
-})
 </script>
 
 <template>
-  <div ref="mountRef" style="display:block; width:100%; height:100%"></div>
+  <div ref="mountRef"
+    :style="
+      props.isMobile
+        ? `display:block; width:calc(100vw - 40px); height:${getResponsiveHeight()}px; max-width:100vw; margin:0 auto;`
+        : `display:block; width:${getResponsiveWidth()}px; height:${getResponsiveHeight()}px; max-width:100%; margin:0 auto;`
+    "
+  ></div>
 </template>
 
 <!-- Kein scoped CSS, Styling kommt aus style.css -->
