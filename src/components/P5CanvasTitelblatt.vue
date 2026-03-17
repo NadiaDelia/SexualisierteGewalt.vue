@@ -80,6 +80,8 @@ const sketch = (p) => {
     p.resizeCanvas(w, h)
   }
 
+  p.touchMoved = () => false
+
   class Particle {
     constructor(x, y, p) {
       this.pos = p.createVector(x, y)

@@ -33,12 +33,15 @@
 
 /* Vertikales Scrollen hat Vorrang vor Canvas-Events. */
 
+canvas {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
 @media (max-width: 768px) {
   canvas {
     touch-action: pan-y !important;
-    user-select: none; /* Verhindert Textauswahl auf Touch-Geräten */
-    -webkit-user-select: none; /* Verhindert Textauswahl auf iOS und Chrome*/
-    -webkit-touch-callout: none; /* deaktiviert das Kontextmenü auf iOS und Chrome*/
   }
 
   .info-btn {
@@ -146,6 +149,8 @@ button {
   cursor: pointer;
   padding: 8px 16px;
   transition: background 0.2s ease;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 button:hover,
@@ -730,6 +735,12 @@ body {
 .split-right {
   max-width: 100vw !important;
   box-sizing: border-box;
+}
+
+.fullscreen-sketch {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 /* Always show border for info-btn */

@@ -200,6 +200,15 @@ export default {
         align-items: flex-start;
         text-align: left;
         order: 2;
+        gap: 4px;
+    }
+
+    .footer-right .footer-gross {
+        margin-bottom: 2px;
+    }
+
+    .footer-right .cross-list {
+        margin: 0 !important;
     }
 
     .footer-left {

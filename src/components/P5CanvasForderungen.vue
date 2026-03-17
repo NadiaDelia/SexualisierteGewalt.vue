@@ -24,6 +24,12 @@ const props = defineProps({
     type: String,
     default: 'PxGroteskPan'
   },
+
+  isMobile: { 
+    type: Boolean,
+    default: false
+  },
+
   triggerFall: {
     type: Boolean,
     default: false
@@ -44,9 +50,9 @@ let observer = null
 // p5.js Sketch definieren
 const sketch = (p) => {
   let particles = []
-  let crossSize = 20
-  let crossStrokeWeight = 10
-  let anzahlKreuze = 50
+  let crossSize = props.isMobile ? 16 : 20 // 16 für Mobile, 20 für Desktop
+  let crossStrokeWeight = props.isMobile ? 8 : 10 // 8 für Mobile, 10 für Desktop
+  let anzahlKreuze = props.isMobile ? 20 : 50 
 
   // Particle Klasse
   class Particle {
@@ -105,10 +111,10 @@ const sketch = (p) => {
       const menuTop = p.height * 0.25
       const menuBottom = p.height * 0.75
       const menuRight = p.width - 80
-      
+
       this.pos.x = p.constrain(this.pos.x, this.r, p.width - this.r)
       this.pos.y = p.constrain(this.pos.y, this.r, p.height - this.r)
-      
+
       // Wenn im Menü-Bereich (vertikal), nicht zu weit rechts
       if (this.pos.y > menuTop && this.pos.y < menuBottom && this.pos.x > menuRight) {
         this.pos.x = menuRight
@@ -141,38 +147,38 @@ const sketch = (p) => {
     for (let i = 0; i < anzahlKreuze; i++) {
       let px, py
       let attempts = 0
-      
+
       // Platzierung mit Menü-Ausschluss
       do {
         px = p.random(crossSize, p.width - crossSize)
         py = p.random(crossSize, p.height - crossSize)
         attempts++
       } while (py > menuTop && py < menuBottom && px > menuRight && attempts < 50)
-      
+
       particles.push(new Particle(px, py))
     }
-    
+
     window.globalParticles = particles
-    
+
     window.globalResetParticles = () => {
-      
+
       particles = []
       for (let i = 0; i < anzahlKreuze; i++) {
         let px, py
         let attempts = 0
-        
+
         do {
           px = p.random(crossSize, p.width - crossSize)
           py = p.random(crossSize, p.height - crossSize)
           attempts++
         } while (py > menuTop && py < menuBottom && px > menuRight && attempts < 50)
-        
+
         particles.push(new Particle(px, py))
-        
+
         if (i < 5) {
         }
       }
-      
+
       window.globalParticles = particles
     }
   }
@@ -186,7 +192,7 @@ const sketch = (p) => {
 
     for (let i = particles.length - 1; i >= 0; i--) {
       let particle = particles[i]
-      
+
       if (globalFallCrosses) {
         if (!particle.falling) {
           particle.fallDelay = p.int(p.random(0, 40))
@@ -207,7 +213,7 @@ const sketch = (p) => {
       } else {
         particle.update()
       }
-      
+
       if (!particle.hasFallen) {
         particle.display()
       }
@@ -217,6 +223,8 @@ const sketch = (p) => {
   p.windowResized = () => {
     p.resizeCanvas(props.width, props.height)
   }
+
+  p.touchMoved = () => false
 }
 
 onMounted(() => {
@@ -271,14 +279,14 @@ watch(() => props.triggerFall, (newVal) => {
 
 watch(() => props.resetCounter, (newVal, oldVal) => {
   if (newVal > oldVal && p5Instance) {
-    
+
     globalFallCrosses = false
     window.globalFallCrosses = false
-    
+
     if (window.globalResetParticles) {
       window.globalResetParticles()
     }
-    
+
   }
 })
 </script>

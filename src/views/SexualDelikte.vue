@@ -208,6 +208,20 @@ onMounted(() => {
       showInfoDunkelziffer.value = false
     }
   })
+
+  // Mobile: #section-pks scrollt intern – wenn am Ende, weiter zur nächsten Section
+  if (window.innerWidth <= 768) {
+    const pksSection = document.getElementById('section-pks')
+    const nextSection = document.getElementById('section-bestellen')
+    if (pksSection && nextSection && mainScroll) {
+      pksSection.addEventListener('scroll', () => {
+        const atBottom = pksSection.scrollTop + pksSection.clientHeight >= pksSection.scrollHeight - 4
+        if (atBottom) {
+          mainScroll.scrollTo({ top: nextSection.offsetTop, behavior: 'smooth' })
+        }
+      })
+    }
+  }
 })
 
 /* ------------------------------------------------------------------
@@ -932,7 +946,7 @@ function setFilter(key) {
     <section class="final-text-overlay-section" id="section-bestellen">
       <div class="forderungen-canvas-container">
         <P5CanvasForderungen :width="widthForderungen" :height="heightForderungen" :background="'transparent'"
-          :font-family="'PxGroteskPan'" :trigger-fall="triggerFallForderungen" :reset-counter="resetForderungen" />
+          :font-family="'PxGroteskPan'" :isMobile="isMobile" :trigger-fall="triggerFallForderungen" :reset-counter="resetForderungen" />
       </div>
       <div class="text-overlay-content">
         <h2>Jetzt Kartenset bestellen</h2>
@@ -946,38 +960,38 @@ function setFilter(key) {
               <div class="form-row">
                 <div class="form-field">
                   <label for="email">E-Mail*</label>
-                  <input id="email" name="email" v-model="form.email" autocomplete="off" />
+                  <input id="email" name="email" type="email" v-model="form.email" autocomplete="email" />
                   <span v-if="errors.email" class="form-error">{{ errors.email }}</span>
                 </div>
               </div>
               <div class="form-row two-cols">
                 <div class="form-field">
                   <label for="vorname">Vorname*</label>
-                  <input id="vorname" name="vorname" v-model="form.vorname" autocomplete="off" />
+                  <input id="vorname" name="vorname" v-model="form.vorname" autocomplete="given-name" />
                   <span v-if="errors.vorname" class="form-error">{{ errors.vorname }}</span>
                 </div>
                 <div class="form-field">
                   <label for="name">Name*</label>
-                  <input id="name" name="name" v-model="form.name" autocomplete="off" />
+                  <input id="name" name="name" v-model="form.name" autocomplete="family-name" />
                   <span v-if="errors.name" class="form-error">{{ errors.name }}</span>
                 </div>
               </div>
               <div class="form-row">
                 <div class="form-field">
                   <label for="adresse">Adresse*</label>
-                  <input id="adresse" name="adresse" v-model="form.adresse" autocomplete="off" />
+                  <input id="adresse" name="adresse" v-model="form.adresse" autocomplete="street-address" />
                   <span v-if="errors.adresse" class="form-error">{{ errors.adresse }}</span>
                 </div>
               </div>
               <div class="form-row two-cols">
                 <div class="form-field">
                   <label for="plz">Postleitzahl*</label>
-                  <input id="plz" name="plz" v-model="form.plz" autocomplete="off" />
+                  <input id="plz" name="plz" v-model="form.plz" autocomplete="postal-code" />
                   <span v-if="errors.plz" class="form-error">{{ errors.plz }}</span>
                 </div>
                 <div class="form-field">
                   <label for="ort">Ort*</label>
-                  <input id="ort" name="ort" v-model="form.ort" autocomplete="off" />
+                  <input id="ort" name="ort" v-model="form.ort" autocomplete="address-level2" />
                   <span v-if="errors.ort" class="form-error">{{ errors.ort }}</span>
                 </div>
               </div>
@@ -1949,6 +1963,9 @@ BUTTONS
 .checkbox-field input[type='checkbox'] {
   width: 18px;
   height: 18px;
+  min-width: 18px;
+  min-height: 18px;
+  flex-shrink: 0;
   margin: 0;
   background: transparent;
   border-radius: 0;
@@ -1957,18 +1974,11 @@ BUTTONS
   -webkit-appearance: none;
   outline: none;
   cursor: pointer;
-  position: relative;
+  box-sizing: content-box;
 }
 
-.checkbox-field input[type='checkbox']:checked::after {
-  content: '';
-  display: block;
-  width: 15px;
-  height: 15px;
-  background: #000;
-  position: absolute;
-  top: 0px;
-  left: 0px;
+.checkbox-field input[type='checkbox']:checked {
+  background-color: #000;
 }
 
 .footer-brava.footer-visible {
@@ -2060,6 +2070,19 @@ BUTTONS
 
 @media (max-width: 768px) {
 
+  /* section-pks: als Snap-Punkt behalten, aber intern scrollbar machen */
+  #section-pks {
+    height: 100vh !important;
+    min-height: 100vh !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  #section-pks .text-overlay-content {
+    padding-bottom: 6em !important;
+  }
+
   .split-section,
   .fullscreen-section,
   .text-overlay-section,
@@ -2136,6 +2159,11 @@ BUTTONS
     padding: 0 !important;
     margin: 0 !important;
     max-width: 100% !important;
+  }
+
+  /* Abstand vor dem Footer auf Mobile */
+  #section-bestellen .text-overlay-content {
+    padding-bottom: 120px !important;
   }
 }
 </style>

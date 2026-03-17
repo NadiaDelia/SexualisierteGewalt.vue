@@ -44,11 +44,13 @@ const sketch = (p) => {
 
   let crossSize = props.isMobile ? 10 : 14
   let crossStrokeWeight = props.isMobile ? 4 : 6
-  const attractPower = props.isMobile ? 1.5 : 1.5
-  const homePower    = props.isMobile ? 0.07 : 0.04
-  const repelPower   = props.isMobile ? 1.0 : 2.0
+  const attractPower = props.isMobile ? 2.0 : 1.5
+  const homePower    = props.isMobile ? 0.04 : 0.04
+  const repelPower   = props.isMobile ? 2.0 : 2.0
   let fpsCheckDone = false
   let fpsCheckFrame = 0
+
+  p.touchMoved = () => false
 
   p.setup = () => {
     p.createCanvas(props.width, props.height)
@@ -202,7 +204,7 @@ const sketch = (p) => {
         totalForce.add(homeForce)
       }
 
-      if (distToMouse < 150 && !props.isMobile) {
+      if (distToMouse < 150) {
         for (let other of particles) {
           if (other !== this) {
             let distance = p5.Vector.dist(this.pos, other.pos)

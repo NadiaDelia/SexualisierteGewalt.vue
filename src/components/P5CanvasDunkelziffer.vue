@@ -253,6 +253,8 @@ const sketch = (p) => {
     }
   }
 
+  p.touchMoved = () => false
+
   // Public API für reactive Updates / Resize
   p.updateData = (rows) => {
     selectedData = rows || []

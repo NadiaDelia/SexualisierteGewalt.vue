@@ -61,6 +61,8 @@ const sketch = (p) => {
     applyData(props.data)
   }
 
+  p.touchMoved = () => false
+
   p.draw = () => {
     p.background(props.background)
     if (props.fontFamily) p.textFont(props.fontFamily)
@@ -73,29 +75,20 @@ const sketch = (p) => {
     p.fill(0)
 
     if (props.isMobile) {
-      p.textAlign(p.LEFT, p.CENTER);
-      // Frauen oben, Männer unten, jeweils Zahl und Label als Block linksbündig, aber Block zentriert
+      p.textAlign(p.CENTER, p.CENTER);
+      const cx = p.width / 2;
       const half = p.height / 2;
       const frauenYNum = half * 0.4;
       const frauenYLabel = half * 0.6;
       const maennerYNum = half + half * 0.4;
       const maennerYLabel = half + half * 0.6;
       const maennerYLabelClamped = Math.min(maennerYLabel, p.height - dynamicTextSize * 0.5);
-      // Werte vorbereiten
-      const frauenLabel = 'Frauen';
-      const maennerLabel = 'Männer';
       const frauenNum = particleQueue.length > 0 ? formatNumber(visibleFrauen) : formatNumber(geschaedigteFrauen);
       const maennerNum = particleQueue.length > 0 ? formatNumber(visibleMaenner) : formatNumber(geschaedigteMaenner);
-      // Breite bestimmen
-      const frauenBlockWidth = Math.max(p.textWidth(frauenLabel), p.textWidth(frauenNum));
-      const maennerBlockWidth = Math.max(p.textWidth(maennerLabel), p.textWidth(maennerNum));
-      const frauenX = p.width / 2 - frauenBlockWidth / 2;
-      const maennerX = p.width / 2 - maennerBlockWidth / 2;
-      // Zeichnen
-      p.text(frauenNum, frauenX, frauenYNum);
-      p.text(frauenLabel, frauenX, frauenYLabel);
-      p.text(maennerNum, maennerX, maennerYNum);
-      p.text(maennerLabel, maennerX, maennerYLabelClamped);
+      p.text(frauenNum, cx, frauenYNum);
+      p.text('Frauen', cx, frauenYLabel);
+      p.text(maennerNum, cx, maennerYNum);
+      p.text('Männer', cx, maennerYLabelClamped);
     } else {
       // Desktop: wie gehabt
       p.textAlign(p.LEFT, p.CENTER);

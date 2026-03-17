@@ -37,9 +37,9 @@ const sketch = (p) => {
   let visibleOeffentlich = 0;
   let crossSize = props.isMobile ? 10 : 14;
   let crossStrokeWeight = props.isMobile ? 4 : 6;
-  const attractPower = props.isMobile ? 1.5 : 1.5;
-  const homePower    = props.isMobile ? 0.07 : 0.04;
-  const repelPower   = props.isMobile ? 1.0 : 2.0;
+  const attractPower = props.isMobile ? 2.0 : 1.5;
+  const homePower    = props.isMobile ? 0.04 : 0.04;
+  const repelPower   = props.isMobile ? 2.0 : 2.0;
   let fpsCheckDone = false;
   let fpsCheckFrame = 0;
 
@@ -53,6 +53,8 @@ const sketch = (p) => {
     p.resizeCanvas(getResponsiveWidth(), getResponsiveHeight())
     applyData(props.data)
   }
+
+  p.touchMoved = () => false
 
   p.draw = () => {
     p.background(props.background);
@@ -90,25 +92,20 @@ const sketch = (p) => {
 
     // Text über Kreuzen zeichnen
     if (props.isMobile) {
-      p.textAlign(p.LEFT, p.CENTER);
+      p.textAlign(p.CENTER, p.CENTER);
+      const cx = p.width / 2;
       const half = p.height / 2;
       const privatYNum = half * 0.4;
       const privatYLabel = half * 0.6;
       const oeffentlichYNum = half + half * 0.4;
       const oeffentlichYLabel = half + half * 0.6;
       const oeffentlichYLabelClamped = Math.min(oeffentlichYLabel, p.height - dynamicTextSize * 0.5);
-      const privatLabel = 'privat';
-      const oeffentlichLabel = 'öffentlich';
       const privatNum = formatNumber(visiblePrivat);
       const oeffentlichNum = formatNumber(visibleOeffentlich);
-      const privatBlockWidth = Math.max(p.textWidth(privatLabel), p.textWidth(privatNum));
-      const oeffentlichBlockWidth = Math.max(p.textWidth(oeffentlichLabel), p.textWidth(oeffentlichNum));
-      const privatX = p.width / 2 - privatBlockWidth / 2;
-      const oeffentlichX = p.width / 2 - oeffentlichBlockWidth / 2;
-      p.text(privatNum, privatX, privatYNum);
-      p.text(privatLabel, privatX, privatYLabel);
-      p.text(oeffentlichNum, oeffentlichX, oeffentlichYNum);
-      p.text(oeffentlichLabel, oeffentlichX, oeffentlichYLabelClamped);
+      p.text(privatNum, cx, privatYNum);
+      p.text('privat', cx, privatYLabel);
+      p.text(oeffentlichNum, cx, oeffentlichYNum);
+      p.text('öffentlich', cx, oeffentlichYLabelClamped);
     } else {
       p.textAlign(p.LEFT, p.CENTER);
       p.text('privat', p.width * 0.04, p.height * 0.65);
@@ -192,7 +189,7 @@ const sketch = (p) => {
         homeForce.mult(homePower);
         totalForce.add(homeForce);
       }
-      if (distToMouse < 150 && !props.isMobile) {
+      if (distToMouse < 150) {
         for (let other of particles) {
           if (other !== this) {
             let distance = p5.Vector.dist(this.pos, other.pos);

@@ -40,9 +40,9 @@ const sketch = (p) => {
   let visibleMaenner = 0;
   let crossSize = props.isMobile ? 10 : 14;
   let crossStrokeWeight = props.isMobile ? 4 : 6;
-  const attractPower = props.isMobile ? 1.5 : 1.5; // Die Kreuze werden stärker von der Maus angezogen bei höherem Wert
-  const homePower    = props.isMobile ? 0.07 : 0.04; // Die Kreuze kehren stärker zu ihrem Ursprungsort zurück bei höherem Wert
-  const repelPower   = props.isMobile ? 1.0 : 2.0; // Die Kreuze stossen sich stärker gegenseitig ab bei höherem Wert
+  const attractPower = props.isMobile ? 2.0 : 1.5; // Die Kreuze werden stärker von der Maus angezogen bei höherem Wert
+  const homePower    = props.isMobile ? 0.04 : 0.04; // Die Kreuze kehren stärker zu ihrem Ursprungsort zurück bei höherem Wert
+  const repelPower   = props.isMobile ? 2.0 : 2.0; // Die Kreuze stossen sich stärker gegenseitig ab bei höherem Wert
 
   p.setup = () => {
     p.createCanvas(getResponsiveWidth(), getResponsiveHeight());
@@ -54,6 +54,8 @@ const sketch = (p) => {
     p.resizeCanvas(getResponsiveWidth(), getResponsiveHeight())
     applyData(props.data)
   }
+
+  p.touchMoved = () => false // Verhindert Scrollen auf Mobile, wenn man über das Canvas wischt
 
   // --- Draw ---
   p.draw = () => {
@@ -92,25 +94,20 @@ const sketch = (p) => {
 
     // Text über Kreuzen zeichnen
     if (props.isMobile) {
-      p.textAlign(p.LEFT, p.CENTER);
+      p.textAlign(p.CENTER, p.CENTER);
+      const cx = p.width / 2;
       const half = p.height / 2;
       const frauenYNum = half * 0.4;
       const frauenYLabel = half * 0.6;
       const maennerYNum = half + half * 0.4;
       const maennerYLabel = half + half * 0.6;
       const maennerYLabelClamped = Math.min(maennerYLabel, p.height - dynamicTextSize * 0.5);
-      const frauenLabel = 'Frauen';
-      const maennerLabel = 'Männer';
       const frauenNum = particleQueue.length > 0 ? formatNumber(visibleFrauen) : formatNumber(beschuldigteFrauen);
       const maennerNum = particleQueue.length > 0 ? formatNumber(visibleMaenner) : formatNumber(beschuldigteMaenner);
-      const frauenBlockWidth = Math.max(p.textWidth(frauenLabel), p.textWidth(frauenNum));
-      const maennerBlockWidth = Math.max(p.textWidth(maennerLabel), p.textWidth(maennerNum));
-      const frauenX = p.width / 2 - frauenBlockWidth / 2;
-      const maennerX = p.width / 2 - maennerBlockWidth / 2;
-      p.text(frauenNum, frauenX, frauenYNum);
-      p.text(frauenLabel, frauenX, frauenYLabel);
-      p.text(maennerNum, maennerX, maennerYNum);
-      p.text(maennerLabel, maennerX, maennerYLabelClamped);
+      p.text(frauenNum, cx, frauenYNum);
+      p.text('Frauen', cx, frauenYLabel);
+      p.text(maennerNum, cx, maennerYNum);
+      p.text('Männer', cx, maennerYLabelClamped);
     } else {
       p.textAlign(p.LEFT, p.CENTER);
       p.text("Frauen", p.width * 0.04, p.height * 0.65);
@@ -201,7 +198,7 @@ const sketch = (p) => {
         homeForce.mult(homePower);
         totalForce.add(homeForce);
       }
-      if (distToMouse < 150 && !props.isMobile) {
+      if (distToMouse < 150) {
         for (let other of particles) {
           if (other !== this) {
             let distance = p5.Vector.dist(this.pos, other.pos);
