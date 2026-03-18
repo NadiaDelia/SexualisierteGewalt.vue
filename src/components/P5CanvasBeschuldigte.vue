@@ -8,7 +8,8 @@ const props = defineProps({
   height: { type: Number, default: 600 },
   background: { type: [Number, Array, String], default: 0 },
   fontFamily: { type: String, default: 'PxGroteskPan' },
-  isMobile: { type: Boolean, default: false }
+  isMobile: { type: Boolean, default: false },
+  isSmallDesktop: { type: Boolean, default: false }
 })
 
 const mountRef = ref(null)
@@ -38,8 +39,8 @@ const sketch = (p) => {
   let beschuldigteMaenner = 0;
   let visibleFrauen = 0;
   let visibleMaenner = 0;
-  let crossSize = props.isMobile ? 10 : 14;
-  let crossStrokeWeight = props.isMobile ? 4 : 6;
+  let crossSize = props.isMobile ? 10 : (props.isSmallDesktop ? 12 : 14);
+  let crossStrokeWeight = props.isMobile ? 4 : (props.isSmallDesktop ? 5 : 6);
   const attractPower = props.isMobile ? 2.0 : 1.5; // Die Kreuze werden stärker von der Maus angezogen bei höherem Wert
   const homePower    = props.isMobile ? 0.04 : 0.04; // Die Kreuze kehren stärker zu ihrem Ursprungsort zurück bei höherem Wert
   const repelPower   = props.isMobile ? 2.0 : 2.0; // Die Kreuze stossen sich stärker gegenseitig ab bei höherem Wert
@@ -62,8 +63,10 @@ const sketch = (p) => {
     p.background(props.background);
     if (props.fontFamily) p.textFont(props.fontFamily);
     const dynamicTextSize = props.isMobile
-      ? Math.max(20, Math.min(p.width * 0.14, 90))
-      : Math.max(18, Math.min(p.width * 0.13, 90))
+      ? Math.max(20, Math.min(p.width * 0.12, 50))
+      : props.isSmallDesktop
+        ? Math.max(18, Math.min(window.innerHeight * 0.08, 60))
+        : Math.max(36, Math.min(p.width * 0.12, 90))
     p.textSize(dynamicTextSize);
     p.textAlign(p.LEFT, p.BOTTOM);
     p.fill(255);
@@ -109,16 +112,22 @@ const sketch = (p) => {
       p.text(maennerNum, cx, maennerYNum);
       p.text('Männer', cx, maennerYLabelClamped);
     } else {
+      const frauenZahl = particleQueue.length > 0 ? formatNumber(visibleFrauen) : formatNumber(beschuldigteFrauen)
+      const maennerZahl = particleQueue.length > 0 ? formatNumber(visibleMaenner) : formatNumber(beschuldigteMaenner)
+      p.textSize(dynamicTextSize)
+      const frauenBlockW = Math.max(p.textWidth(frauenZahl), p.textWidth('Frauen'))
+      const maennerBlockW = Math.max(p.textWidth(maennerZahl), p.textWidth('Männer'))
+      const frauenX = p.width / 4 - frauenBlockW / 2
+      const maennerX = p.width * 3 / 4 - maennerBlockW / 2
+      const lineGap = dynamicTextSize * 0.15
+      const blockH = dynamicTextSize * 2 + lineGap
+      const numY = p.height / 2 - blockH / 2 + dynamicTextSize / 2
+      const labelY = numY + dynamicTextSize + lineGap
       p.textAlign(p.LEFT, p.CENTER);
-      p.text("Frauen", p.width * 0.04, p.height * 0.65);
-      p.text("Männer", p.width * 0.54, p.height * 0.65);
-      if (particleQueue.length > 0) {
-        p.text(formatNumber(visibleFrauen), p.width * 0.04, p.height * 0.54);
-        p.text(formatNumber(visibleMaenner), p.width * 0.54, p.height * 0.54);
-      } else {
-        p.text(formatNumber(beschuldigteFrauen), p.width * 0.04, p.height * 0.54);
-        p.text(formatNumber(beschuldigteMaenner), p.width * 0.54, p.height * 0.54);
-      }
+      p.text("Frauen", frauenX, labelY);
+      p.text("Männer", maennerX, labelY);
+      p.text(frauenZahl, frauenX, numY);
+      p.text(maennerZahl, maennerX, numY);
     }
   };
 

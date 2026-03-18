@@ -228,4 +228,10 @@ export default {
         font-size: 1.4em;
     }
 }
+
+@media (max-height: 780px) and (min-width: 769px) {
+    .footer-content {
+        padding-bottom: 20px;
+    }
+}
 </style>

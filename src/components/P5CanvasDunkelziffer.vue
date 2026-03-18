@@ -10,6 +10,7 @@ const props = defineProps({
   fontFamily: { type: String, default: 'PxGroteskPan' },
   dunkelziffer: { type: String, default: 'hell' }, // 'hell' oder 'dunkel'
   isMobile: { type: Boolean, default: false },
+  isSmallDesktop: { type: Boolean, default: false }, // kleiner Desktop-Screen (max-height: 780px)
 })
 
 const mountRef = ref(null)
@@ -25,13 +26,23 @@ const sketch = (p) => {
   let visibleMann = 0
   let currentDunkelziffer = 'hell' // Lokale Variable wie in deinem ursprünglichen Code
 
-  let crossSize = props.isMobile ? 10 : 14
-  let crossStrokeWeight = props.isMobile ? 4 : 6
+  let crossSize = props.isMobile ? 10 : (props.isSmallDesktop ? 12 : 14) // m
+  let crossStrokeWeight = props.isMobile ? 4 : (props.isSmallDesktop ? 5 : 6)
   let fpsCheckDone = false
   let fpsCheckFrame = 0
 
-  const getAreaWidth = () => props.isMobile ? props.width * 0.88 : Math.min(props.width * 0.85, 1000)
-  const getAreaHeight = () => props.isMobile ? props.height * 0.72 : Math.min(props.height * 0.9, 800)
+  // Auf kleinen Desktop-Screens: im 'hell'-Modus kompakterer Bereich (passt Kreuze in obere Screenhälfte)
+  // Im 'dunkel'-Modus: volle Canvas wie auf normalem Desktop
+  const getAreaWidth = () => {
+    if (props.isMobile) return props.width * 0.88
+    if (props.isSmallDesktop) return Math.min(props.width, 800) * 1
+    return Math.min(props.width * 0.85, 1000)
+  }
+  const getAreaHeight = () => {
+    if (props.isMobile) return props.height * 0.72
+    if (props.isSmallDesktop) return Math.min(props.height * 0.75, 550)//65% des screens aber maximal 500px, damit es auf kleinen Desktop-Screens nicht zu hoch wird (passt Kreuze in obere Screenhälfte)
+    return Math.min(props.height * 0.9, 800)
+  }
 
   p.setup = () => {
     p.createCanvas(props.width, props.height)
@@ -197,7 +208,11 @@ const sketch = (p) => {
     visibleMann = particles.filter(particle => particle.gender === 'mann').length
 
     // Responsive, vertikal zentrierte Zahlen und Labels
-    let zahlSize = props.isMobile ? Math.max(20, Math.min(p.width * 0.12, 50)) : 90
+    let zahlSize = props.isMobile
+      ? Math.max(20, Math.min(p.width * 0.12, 50))
+      : props.isSmallDesktop
+        ? Math.max(28, Math.min(p.height * 0.08, 60))// Minimum 28, maximal 60
+        : Math.max(36, Math.min(p.height * 0.12, 90))
     let abstand = props.isMobile ? 15 : 40
     let frauenText = "Frauen"
     let maennerText = "Männer"
@@ -207,9 +222,11 @@ const sketch = (p) => {
 
       // Wenn keine Daten zur Dunkelziffer vorhanden sind, Hinweistext anzeigen
       if (visibleFrau === 0 && visibleMann === 0) {
-        p.textSize(zahlSize)
+        let hinweisSize = props.isMobile ? 26 : (props.isSmallDesktop ? 29 : 35)
+        p.textSize(hinweisSize)
         p.textAlign(p.CENTER, p.CENTER)
-        p.text('Keine Daten zur Dunkelziffer verfügbar', props.width / 2, props.height / 2)
+        p.textLeading(hinweisSize * 1.1)
+        p.text('Keine Daten zur\nDunkelziffer verfügbar', props.width / 2, props.height / 2)
       } else if (props.isMobile) {
         let totalBlockH = zahlSize * 2 + 10
         let cx = props.width / 2
@@ -232,15 +249,20 @@ const sketch = (p) => {
         p.text(formatNumber(visibleMann), cx, mannBlockTop)
         p.text(maennerText, cx, mannBlockTop + zahlSize + 5)
       } else {
-        let frauenBreite = p.textWidth(frauenText)
-        let frauenX = props.width / 2 - abstand - frauenBreite
-        let maennerX = props.width / 2 + abstand
+        p.textSize(zahlSize)
+        let frauenZahl = formatNumber(visibleFrau)
+        let maennerZahl = formatNumber(visibleMann)
+        let frauenBlockW = Math.max(p.textWidth(frauenZahl), p.textWidth(frauenText))
+        let maennerBlockW = Math.max(p.textWidth(maennerZahl), p.textWidth(maennerText))
+        let areaWidth = getAreaWidth()
+        let centerX = props.width / 2
+        let frauenX = (centerX - areaWidth / 2 + centerX) / 2 - frauenBlockW / 2
+        let maennerX = (centerX + centerX + areaWidth / 2) / 2 - maennerBlockW / 2
         let blockHeight = zahlSize + 10 + zahlSize
         let blockCenterY = props.height / 2 - blockHeight / 2
-        p.textSize(zahlSize)
         p.textAlign(p.LEFT, p.TOP)
-        p.text(formatNumber(visibleFrau), frauenX, blockCenterY)
-        p.text(formatNumber(visibleMann), maennerX, blockCenterY)
+        p.text(frauenZahl, frauenX, blockCenterY)
+        p.text(maennerZahl, maennerX, blockCenterY)
         p.text(frauenText, frauenX, blockCenterY + zahlSize + 10)
         p.text(maennerText, maennerX, blockCenterY + zahlSize + 10)
       }

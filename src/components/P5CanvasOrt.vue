@@ -8,7 +8,8 @@ const props = defineProps({
   height: { type: Number, default: 800 },
   background: { type: [Number, Array, String], default: 0 },
   fontFamily: { type: String, default: 'PxGroteskPan' },
-  isMobile: { type: Boolean, default: false }
+  isMobile: { type: Boolean, default: false },
+  isSmallDesktop: { type: Boolean, default: false }
 })
 
 const mountRef = ref(null)
@@ -35,8 +36,8 @@ const sketch = (p) => {
   let selectedData = [];
   let visiblePrivat = 0;
   let visibleOeffentlich = 0;
-  let crossSize = props.isMobile ? 10 : 14;
-  let crossStrokeWeight = props.isMobile ? 4 : 6;
+  let crossSize = props.isMobile ? 10 : (props.isSmallDesktop ? 12 : 14);
+  let crossStrokeWeight = props.isMobile ? 4 : (props.isSmallDesktop ? 5 : 6);
   const attractPower = props.isMobile ? 2.0 : 1.5;
   const homePower    = props.isMobile ? 0.04 : 0.04;
   const repelPower   = props.isMobile ? 2.0 : 2.0;
@@ -61,7 +62,9 @@ const sketch = (p) => {
     if (props.fontFamily) p.textFont(props.fontFamily);
     const dynamicTextSize = props.isMobile
       ? Math.max(20, Math.min(p.width * 0.14, 90))
-      : Math.max(18, Math.min(p.width * 0.13, 90))
+      : props.isSmallDesktop
+        ? Math.max(18, Math.min(window.innerHeight * 0.08, 60))
+        : Math.max(18, Math.min(p.width * 0.13, 90))
     p.textSize(dynamicTextSize);
     p.textAlign(p.LEFT, p.BOTTOM);
     p.fill(255);
@@ -107,11 +110,22 @@ const sketch = (p) => {
       p.text(oeffentlichNum, cx, oeffentlichYNum);
       p.text('öffentlich', cx, oeffentlichYLabelClamped);
     } else {
+      p.textSize(dynamicTextSize)
+      const privatZahl = formatNumber(visiblePrivat)
+      const oeffentlichZahl = formatNumber(visibleOeffentlich)
+      const privatBlockW = Math.max(p.textWidth(privatZahl), p.textWidth('privat'))
+      const oeffentlichBlockW = Math.max(p.textWidth(oeffentlichZahl), p.textWidth('öffentlich'))
+      const privatX = p.width / 4 - privatBlockW / 2
+      const oeffentlichX = p.width * 3 / 4 - oeffentlichBlockW / 2
+      const lineGap = dynamicTextSize * 0.15
+      const blockH = dynamicTextSize * 2 + lineGap
+      const numY = p.height / 2 - blockH / 2 + dynamicTextSize / 2
+      const labelY = numY + dynamicTextSize + lineGap
       p.textAlign(p.LEFT, p.CENTER);
-      p.text('privat', p.width * 0.04, p.height * 0.65);
-      p.text('öffentlich', p.width * 0.54, p.height * 0.65);
-      p.text(formatNumber(visiblePrivat), p.width * 0.04, p.height * 0.54);
-      p.text(formatNumber(visibleOeffentlich), p.width * 0.54, p.height * 0.54);
+      p.text('privat', privatX, labelY);
+      p.text('öffentlich', oeffentlichX, labelY);
+      p.text(privatZahl, privatX, numY);
+      p.text(oeffentlichZahl, oeffentlichX, numY);
     }
     if (!fpsCheckDone) {
       fpsCheckFrame++;

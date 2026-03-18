@@ -23,12 +23,12 @@
 }
 
 /* Fall-Button */
- .fall-button {
-   font-size: 1.4em;
-   margin-top: 20px;
-   display: block;
-   border: 3px solid #000;
-   background: none;
+.fall-button {
+  font-size: 1.4em;
+  margin-top: 20px;
+  display: block;
+  border: 3px solid #000;
+  background: none;
 }
 
 /* Vertikales Scrollen hat Vorrang vor Canvas-Events. */
@@ -50,7 +50,7 @@ canvas {
     padding: 0 12px;
     margin-left: 12px;
     font-size: 0.8em;
-    
+
   }
 
   .fall-button {
@@ -126,6 +126,12 @@ canvas {
   left: 0 !important;
   width: 100% !important;
   height: 100% !important;
+}
+
+/* p5.js setzt automatisch margin: 0 auto auf den Canvas-Container –
+   das zentriert den Sketch in Split-Sections. Hier zurücksetzen auf links. */
+.sticky-sketch > div:has(canvas) {
+  margin: 0 !important;
 }
 
 /* P5 Canvas Titelblatt - zentrierte Anordnung */
@@ -266,7 +272,7 @@ button.active {
 /* Info Pop-up */
 .info-popup {
   position: absolute;
-  bottom: 80px;
+  bottom: 42px;
   right: 0;
   background: #fff;
   border: 2.5px solid #000;
@@ -279,12 +285,12 @@ button.active {
 .info-popup-dunkelziffer {
   position: absolute;
   bottom: 42px;
-  right: 0;
+  right: 260px;
   background: #fff;
   border: 2.5px solid #000;
   padding: 20px;
   width: 400px;
-  z-index: 10001 !important;
+  z-index: 100;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
@@ -348,9 +354,9 @@ a {
   font-weight: 700;
   color: #000;
   text-decoration: underline;
-  text-decoration-thickness: 3px;
+  text-decoration-thickness: 2.5px;
   /* Dicke der Linie */
-  text-underline-offset: 3px;
+  text-underline-offset: 0.25em;
 }
 
 @media (max-width: 768px) {
@@ -381,8 +387,14 @@ body {
    ========================= */
 
 h1 {
-  font-size: 12em;
+  /* clamp: minimum 85px für sehr kleine Screens, skaliert mit 22vh,
+     maximal 192px (= 12em @ 16px base) auf grossen Bildschirmen.
+     Verhindert dass h1 auf kurzen Viewports (z.B. 1024×600) in die nächste Sektion überläuft.
+     22vh erreicht das Maximum bereits ab ~873px Viewport-Höhe → MacBook Pro unverändert. */
+  font-size: clamp(85px, 22vh, 192px);
   line-height: 1;
+  margin-top: 0;
+  /* Browser-Default (0.67em) entfernt – verhindert 88px Leer-Abstand oben auf Titelblatt */
   font-family: 'PxGroteskPan', sans-serif;
   font-weight: 700;
   color: #000;
@@ -440,10 +452,20 @@ textarea {
     font-weight: 700;
     color: #000;
     margin-bottom: 10px;
-    /* max-width: 80vw; */
+    max-width: 80vw;
     word-break: break-word;
     margin-left: none;
     margin-right: auto;
+  }
+
+  .dunkelziffer-title {
+    max-width: 85vw;
+    word-break: break-word;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    margin-left: none;
+    margin-right: auto;
+    margin-top: 20px !important;
   }
 
   .titelblatt-headline {
@@ -480,6 +502,67 @@ textarea {
     font-family: 'PxGroteskPan', sans-serif;
     font-weight: 700;
     color: #000;
+  }
+
+}
+
+/* =========================
+   KLEINE DESKTOP-BILDSCHIRME (z.B. 1280×720, NestHub 1024×600)
+   Skaliert alle em-basierten Grössen proportional herunter.
+   h1 (clamp px/vh) und absolute Werte sind bewusst ausgenommen.
+   ========================= */
+@media (max-height: 780px) and (min-width: 769px) {
+
+  h2{
+    font-size: 1.8em !important;
+  }
+
+  p,
+  ul,
+  .cross-list {
+    font-size: 1.2em;
+  }
+
+  .annotation,
+  .small,
+  label,
+  input,
+  select,
+  textarea {
+    font-size: 0.9em !important;
+  }
+
+  a {
+    text-decoration-thickness: 2px !important;
+  }
+
+  .accordion-header {
+    font-size: 1.25em !important;
+  }
+
+  .accordion-item {
+    border-top: 2.5px solid #000 !important;
+  }
+
+.form-field label {
+    font-size: 0.9em;
+  }
+
+  .form-error {
+    font-size: 0.9em;
+  }
+
+  .form-field input,
+  .form-field textarea {
+    font-size: 1.25em !important;
+  }
+
+  .bestellung-success-message {
+    font-size: 1.8em !important;
+  }
+
+  .fall-button {
+    font-size: 1.25em !important;
   }
 
 }
@@ -581,9 +664,9 @@ textarea {
 
 
 @media (max-width: 768px) {
-.accordion-list {
-  margin: 0px 0;
-}
+  .accordion-list {
+    margin: 0px 0;
+  }
 
   .accordion-header {
     font-size: 1.1em;
@@ -613,10 +696,10 @@ textarea {
   }
 
   .accordion-icon.open {
-  transform: rotate(45deg);
-  font-size: 1.4em;
+    transform: rotate(45deg);
+    font-size: 1.4em;
 
-}
+  }
 
   .accordion-item {
     border-top: 2px solid #000;
