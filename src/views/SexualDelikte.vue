@@ -6,8 +6,13 @@ const menuOpen = vueRef(false)
 const showHamburger = vueRef(false)
 
 
+function isMobileDevice() {
+  if (typeof window === 'undefined') return false
+  const isTouch = window.matchMedia('(pointer: coarse)').matches
+  return window.innerWidth <= 768 || (isTouch && window.innerWidth <= 1024)
+}
 function updateShowHamburger() {
-  showHamburger.value = typeof window !== 'undefined' ? window.innerWidth <= 768 : false
+  showHamburger.value = isMobileDevice()
 }
 
 vueOnMounted(() => {
@@ -210,7 +215,7 @@ onMounted(() => {
   })
 
   // Mobile: #section-pks scrollt intern – wenn am Ende, weiter zur nächsten Section
-  if (window.innerWidth <= 768) {
+  if (isMobileDevice()) {
     const pksSection = document.getElementById('section-pks')
     const nextSection = document.getElementById('section-bestellen')
     if (pksSection && nextSection && mainScroll) {
@@ -352,12 +357,12 @@ const { width: widthBeschuldigte, height: heightBeschuldigte } = useSketchDimens
 const { width: widthOrt, height: heightOrt } = useSketchDimensions(splitOpts)
 const { width: widthBeziehung, height: heightBeziehung } = useSketchDimensions(splitOpts)
 import { ref as vueRef2, computed as vueComputed2 } from 'vue'
-const isMobile = vueRef2(typeof window !== 'undefined' ? window.innerWidth <= 768 : false)
-const isSmallDesktop = vueRef2(typeof window !== 'undefined' ? (window.innerWidth > 768 && window.innerHeight <= 780) : false)
+const isMobile = vueRef2(typeof window !== 'undefined' ? isMobileDevice() : false)
+const isSmallDesktop = vueRef2(typeof window !== 'undefined' ? (!isMobileDevice() && window.innerWidth > 768 && window.innerHeight <= 780) : false)
 if (typeof window !== 'undefined') {
   window.addEventListener('resize', () => {
-    isMobile.value = window.innerWidth <= 768
-    isSmallDesktop.value = window.innerWidth > 768 && window.innerHeight <= 780
+    isMobile.value = isMobileDevice()
+    isSmallDesktop.value = !isMobileDevice() && window.innerWidth > 768 && window.innerHeight <= 780
   })
 }
 const { width: widthTitelblatt, height: heightTitelblatt } =
@@ -539,7 +544,7 @@ function setFilter(key) {
   <!-- Filter-Button (nur Mobile & wenn P5 sichtbar) -->
   <button v-if="showHamburger && isSketchVisible && !menuOpen" class="filter-btn-mobile" @click="showFilterSheet = true"
     aria-label="Filter öffnen">
-    {{STRAFTATEN.find(s => s.key === (activeSection === 'beschuldigte' ? activeBeschuldigte : activeSection === 'ort' ?
+    Filter: {{STRAFTATEN.find(s => s.key === (activeSection === 'beschuldigte' ? activeBeschuldigte : activeSection === 'ort' ?
       activeOrt : activeSection === 'beziehung' ? activeBeziehung : activeSection === 'dunkelziffer' ? activeDunkelziffer
         : activeGeschaedigte))?.label || 'Straftat auswählen'}}
     <svg width="24" height="24" viewBox="0 0 24 24"
@@ -555,7 +560,8 @@ function setFilter(key) {
       <div class="fullscreen-sketch">
         <div class="titelblatt-text">
           <h1>Muster<br />und blinde<br />Flecken</h1>
-          <h2 class="titelblatt-headline">Was die Polizeiliche Kriminalstatistik 2025 zu<br />Sexualisierter Gewalt <br
+          <h2 class="titelblatt-headline">Was die Polizeiliche <br
+              class="mobile-only" />Kriminalstatistik 2025 zu<br />Sexualisierter Gewalt <br
               class="mobile-only" />aufzeigt
             – und was nicht</h2>
         </div>
@@ -623,8 +629,6 @@ function setFilter(key) {
             Frauen stellen bei allen Delikten die überwiegende Mehrheit der Betroffenen. Der Anteil liegt zwischen 84
             Prozent (sexuelle Nötigung) und 98 Prozent (Vergewaltigung).
             Diese Struktur ist seit Jahren stabil: Frauen machen konstant die deutliche Mehrheit der Betroffenen aus.
-            Einziger Ausreisser und hier nicht dargestellt: Sexuelle Handlungen mit Kindern. Hier liegt der Anteil
-            Jungen bei rund einem Viertel der Betroffenen.
           </p>
           <p>
             Einziger Ausreisser und hier nicht dargestellt: Sexuelle Handlungen mit Kindern. Hier liegt der Anteil
@@ -1148,7 +1152,6 @@ function setFilter(key) {
   margin-left: -24px;
   margin-right: -24px;
   border-bottom: none;
-  margin-bottom: 30px;
 }
 
 .dz-toggle-btn {
@@ -1213,7 +1216,6 @@ function setFilter(key) {
 }
 
 .filter-sheet-btn-info {
-  /* border-top: 2.5px solid #000; */
   margin-top: 20px;
 }
 
@@ -1469,7 +1471,7 @@ function setFilter(key) {
   text-align: left;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
   .hamburger-link {
     font-size: 1.6em;
     padding: 5px 20px;
@@ -1505,7 +1507,7 @@ function setFilter(key) {
   scroll-behavior: smooth;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
   #section-dunkelziffer.fullscreen-section {
     padding-left: 0 !important;
     padding-right: 0 !important;
@@ -1563,7 +1565,7 @@ function setFilter(key) {
 }
 
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
   #section-intro .fullscreen-sketch {
     display: flex;
     flex-direction: column;
@@ -1660,7 +1662,7 @@ function setFilter(key) {
   pointer-events: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
   .dunkelziffer-title {
     left: 20px;
     right: 20px;
@@ -1823,7 +1825,6 @@ BUTTONS
   justify-content: center;
   overflow: visible;
   position: relative;
-  z-index: 1;
   z-index: 10001;
 }
 
@@ -1974,7 +1975,7 @@ BUTTONS
   box-sizing: border-box;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
 
   .form-field input,
   .form-field textarea {
@@ -2042,7 +2043,7 @@ BUTTONS
   animation: footer-fade-in 1.2s cubic-bezier(.4, 2, .6, 1);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
   .footer-brava.footer-visible {
     animation: none !important;
     transform: none !important;
@@ -2065,7 +2066,7 @@ BUTTONS
 
 
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
 
   /* Alle Sections auf Mobile: volle Breite, keine Splits */
   .split-section,
@@ -2103,7 +2104,7 @@ BUTTONS
   }
 
 
-  @media (max-width: 768px) {
+  @media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
 
     .split-section,
     .fullscreen-section,
@@ -2114,7 +2115,7 @@ BUTTONS
     }
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
     .text-overlay-content {
       max-width: 100vw !important;
       padding: 0 !important;
@@ -2123,7 +2124,7 @@ BUTTONS
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
 
   /* section-pks: als Snap-Punkt behalten, aber intern scrollbar machen */
   #section-pks {
@@ -2230,7 +2231,7 @@ BUTTONS
    KLEINE DESKTOP-BILDSCHIRME (1280×720, NestHub 1024×600)
    Greift nur auf Desktop (> 768px Breite) mit kurzem Viewport.
    ========================= */
-@media (max-height: 780px) and (min-width: 769px) {
+@media (max-height: 780px) and (min-width: 769px) and (pointer: fine) {
   /* =====================================================
      KLEINE DESKTOP-BILDSCHIRME (z.B. 1280×720, 1024×600)
      Split-Sections werden wie auf Mobile gestapelt:
@@ -2415,6 +2416,77 @@ BUTTONS
   .dot-item.dot-active .dot::before {
     width: 4px;
     height: 28px;
+  }
+}
+
+/* =========================
+   TABLET / IPAD (Touch-Gerät, min. 740px Breite)
+   ========================= */
+@media (pointer: coarse) and (min-width: 740px) {
+  .hamburger-link {
+    font-size: 2.8em;
+    padding: 10px 40px;
+  }
+
+  .text-overlay-section,
+  .final-text-overlay-section {
+    padding-left: 80px !important;
+    padding-right: 80px !important;
+    padding-top: 3vh !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+  }
+
+  .text-overlay-content {
+    padding: 3vh 40px 0 !important;
+    max-width: 900px !important;
+  }
+
+  .side-text {
+    padding: 3vh 40px !important;
+    max-width: 800px !important;
+  }
+
+  /* Weissraum unten reduzieren */
+  .split-right {
+    justify-content: flex-start !important;
+    padding-top: 5vh !important;
+  }
+
+  #section-pks .text-overlay-content {
+    padding-bottom: 5em !important;
+  }
+
+  #section-bestellen .text-overlay-content {
+    padding-bottom: 120px !important;
+  }
+
+  .dunkelziffer-title {
+    left: 80px;
+    right: 80px;
+  }
+
+  .btns {
+    margin-bottom: 40px !important;
+  }
+
+  .filter-btn-mobile {
+    padding: 16px 0;
+    font-size: 1.5em;
+  }
+
+  .filter-sheet-btn {
+    font-size: 1.5em;
+  }
+
+  .dz-toggle-btn {
+    font-size: 1.5em;
+    padding: 20px 0;
+  }
+
+  .form-field input,
+  .form-field textarea {
+    border: 3px solid #000;
   }
 }
 </style>

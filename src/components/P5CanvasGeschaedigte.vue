@@ -30,7 +30,7 @@ const getResponsiveWidth = () => {
 }
 const getResponsiveHeight = () => {
   if (props.isMobile) {
-    return Math.max(320, Math.min(window.innerHeight * 0.7, 700)) // Min 320px, max 70vh oder 700px
+    return Math.max(320, window.innerHeight - 200)
   }
   return props.height
 }
@@ -45,8 +45,9 @@ const sketch = (p) => {
   let visibleMaenner = 0;
 
   // Responsive cross size
-  let crossSize = props.isMobile ? 10 : (props.isSmallDesktop ? 12 : 14);
-  let crossStrokeWeight = props.isMobile ? 4 : (props.isSmallDesktop ? 5 : 6);
+  const isTablet = window.matchMedia('(pointer: coarse) and (min-width: 740px)').matches
+  let crossSize = props.isMobile ? (isTablet ? 14 : 10) : (props.isSmallDesktop ? 12 : 14);
+  let crossStrokeWeight = props.isMobile ? (isTablet ? 6 : 4) : (props.isSmallDesktop ? 5 : 6);
   let fpsCheckDone = false;
   let fpsCheckFrame = 0;
 

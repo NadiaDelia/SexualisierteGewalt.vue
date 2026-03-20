@@ -25,7 +25,7 @@ const getResponsiveWidth = () => {
 }
 const getResponsiveHeight = () => {
   if (props.isMobile) {
-    return Math.max(320, Math.min(window.innerHeight * 0.7, 700))
+    return Math.max(320, window.innerHeight - 200)
   }
   return props.height
 }
@@ -39,11 +39,12 @@ const sketch = (p) => {
   let beschuldigteMaenner = 0;
   let visibleFrauen = 0;
   let visibleMaenner = 0;
-  let crossSize = props.isMobile ? 10 : (props.isSmallDesktop ? 12 : 14);
-  let crossStrokeWeight = props.isMobile ? 4 : (props.isSmallDesktop ? 5 : 6);
+  const isTablet = window.matchMedia('(pointer: coarse) and (min-width: 740px)').matches
+  let crossSize = props.isMobile ? (isTablet ? 14 : 10) : (props.isSmallDesktop ? 12 : 14);
+  let crossStrokeWeight = props.isMobile ? (isTablet ? 6 : 4) : (props.isSmallDesktop ? 5 : 6);
   const attractPower = props.isMobile ? 2.0 : 1.5; // Die Kreuze werden stärker von der Maus angezogen bei höherem Wert
-  const homePower    = props.isMobile ? 0.04 : 0.04; // Die Kreuze kehren stärker zu ihrem Ursprungsort zurück bei höherem Wert
-  const repelPower   = props.isMobile ? 2.0 : 2.0; // Die Kreuze stossen sich stärker gegenseitig ab bei höherem Wert
+  const homePower = props.isMobile ? 0.04 : 0.04; // Die Kreuze kehren stärker zu ihrem Ursprungsort zurück bei höherem Wert
+  const repelPower = props.isMobile ? 2.0 : 2.0; // Die Kreuze stossen sich stärker gegenseitig ab bei höherem Wert
 
   p.setup = () => {
     p.createCanvas(getResponsiveWidth(), getResponsiveHeight());
@@ -63,10 +64,10 @@ const sketch = (p) => {
     p.background(props.background);
     if (props.fontFamily) p.textFont(props.fontFamily);
     const dynamicTextSize = props.isMobile
-      ? Math.max(20, Math.min(p.width * 0.12, 50))
+      ? Math.max(20, Math.min(p.width * 0.14, 90))
       : props.isSmallDesktop
         ? Math.max(18, Math.min(window.innerHeight * 0.08, 60))
-        : Math.max(36, Math.min(p.width * 0.12, 90))
+        : Math.max(18, Math.min(p.width * 0.13, 90))
     p.textSize(dynamicTextSize);
     p.textAlign(p.LEFT, p.BOTTOM);
     p.fill(255);
@@ -287,11 +288,8 @@ watch(() => props.data, (rows) => {
 </script>
 
 <template>
-  <div ref="mountRef"
-    :style="
-      props.isMobile
-        ? `display:block; width:calc(100vw - 40px); height:${getResponsiveHeight()}px; max-width:100vw; margin:0 auto;`
-        : `display:block; width:${getResponsiveWidth()}px; height:${getResponsiveHeight()}px; max-width:100%; margin:0 auto;`
-    "
-  ></div>
+  <div ref="mountRef" :style="props.isMobile
+      ? `display:block; width:calc(100vw - 40px); height:${getResponsiveHeight()}px; max-width:100vw; margin:0 auto;`
+      : `display:block; width:${getResponsiveWidth()}px; height:${getResponsiveHeight()}px; max-width:100%; margin:0 auto;`
+    "></div>
 </template>

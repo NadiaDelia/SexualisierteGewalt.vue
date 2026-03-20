@@ -24,11 +24,10 @@ const props = defineProps({
   z-index: 30000;
   display: flex;
   align-items: flex-end;
-  justify-content: center;
+  justify-content: flex-start;
 }
 .filter-bottom-sheet {
   width: 100vw;
-  max-width: 480px;
   background: #fff;
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;

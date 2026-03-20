@@ -26,8 +26,9 @@ const sketch = (p) => {
   let visibleMann = 0
   let currentDunkelziffer = 'hell' // Lokale Variable wie in deinem ursprünglichen Code
 
-  let crossSize = props.isMobile ? 10 : (props.isSmallDesktop ? 12 : 14) // m
-  let crossStrokeWeight = props.isMobile ? 4 : (props.isSmallDesktop ? 5 : 6)
+  const isTablet = window.matchMedia('(pointer: coarse) and (min-width: 740px)').matches
+  let crossSize = props.isMobile ? (isTablet ? 14 : 10) : (props.isSmallDesktop ? 12 : 14) // m
+  let crossStrokeWeight = props.isMobile ? (isTablet ? 6 : 4) : (props.isSmallDesktop ? 5 : 6)
   let fpsCheckDone = false
   let fpsCheckFrame = 0
 
@@ -209,10 +210,10 @@ const sketch = (p) => {
 
     // Responsive, vertikal zentrierte Zahlen und Labels
     let zahlSize = props.isMobile
-      ? Math.max(20, Math.min(p.width * 0.12, 50))
+      ? Math.max(20, Math.min(p.width * 0.14, 90))
       : props.isSmallDesktop
-        ? Math.max(28, Math.min(p.height * 0.08, 60))// Minimum 28, maximal 60
-        : Math.max(36, Math.min(p.height * 0.12, 90))
+        ? Math.max(18, Math.min(p.height * 0.08, 60))// Minimum 28, maximal 60
+        : Math.max(18, Math.min(p.height * 0.13, 90))
     let abstand = props.isMobile ? 15 : 40
     let frauenText = "Frauen"
     let maennerText = "Männer"

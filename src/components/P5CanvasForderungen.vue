@@ -50,8 +50,9 @@ let observer = null
 // p5.js Sketch definieren
 const sketch = (p) => {
   let particles = []
-  let crossSize = props.isMobile ? 16 : 20 // 16 für Mobile, 20 für Desktop
-  let crossStrokeWeight = props.isMobile ? 8 : 10 // 8 für Mobile, 10 für Desktop
+  const isTablet = window.matchMedia('(pointer: coarse) and (min-width: 740px)').matches
+  let crossSize = props.isMobile ? (isTablet ? 20 : 16) : 20 // 16 für Mobile, 20 für Desktop/Tablet
+  let crossStrokeWeight = props.isMobile ? (isTablet ? 10 : 8) : 10 // 8 für Mobile, 10 für Desktop/Tablet
   let anzahlKreuze = props.isMobile ? 20 : 50 
 
   // Particle Klasse

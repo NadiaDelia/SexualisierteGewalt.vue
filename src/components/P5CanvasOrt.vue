@@ -25,7 +25,7 @@ const getResponsiveWidth = () => {
 }
 const getResponsiveHeight = () => {
   if (props.isMobile) {
-    return Math.max(320, Math.min(window.innerHeight * 0.7, 700))
+    return Math.max(320, window.innerHeight - 200)
   }
   return props.height
 }
@@ -36,8 +36,9 @@ const sketch = (p) => {
   let selectedData = [];
   let visiblePrivat = 0;
   let visibleOeffentlich = 0;
-  let crossSize = props.isMobile ? 10 : (props.isSmallDesktop ? 12 : 14);
-  let crossStrokeWeight = props.isMobile ? 4 : (props.isSmallDesktop ? 5 : 6);
+  const isTablet = window.matchMedia('(pointer: coarse) and (min-width: 740px)').matches
+  let crossSize = props.isMobile ? (isTablet ? 14 : 10) : (props.isSmallDesktop ? 12 : 14);
+  let crossStrokeWeight = props.isMobile ? (isTablet ? 6 : 4) : (props.isSmallDesktop ? 5 : 6);
   const attractPower = props.isMobile ? 2.0 : 1.5;
   const homePower    = props.isMobile ? 0.04 : 0.04;
   const repelPower   = props.isMobile ? 2.0 : 2.0;

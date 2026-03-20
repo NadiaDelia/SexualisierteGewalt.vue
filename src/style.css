@@ -39,7 +39,7 @@ canvas {
   -webkit-touch-callout: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
   canvas {
     touch-action: pan-y !important;
   }
@@ -81,7 +81,7 @@ canvas {
   font-size: 2.2em;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
   .form-field label {
     font-size: 0.8em;
   }
@@ -99,10 +99,6 @@ canvas {
     font-size: 1.6em;
   }
 }
-
-/* =========================
-   GLOBAL BASE STYLES
-   ========================= */
 
 /* =========================
    P5 CANVAS COMPONENTS
@@ -189,11 +185,6 @@ button.active {
   pointer-events: auto;
   flex-wrap: wrap;
   margin: 20px 0;
-}
-
-.fullscreen-buttons {
-
-
   display: flex !important;
   flex-direction: row !important;
   gap: 30px !important;
@@ -202,7 +193,6 @@ button.active {
   padding: 0 !important;
   width: 100% !important;
   justify-content: center;
-
 }
 
 .fullscreen-buttons .filter-buttons {
@@ -322,7 +312,6 @@ button.active {
   border: none;
   font-size: 1.8em;
   line-height: 1;
-  position: fixed;
   padding: 0;
   width: 28px;
   height: 28px;
@@ -359,7 +348,7 @@ a {
   text-underline-offset: 0.25em;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
   a {
     text-decoration-thickness: 2px !important;
   }
@@ -378,9 +367,6 @@ body {
   /* damit Text lesbar bleibt */
   margin: 0;
 }
-
-/* Schwarzer Bereich unter Footer, nur am unteren Rand */
-
 
 /* =========================
    TYPOGRAFIE BASISREGELN
@@ -439,7 +425,7 @@ textarea {
 }
 
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
   h1 {
     font-size: 5.3em !important;
     line-height: 1 !important;
@@ -511,7 +497,7 @@ textarea {
    Skaliert alle em-basierten Grössen proportional herunter.
    h1 (clamp px/vh) und absolute Werte sind bewusst ausgenommen.
    ========================= */
-@media (max-height: 780px) and (min-width: 769px) {
+@media (max-height: 780px) and (min-width: 769px) and (pointer: fine) {
 
   h2{
     font-size: 1.8em !important;
@@ -599,7 +585,7 @@ textarea {
 @font-face {
   font-family: 'PxGroteskPan';
   src: url('/Px-Grotesk-Pan-Bold.otf') format('opentype');
-  font-display: swap;
+  font-display: block;
 }
 
 /* Accordion-Liste */
@@ -663,7 +649,7 @@ textarea {
 }
 
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
   .accordion-list {
     margin: 0px 0;
   }
@@ -842,8 +828,91 @@ body {
   display: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
   .mobile-only {
     display: inline;
+  }
+}
+
+/* =========================
+   TABLET / IPAD (Touch-Gerät, min. 740px Breite)
+   Skaliert Mobile-Werte für iPad mini, Air, Pro und grosse Tablets hoch.
+   ========================= */
+@media (pointer: coarse) and (min-width: 740px) {
+  h1 {
+    font-size: 9em !important;
+  }
+
+  h2 {
+    font-size: 2.6em;
+    max-width: 85vw;
+  }
+
+  p,
+  ul,
+  .cross-list {
+    font-size: 1.5em;
+  }
+
+  .annotation,
+  .small,
+  label,
+  button,
+  input,
+  select,
+  textarea {
+    font-size: 1.1em;
+  }
+
+  .form-field label {
+    font-size: 1em;
+  }
+
+  .form-field input,
+  .form-field textarea {
+    font-size: 1.4em;
+  }
+
+  .bestellung-success-message {
+    font-size: 2.4em;
+  }
+
+  .info-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 1.1em;
+  }
+
+  .fall-button {
+    font-size: 1.5em;
+    border: 3px solid #000 !important;
+  }
+
+  .accordion-header {
+    font-size: 1.6em;
+    padding: 14px 0;
+  }
+
+  .accordion-icon {
+    font-size: 1.8em;
+    width: 35px;
+    height: 35px;
+  }
+
+  .accordion-icon.open {
+    font-size: 2.1em;
+  }
+
+  a {
+    text-decoration-thickness: 2.5px !important;
+  }
+
+  .accordion-item {
+    border-top: 3px solid #000;
+  }
+
+  .form-field input,
+  .form-field textarea {
+    border: 3px solid #000;
   }
 }

@@ -144,8 +144,9 @@ export default {
 .cross-list li {
     color: #fff;
     margin: 0.1em 0;
-    position: relative;
-    padding-left: 2em;
+    display: flex;
+    align-items: center;
+    padding-left: 0;
 }
 
 .cross-list li::marker {
@@ -154,19 +155,17 @@ export default {
 
 .cross-list li::before {
     content: "×" !important;
-    position: absolute;
-    color: #000;
+    position: static;
+    flex-shrink: 0;
+    color: #fff;
     font-size: 1.4em;
     font-weight: 600;
-    margin-bottom: 0.2em;
-    color: #fff;
-    margin-left: 0.4em;
-    height: 20px;
-    display: inline-block;
-    text-align: left;
+    margin-right: 0.3em;
+    line-height: 1;
+    transform: translateY(-0.1em);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
     .footer-brava,
     .footer-brava.footer-visible {
         position: static !important;
@@ -216,20 +215,28 @@ export default {
     }
 
     .cross-list li {
+        display: flex;
+        align-items: center;
         padding-left: 0;
     }
 
     .cross-list li::before {
         position: static;
-        display: inline-block;
-        vertical-align: middle;
+        flex-shrink: 0;
         margin-left: 0;
         margin-right: 0.3em;
         font-size: 1.4em;
+        transform: translateY(-0.1em);
     }
 }
 
-@media (max-height: 780px) and (min-width: 769px) {
+@media (pointer: coarse) and (min-width: 740px) {
+    .cross-list li::before {
+        transform: translateY(-0.2em);
+    }
+}
+
+@media (max-height: 780px) and (min-width: 769px) and (pointer: fine) {
     .footer-content {
         padding-bottom: 20px;
     }

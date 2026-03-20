@@ -16,8 +16,9 @@ let observer = null
 
 const sketch = (p) => {
   let particles = []
-  let crossSize = props.isMobile ? 16 : 20
-  let crossStrokeWeight = props.isMobile ? 8 : 10
+  const isTablet = window.matchMedia('(pointer: coarse) and (min-width: 740px)').matches
+  let crossSize = props.isMobile ? (isTablet ? 20 : 16) : 20
+  let crossStrokeWeight = props.isMobile ? (isTablet ? 10 : 8) : 10
   let anzahlKreuze = props.isMobile ? 150 : 500
 
   p.setup = () => {
