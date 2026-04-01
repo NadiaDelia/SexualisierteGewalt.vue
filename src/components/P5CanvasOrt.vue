@@ -36,6 +36,7 @@ const sketch = (p) => {
   let selectedData = [];
   let visiblePrivat = 0;
   let visibleOeffentlich = 0;
+  let noOrtData = false;
   const isTablet = window.matchMedia('(pointer: coarse) and (min-width: 740px)').matches
   let crossSize = props.isMobile ? (isTablet ? 14 : 10) : (props.isSmallDesktop ? 12 : 14);
   let crossStrokeWeight = props.isMobile ? (isTablet ? 6 : 4) : (props.isSmallDesktop ? 5 : 6);
@@ -72,6 +73,22 @@ const sketch = (p) => {
 
     // Partikel animieren
     const mouseVec = p.createVector(p.mouseX, p.mouseY);
+
+    // Wenn keine Ort-Daten vorhanden (z.B. Revenge-Porn = digitale Gewalt)
+    if (noOrtData) {
+      p.fill(0);
+      p.noStroke();
+      const msgSize = props.isMobile ? 26 : (props.isSmallDesktop ? 29 : 35);
+      p.textSize(msgSize);
+      p.textLeading(msgSize * 1.1);
+      p.textAlign(p.CENTER, p.CENTER);
+      const msg = props.isMobile
+        ? 'Keine Daten\nzum Tatort verfügbar\n(digitale Straftat)'
+        : 'Keine Daten zum Tatort verfügbar\n(digitale Straftat)';
+      p.text(msg, p.width / 2, p.height / 2);
+      return;
+    }
+
     for (let i = 0; i < particles.length; i++) {
       particles[i].update(p, mouseVec);
       particles[i].display(p);
@@ -147,6 +164,10 @@ const sketch = (p) => {
     visibleOeffentlich = 0;
     particleQueue = [];
     particles = [];
+    // Prüfen ob Ort-Daten fehlen (z.B. bei digitalen Straftaten wie Revenge-Porn)
+    noOrtData = selectedData.length > 0 &&
+      !selectedData[0].ort_privat_total &&
+      !selectedData[0].ort_oeffentlich_total;
     for (let i = 0; i < selectedData.length; i++) {
       for (let j = 0; j < (selectedData[i].ort_privat_total || 0); j++) {
         let px, py;

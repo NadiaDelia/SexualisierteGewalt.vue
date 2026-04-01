@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Felder auslesen und bereinigen
 $fields = [
-    'vorname', 'name', 'adresse', 'adresszusatz', 'plz', 'ort', 'kommentar', 'newsletter'
+    'vorname', 'name', 'email', 'adresse', 'adresszusatz', 'plz', 'ort', 'kommentar', 'newsletter'
 ];
 $data = [];
 foreach ($fields as $field) {
@@ -24,7 +24,7 @@ $file = __DIR__ . '/bestellungen.csv';
 
 // Datei anlegen, falls nicht vorhanden, und Header schreiben
 if (!file_exists($file)) {
-    file_put_contents($file, "Vorname;Name;Adresse;Adresszusatz;PLZ;Ort;Kommentar;Newsletter\n");
+    file_put_contents($file, "Vorname;Name;Email;Adresse;Adresszusatz;PLZ;Ort;Kommentar;Newsletter\n");
 }
 
 // Daten als neue Zeile anhängen

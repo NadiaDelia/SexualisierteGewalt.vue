@@ -1,6 +1,7 @@
 straftat,beschuldigte_total,beschuldigte_m,beschuldigte_f,geschaedigte_total,geschaedigte_m,geschaedigte_f,anzeigerate,dunkelziffer,geschaedigte_m_dz,geschaedigte_f_dz,ort_privat_total,ort_oeffentlich_total,beziehung_partner,beziehung_verwandt,beziehung_bekannt,beziehung_arbeit,beziehung_keine,beziehung_andere
-sexuelle_noetigung,595,572,23,732,119,613,12.4,87.6,960,4944,380,308,151,60,227,30,158,106
-vergewaltigung,939,935,4,1044,16,1028,12.4,87.6,129,8290,791,271,432,52,291,32,127,110
-missbrauch,219,215,4,249,28,221,-,,,,158,84,40,16,111,11,28,43
-exhibitionismus,177,175,2,405,50,355,11.7,88.3,427,3034,62,354,2,2,26,7,172,196
-belaestigung,1038,1005,33,1649,199,1450,6.8,93.2,2926,21324,357,1213,82,38,237,133,649,510
+sexuelle_noetigung,516,502,14,625,118,507,12.4,87.6,952,4089,343,286,151,60,227,30,158,106
+vergewaltigung,1222,1211,11,1312,62,1250,12.4,87.6,500,10081,1008,356,432,52,291,32,127,110
+missbrauch,217,208,9,288,30,258,,,,,219,73,40,16,111,11,28,43
+exhibitionismus,161,157,4,438,50,388,11.7,88.3,427,3316,72,373,2,2,26,7,172,196
+belaestigung,1198,1158,40,1843,248,1595,6.8,93.2,3647,23456,421,1334,82,38,237,133,649,510
+revenge_porn,174,143,31,195,38,157,,,,,,,,,,,,

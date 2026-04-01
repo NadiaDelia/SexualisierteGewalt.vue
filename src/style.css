@@ -1,18 +1,19 @@
 /* Info Button (Desktop) */
 .info-btn {
-  width: 35px;
-  height: 35px;
-  padding: 0 16px;
+  width: auto;
+  height: auto;
+  padding: 8px 14px;
   margin-left: 15px;
   background-color: #fff;
   color: #000;
   border: 2.5px solid #000;
-  cursor: pointer;
+  cursor: none !important;
   border-radius: 0;
-  transition: all 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, border 0.2s ease, transform 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  font-size: 1em;
   z-index: 1;
   position: relative;
 }
@@ -148,11 +149,21 @@ button {
   font-size: 1em;
   font-weight: 700;
   font-family: 'PxGroteskPan', sans-serif;
-  cursor: pointer;
+  cursor: none !important;
   padding: 8px 16px;
   transition: background 0.2s ease;
   user-select: none;
   -webkit-user-select: none;
+  white-space: normal;
+}
+
+.btns button,
+.filter-buttons-with-info button {
+  min-width: 0;
+  flex-shrink: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 button:hover,
@@ -168,8 +179,9 @@ button.active {
 .btns {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  align-items: flex-start;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: stretch;
   gap: 12px;
   margin-top: 25px;
 }
@@ -188,7 +200,7 @@ button.active {
   display: flex !important;
   flex-direction: row !important;
   gap: 30px !important;
-  align-items: center !important;
+  align-items: stretch !important;
   background: none !important;
   padding: 0 !important;
   width: 100% !important;
@@ -215,14 +227,14 @@ button.active {
   border: none !important;
   border-radius: 0 !important;
   min-width: 80px;
-  height: 30px;
+  height: auto;
   padding: 0 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #fff;
   color: #000;
-  cursor: pointer;
+  cursor: none !important;
   transition: background .2s, color .2s;
 }
 
@@ -259,10 +271,17 @@ button.active {
 }
 
 
+/* Wrapper um Info-Button + Popup: stellt sicher dass Popup immer am Info-Button ausgerichtet ist */
+.info-btn-wrapper {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
 /* Info Pop-up */
 .info-popup {
   position: absolute;
-  bottom: 42px;
+  bottom: calc(100% + 8px);
   right: 0;
   background: #fff;
   border: 2.5px solid #000;
@@ -274,13 +293,13 @@ button.active {
 
 .info-popup-dunkelziffer {
   position: absolute;
-  bottom: 42px;
-  right: 260px;
+  bottom: calc(100% + 8px);
+  right: 0;
   background: #fff;
   border: 2.5px solid #000;
   padding: 20px;
   width: 400px;
-  z-index: 100;
+  z-index: 10000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
@@ -603,7 +622,7 @@ textarea {
 .accordion-header {
   display: flex;
   align-items: center;
-  cursor: pointer;
+  cursor: none !important;
   padding: 15px 0;
   transition: color 0.3s ease;
   font-family: 'PxGroteskPan', sans-serif;
@@ -755,7 +774,7 @@ section {
   border-radius: 50%;
   pointer-events: none;
   transform: translate(-50%, -50%);
-  z-index: 10001 !important;
+  z-index: 20000 !important;
   transition: width 0.2s, height 0.2s, border-radius 0.2s;
 }
 
@@ -777,6 +796,10 @@ section {
 
 
 /* Standard Pfeil ausblenden*/
+html, body {
+  cursor: none !important;
+}
+
 *,
 *::before,
 *::after {

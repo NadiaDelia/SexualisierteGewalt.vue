@@ -198,7 +198,16 @@ onMounted(() => {
     sections.forEach(section => {
       const rect = section.getBoundingClientRect()
       if (rect.top < viewportHeight / 2 && rect.bottom > viewportHeight / 2) {
-        activeSection.value = section.id.replace('section-', '')
+        const newSection = section.id.replace('section-', '')
+        if (newSection !== activeSection.value) {
+          activeSection.value = newSection
+          // Alle Info-Popups beim Section-Wechsel schliessen
+          showInfoGeschaedigte.value = false
+          showInfoBeschuldigte.value = false
+          showInfoOrt.value = false
+          showInfoBeziehung.value = false
+          showInfoDunkelziffer.value = false
+        }
       }
     })
   })
@@ -253,8 +262,12 @@ const STRAFTATEN = [
   { key: 'vergewaltigung', label: 'Vergewaltigung' },
   { key: 'missbrauch', label: 'Sexueller Missbrauch' },
   { key: 'belaestigung', label: 'Sexuelle Belästigung' },
-  { key: 'exhibitionismus', label: 'Exhibitionismus' }
+  { key: 'exhibitionismus', label: 'Exhibitionismus' },
+  { key: 'revenge_porn', label: 'Revenge Porn', noOrt: true }, // Aktivieren wenn CSV-Daten bereit sind
 ]
+
+// Straftaten ohne Ort-Daten (z.B. Revenge-Porn = digitale Gewalt)
+const STRAFTATEN_ORT = STRAFTATEN.filter(s => !s.noOrt)
 
 const csvUrl = new URL('../assets/data_sg.csv', import.meta.url).href
 const fontUrl = '/Px-Grotesk-Pan-Bold.otf'
@@ -329,6 +342,10 @@ const showInfoBeschuldigte = ref(false)
 const showInfoOrt = ref(false)
 const showInfoBeziehung = ref(false)
 const showInfoDunkelziffer = ref(false)
+const dunkelzifferInfoBtnEl = ref(null)
+function toggleDunkelzifferInfo() {
+  showInfoDunkelziffer.value = !showInfoDunkelziffer.value
+}
 
 /* ------------------------------------------------------------------
    ACCORDION STATE
@@ -338,7 +355,8 @@ const openAccordions = ref({
   vergewaltigung: false,
   missbrauch: false,
   sexuelleBelästigung: false,
-  exhibitionismus: false
+  exhibitionismus: false,
+  revengePorn: false
 })
 
 const toggleAccordion = (key) => {
@@ -542,9 +560,11 @@ function setFilter(key) {
   </div>
 
   <!-- Filter-Button (nur Mobile & wenn P5 sichtbar) -->
-  <button v-if="showHamburger && isSketchVisible && !menuOpen" class="filter-btn-mobile" @click="showFilterSheet = true"
+  <button v-if="showHamburger && isSketchVisible && !menuOpen" class="filter-btn-mobile"
+    @click="showFilterSheet = true; window?._paq?.push(['trackEvent', 'Filter', 'Klick', 'Filter öffnen'])"
     aria-label="Filter öffnen">
-    Filter: {{STRAFTATEN.find(s => s.key === (activeSection === 'beschuldigte' ? activeBeschuldigte : activeSection === 'ort' ?
+    Filter: {{STRAFTATEN.find(s => s.key === (activeSection === 'beschuldigte' ? activeBeschuldigte : activeSection ===
+      'ort' ?
       activeOrt : activeSection === 'beziehung' ? activeBeziehung : activeSection === 'dunkelziffer' ? activeDunkelziffer
         : activeGeschaedigte))?.label || 'Straftat auswählen'}}
     <svg width="24" height="24" viewBox="0 0 24 24"
@@ -560,9 +580,8 @@ function setFilter(key) {
       <div class="fullscreen-sketch">
         <div class="titelblatt-text">
           <h1>Muster<br />und blinde<br />Flecken</h1>
-          <h2 class="titelblatt-headline">Was die Polizeiliche <br
-              class="mobile-only" />Kriminalstatistik 2025 zu<br />Sexualisierter Gewalt <br
-              class="mobile-only" />aufzeigt
+          <h2 class="titelblatt-headline">Was die Polizeiliche <br class="mobile-only" />Kriminalstatistik 2025
+            zu<br />Sexualisierter Gewalt <br class="mobile-only" />aufzeigt
             – und was nicht</h2>
         </div>
         <div class="titelblatt-canvas-container">
@@ -602,20 +621,27 @@ function setFilter(key) {
     <div class="split-section" id="section-geschaedigte">
       <div id="sketch-geschaedigte" class="split-left sticky-sketch">
         <h2>Wer ist von Sexualisierter Gewalt betroffen?</h2>
-        <P5CanvasGeschaedigte :key="activeGeschaedigte + '-' + filteredGeschaedigte.length" :data="filteredGeschaedigte"
-          :width="widthGeschaedigte" :height="heightGeschaedigte" :font-family="'PxGroteskPan'" :background="255"
-          :isMobile="isMobile" :isSmallDesktop="isSmallDesktop" />
+        <div :style="'flex-shrink: 0; height: ' + heightGeschaedigte + 'px; overflow: visible;'">
+          <P5CanvasGeschaedigte :key="activeGeschaedigte + '-' + filteredGeschaedigte.length" :data="filteredGeschaedigte"
+            :width="widthGeschaedigte" :height="heightGeschaedigte" :font-family="'PxGroteskPan'" :background="255"
+            :isMobile="isMobile" :isSmallDesktop="isSmallDesktop" />
+        </div>
         <div class="btns" v-if="!showHamburger">
           <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeGeschaedigte === s.key }"
-            @click="activeGeschaedigte = s.key">{{ s.label }}</button>
-          <button class="info-btn" @click="showInfoGeschaedigte = !showInfoGeschaedigte">i</button>
-          <div v-if="showInfoGeschaedigte" class="info-popup">
-            <button class="popup-close" @click="showInfoGeschaedigte = false">×</button>
-            <h3>Anmerkungen</h3>
-            <p>Darstellung: Ein Kreuz entspricht einer geschädigten bzw. betroffenen Person. </p>
-            <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a
-                href="#section-pks">«Über die Visualisierungen»</a>.</p>
-            <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
+            @click="activeGeschaedigte = s.key; window?._paq?.push(['trackEvent', 'Filter', 'Klick', 'Geschaedigte: ' + s.key])"
+            v-html="s.htmlLabel ?? s.label"></button>
+          <div class="info-btn-wrapper">
+            <button class="info-btn"
+              @click="showInfoGeschaedigte = !showInfoGeschaedigte; window?._paq?.push(['trackEvent', 'Info', 'Klick', 'Geschaedigte'])">i</button>
+            <div v-if="showInfoGeschaedigte" class="info-popup">
+              <button class="popup-close"
+                @click="showInfoGeschaedigte = false; window?._paq?.push(['trackEvent', 'Info', 'Klick', 'Geschaedigte Popup Close'])">×</button>
+              <h3>Anmerkungen</h3>
+              <p>Darstellung: Ein Kreuz entspricht einer geschädigten bzw. betroffenen Person. </p>
+              <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a
+                  href="#section-pks">«Über die Visualisierungen»</a>.</p>
+              <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -626,8 +652,8 @@ function setFilter(key) {
           <h2>Es trifft vor allem Frauen</h2>
           <p>
             Die Visualisierung zeigt, wie viele Personen 2025 für die jeweiligen Straftaten Anzeige erstattet haben.
-            Frauen stellen bei allen Delikten die überwiegende Mehrheit der Betroffenen. Der Anteil liegt zwischen 84
-            Prozent (sexuelle Nötigung) und 98 Prozent (Vergewaltigung).
+            Frauen stellen bei allen Delikten die überwiegende Mehrheit der Betroffenen. Der Anteil liegt zwischen 81
+            Prozent (sexuelle Nötigung) und 95 Prozent (Vergewaltigung).
             Diese Struktur ist seit Jahren stabil: Frauen machen konstant die deutliche Mehrheit der Betroffenen aus.
           </p>
           <p>
@@ -643,22 +669,29 @@ function setFilter(key) {
     <div class="split-section" id="section-beschuldigte">
       <div class="split-left sticky-sketch" id="sketch-beschuldigte">
         <h2>Wer übt Sexualisierte Gewalt aus?</h2>
-        <P5CanvasBeschuldigte :key="activeBeschuldigte + '-' + filteredBeschuldigte.length" :data="filteredBeschuldigte"
-          :width="widthBeschuldigte" :height="heightBeschuldigte" :background="255" :font-family="'PxGroteskPan'"
-          :isMobile="isMobile" :isSmallDesktop="isSmallDesktop" :show-labels="true" left-field="beschuldigte_f"
-          right-field="beschuldigte_m" left-label="Frauen" right-label="Männer" :mouse-radius="150" :repel-radius="80"
-          :attract-power="1.5" />
+        <div :style="'flex-shrink: 0; height: ' + heightBeschuldigte + 'px; overflow: visible;'">
+          <P5CanvasBeschuldigte :key="activeBeschuldigte + '-' + filteredBeschuldigte.length" :data="filteredBeschuldigte"
+            :width="widthBeschuldigte" :height="heightBeschuldigte" :background="255" :font-family="'PxGroteskPan'"
+            :isMobile="isMobile" :isSmallDesktop="isSmallDesktop" :show-labels="true" left-field="beschuldigte_f"
+            right-field="beschuldigte_m" left-label="Frauen" right-label="Männer" :mouse-radius="150" :repel-radius="80"
+            :attract-power="1.5" />
+        </div>
         <div class="btns" v-if="!showHamburger">
           <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeBeschuldigte === s.key }"
-            @click="activeBeschuldigte = s.key">{{ s.label }}</button>
-          <button class="info-btn" @click="showInfoBeschuldigte = !showInfoBeschuldigte">i</button>
-          <div v-if="showInfoBeschuldigte" class="info-popup">
-            <button class="popup-close" @click="showInfoBeschuldigte = false">×</button>
-            <h3>Anmerkungen</h3>
-            <p>Darstellung: Ein Kreuz entspricht einer beschuldigten Person.</p>
-            <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a
-                href="#section-pks">«Über die Visualisierungen»</a>.</p>
-            <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
+            @click="activeBeschuldigte = s.key; window?._paq?.push(['trackEvent', 'Filter', 'Klick', 'Geschaedigte: ' + s.key])"
+            v-html="s.htmlLabel ?? s.label"></button>
+          <div class="info-btn-wrapper">
+            <button class="info-btn"
+              @click="showInfoBeschuldigte = !showInfoBeschuldigte; window?._paq?.push(['trackEvent', 'Info', 'Klick', 'Geschaedigte'])">i</button>
+            <div v-if="showInfoBeschuldigte" class="info-popup">
+              <button class="popup-close"
+                @click="showInfoBeschuldigte = false; window?._paq?.push(['trackEvent', 'Info', 'Klick', 'Geschaedigte Popup Close'])">×</button>
+              <h3>Anmerkungen</h3>
+              <p>Darstellung: Ein Kreuz entspricht einer beschuldigten Person.</p>
+              <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a
+                  href="#section-pks">«Über die Visualisierungen»</a>.</p>
+              <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -669,14 +702,14 @@ function setFilter(key) {
           <h2>Nicht alle Männer aber fast immer ein Mann</h2>
           <p>
             Die Darstellung weist das Geschlecht der Beschuldigten für die einzelnen Straftaten aus. Das Verhältnis ist
-            noch eindeutiger als bei den Betroffenen Sexualisierter Gewalt. Zwischen 96 Prozent (sexuelle Nötigung) und
-            annähernd 100 Prozent (Vergewaltigung) der Beschuldigten sind Männer.
+            noch eindeutiger als bei den Betroffenen Sexualisierter Gewalt. Zwischen 82 Prozent (Revenge Porn)
+            und 99 Prozent (Vergewaltigung) der Beschuldigten sind Männer.
           </p>
           <p>
             Wichtig zu wissen: Vor der Sexualstrafrechtsreform kannte der Straftatbestand Vergewaltigung ausschliesslich
             weibliche Betroffene und männliche Täter. Seit 1. Juli 2024 ist das Gesetz geschlechtsneutral definiert.
             Vergewaltigung umfasst jegliche Penetration gegen den Willen der betroffenen Person. Ausserdem ist es neu
-            auch eine Vergewaltigung, wenn Täter_innen einen Schockzustand ausnutzen.
+            auch eine Vergewaltigung, wenn Täter_innen einen Schockzustand ausnutzen. Der Anstieg der angezeigten Vergewaltigungen und die Abnahme bei sexueller Nötigung im Vergleich zum Vorjahr könnte darauf zurückzuführen sein. 
           </p>
         </div>
         <div v-if="!isMobile" style="height: 50vh;"></div>
@@ -687,22 +720,29 @@ function setFilter(key) {
     <div class="split-section" id="section-ort">
       <div class="split-left sticky-sketch" id="sketch-ort">
         <h2>Wo findet Sexualisierte Gewalt statt?</h2>
-        <P5CanvasOrt :key="activeOrt + '-' + filteredOrt.length" :data="filteredOrt" :width="widthOrt"
-          :height="heightOrt" :background="255" :font-family="'PxGroteskPan'" :isMobile="isMobile"
-          :isSmallDesktop="isSmallDesktop" />
+        <div :style="'flex-shrink: 0; height: ' + heightOrt + 'px; overflow: visible;'">
+          <P5CanvasOrt :key="activeOrt + '-' + filteredOrt.length" :data="filteredOrt" :width="widthOrt"
+            :height="heightOrt" :background="255" :font-family="'PxGroteskPan'" :isMobile="isMobile"
+            :isSmallDesktop="isSmallDesktop" />
+        </div>
         <div class="btns" v-if="!showHamburger">
           <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeOrt === s.key }"
-            @click="activeOrt = s.key">{{ s.label }}</button>
-          <button class="info-btn" @click="showInfoOrt = !showInfoOrt">i</button>
-          <div v-if="showInfoOrt" class="info-popup">
-            <button class="popup-close" @click="showInfoOrt = false">×</button>
-            <h3>Anmerkungen</h3>
-            <p>Darstellung: Ein Kreuz entspricht einer Straftat.</p>
-            <p>Hinweis: Als privater Raum gelten ausschliesslich die eigenen vier Wände. Treppenhaus oder Waschküche
-              gelten bereits als öffentlich. Delikte, bei denen kein Ort angegeben wurde, sind nicht dargestellt.</p>
-            <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a
-                href="#section-pks">«Über die Visualisierungen»</a>.</p>
-            <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
+            @click="activeOrt = s.key; window?._paq?.push(['trackEvent', 'Filter', 'Klick', 'Geschaedigte: ' + s.key])"
+            v-html="s.htmlLabel ?? s.label"></button>
+          <div class="info-btn-wrapper">
+            <button class="info-btn"
+              @click="showInfoOrt = !showInfoOrt; window?._paq?.push(['trackEvent', 'Info', 'Klick', 'Geschaedigte'])">i</button>
+            <div v-if="showInfoOrt" class="info-popup">
+              <button class="popup-close"
+                @click="showInfoOrt = false; window?._paq?.push(['trackEvent', 'Info', 'Klick', 'Geschaedigte Popup Close'])">×</button>
+              <h3>Anmerkungen</h3>
+              <p>Darstellung: Ein Kreuz entspricht einer Straftat.</p>
+              <p>Hinweis: Als privater Raum gelten ausschliesslich die eigenen vier Wände. Treppenhaus oder Waschküche
+                gelten bereits als öffentlich. Delikte, bei denen kein Ort angegeben wurde, sind nicht dargestellt.</p>
+              <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a
+                  href="#section-pks">«Über die Visualisierungen»</a>.</p>
+              <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -738,12 +778,12 @@ function setFilter(key) {
           :mouse-radius="150" :repel-radius="80" :attract-power="1.5" />
         <div class="btns" v-if="!showHamburger">
           <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeBeziehung === s.key }"
-            @click="activeBeziehung = s.key">{{ s.label }}</button>
-          <button class="info-btn" @click="showInfoBeziehung = !showInfoBeziehung">i</button>
+            @click="activeBeziehung = s.key; window?._paq?.push(['trackEvent', 'Filter', 'Klick', 'Geschaedigte: ' + s.key])">{{ s.label }}</button>
+          <button class="info-btn" @click="showInfoBeziehung = !showInfoBeziehung; window?._paq?.push(['trackEvent', 'Info', 'Klick', 'Geschaedigte'])">i</button>
         </div>
 
         <div v-if="showInfoBeziehung" class="info-popup">
-          <button class="popup-close" @click="showInfoBeziehung = false">×</button>
+          <button class="popup-close" @click="showInfoBeziehung = false; window?._paq?.push(['trackEvent', 'Info', 'Klick', 'Geschaedigte Popup Close'])">×</button>
           <h3>Beziehung</h3>
           <p>Darstellung: Ein Kreuz entspricht einer geschädigten Person</p>
           <p>Quelle:Polizeiliche Kriminalstatistik (PKS) 2024, Bundesamt für Statistik</p>
@@ -793,33 +833,36 @@ function setFilter(key) {
         <!-- Info-Popup entfernt, nur noch expanding Button -->
         <div v-if="!isMobile" style="height: 50vh;"></div>
       </div>
-      <div class="btns fullscreen-buttons" v-if="!showHamburger">
-        <div class="filter-buttons-with-info">
-          <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeDunkelziffer === s.key }"
-            @click="activeDunkelziffer = s.key">{{ s.label }}</button>
+      <div class="dunkelziffer-controls-row" v-if="!showHamburger">
+        <div class="btns fullscreen-buttons">
+          <div class="filter-buttons-with-info">
+            <button v-for="s in STRAFTATEN" :key="s.key" :class="{ active: activeDunkelziffer === s.key }"
+              @click="activeDunkelziffer = s.key" v-html="s.htmlLabel ?? s.label"></button>
+          </div>
+          <div class="dunkelziffer-toggle-container">
+            <button :class="['toggle-btn', { 'active-dunkelziffer': dunkelzifferMode === 'hell' }]"
+              @click="dunkelzifferMode = 'hell'">Angezeigt</button>
+            <button :class="['toggle-btn', { 'active-dunkelziffer': dunkelzifferMode === 'dunkel' }]"
+              @click="dunkelzifferMode = 'dunkel'">Tatsächlich</button>
+          </div>
         </div>
-        <div class="dunkelziffer-toggle-container">
-          <button :class="['toggle-btn', { 'active-dunkelziffer': dunkelzifferMode === 'hell' }]"
-            @click="dunkelzifferMode = 'hell'">Angezeigt</button>
-          <button :class="['toggle-btn', { 'active-dunkelziffer': dunkelzifferMode === 'dunkel' }]"
-            @click="dunkelzifferMode = 'dunkel'">Tatsächlich</button>
+        <div class="dunkelziffer-info-cell">
+          <div class="info-btn-absolute-wrapper">
+            <button ref="dunkelzifferInfoBtnEl" class="info-btn" @click="toggleDunkelzifferInfo()">i</button>
+            <div v-if="showInfoDunkelziffer && !showHamburger" class="info-popup info-popup-dunkelziffer">
+              <button class="popup-close" @click="showInfoDunkelziffer = false">×</button>
+              <h3>Anmerkungen</h3>
+              <p>Darstellung: Ein Kreuz entspricht einer betroffenen Person.</p>
+              <p>Hinweis: «Angezeigt» stellt das Hellfeld, also die Anzahl polizeilich registrierter Betroffener dar.
+                «Tatsächlich» zeigt die Anzahl Betroffener, wenn sowohl Hellfeld als auch Dunkelfeld berücksichtigt
+                werden.</p>
+              <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a href="#section-pks">«Über
+                  die Visualisierungen»</a>.</p>
+              <p>Quellen: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik (Hellfeld). Crime Survey 2022 –
+                Studie im Auftrag der Konferenz der Kantonalen Polizeikommandanten (Dunkelfeld).</p>
+            </div>
+          </div>
         </div>
-        <div class="info-btn-absolute-wrapper">
-          <button class="info-btn" @click="showInfoDunkelziffer = !showInfoDunkelziffer">i</button>
-        </div>
-      </div>
-      <!-- Popup ausserhalb von .btns, damit es über dem Canvas (z-index:15) erscheint -->
-      <div v-if="showInfoDunkelziffer && !showHamburger" class="info-popup info-popup-dunkelziffer">
-        <button class="popup-close" @click="showInfoDunkelziffer = false">×</button>
-        <h3>Anmerkungen</h3>
-        <p>Darstellung: Ein Kreuz entspricht einer betroffenen Person.</p>
-        <p>Hinweis: «Angezeigt» stellt das Hellfeld, also die Anzahl polizeilich registrierter Betroffener dar.
-          «Tatsächlich» zeigt die Anzahl Betroffener, wenn sowohl Hellfeld als auch Dunkelfeld berücksichtigt
-          werden.</p>
-        <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a
-            href="#section-pks">«Über die Visualisierungen»</a>.</p>
-        <p>Quellen: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik (Hellfeld). Crime Survey 2022 –
-          Studie im Auftrag der Konferenz der Kantonalen Polizeikommandanten (Dunkelfeld).</p>
       </div>
     </div>
 
@@ -831,7 +874,7 @@ function setFilter(key) {
         <p>
           Die Dunkelziffern für Sexualisierte Gewalt bewegen sich zwischen 88% (Vergewaltigung) und 93% (sexuelle
           Belästigung). Das heisst, nur rund eine von zehn Personen geht zur Polizei.
-          Straftaten im Bereich Sexualisierte Gewalt haben damit die geringste Anzeigerate. Zum Vergleich:
+          Straftaten im Bereich Sexualisierter Gewalt haben damit die geringste Anzeigerate. Zum Vergleich:
           Autodiebstahl hat eine Dunkelziffer von 18%.
         </p>
         <h2 class="h2-spaced">Warum ist das so?</h2>
@@ -852,12 +895,11 @@ function setFilter(key) {
       <div class="text-overlay-content">
         <h2 class="h2-spaced">Wir fordern</h2>
         <ul class="cross-list">
-          <li>Präventionsarbeit, wie zum Beispiel die aktuelle nationale Präventionskampagne und Arbeit mit Tatpersonen
-          </li>
-          <li>Konsequenter Opferschutz, beispielsweise durch Krisenzentren und 24h-Beratungsstellen</li>
-          <li>Bessere Strafverfolgung durch eine konsequente und lückenlose Umsetzung des neuen Sexualstrafrechts</li>
-          <li>Finanzielle Ressourcen – eine professionelle und nachhaltige Umsetzung von Massnahmen steht und fällt mit
-            der Finanzierung</li>
+          <li>eine nationale, verbindliche Strategie, die alle Formen Geschlechtsbezogener Gewalt umfasst</li>
+          <li>die vollständige Umsetzung der vier Pfeiler der Istanbul-Konvention: Prävention, Schutz, Strafverfolgung und Koordination</li>
+          <li>ausreichende finanzielle Mittel: Schätzungen zeigen, dass für eine wirksame Umsetzung mehrere hundert Millionen Franken jährlich notwendig wären.</li>
+          <li>vergleichbare und verlässliche Schutzstandards in allen Kantonen, um die «Postleitzahlen-Lotterie» zu beenden</li>
+          <li>verbindliche Umsetzungs- und Kontrollmechanismen</li>
         </ul>
       </div>
     </section>
@@ -934,8 +976,19 @@ function setFilter(key) {
               <p>Exhibitionistische Handlung vor anderen, in der Regel auf Antrag.</p>
             </div>
           </div>
+          <div class="accordion-item">
+            <div class="accordion-header" @click="toggleAccordion('revengePorn')">
+              <span class="accordion-icon" :class="{ 'open': openAccordions.revengePorn }">+</span>
+              <span>Revenge Porn</span>
+            </div>
+            <div class="accordion-content" :class="{ 'open': openAccordions.revengePorn }">
+              <p>Verbreiten von Bild- oder Tonaufnahmen sexueller Handlungen ohne
+                Einwilligung der betroffenen Person.</p>
+            </div>
+          </div>
         </div>
-        <!-- <h2>Datenquellen</h2>
+      </div>
+      <!-- <h2>Datenquellen</h2>
         <p>Die Visualisierungen basieren auf den Daten der Polizeilichen Kriminalstatistik 2025, welche vom Bundesamt
           für Statistik herausgegeben wird. Die Statistik zählt alle angezeigten bzw. polizeilich registrierten Fälle.
           Wichtig zu wissen: Die
@@ -949,158 +1002,156 @@ function setFilter(key) {
             href="https://www.unisg.ch/de/universitaet/schools/law/forschung/sk-hsg/resultate-des-swiss-crime-survey-2022/"
             target="_blank">Crime Survey 2022</a>.</p> -->
 
-      </div>
+  </section>
 
-    </section>
-
-    <!-- 9. Bestell-Section: Kartenset bestellen -->
-    <section class="final-text-overlay-section" id="section-bestellen">
-      <div class="forderungen-canvas-container">
-        <P5CanvasForderungen :width="widthForderungen" :height="heightForderungen" :background="'transparent'"
-          :font-family="'PxGroteskPan'" :isMobile="isMobile" :trigger-fall="triggerFallForderungen"
-          :reset-counter="resetForderungen" />
-      </div>
-      <div class="text-overlay-content">
-        <h2>Jetzt Kartenset bestellen</h2>
-        <p>
-          Bestelle jetzt ein Set mit drei Postkarten und mache sichtbar, was oft verborgen bleibt. Schreibe Menschen in
-          deinem Umfeld und fordere konsequentes und kollektives Handeln gegen sexualisierte Gewalt.
-        </p>
-        <div class="bestellung-form-success-wrapper">
-          <div v-if="!submitted">
-            <form class="kontakt-form" @submit.prevent="handleFormSubmit">
-              <div class="form-row">
-                <div class="form-field">
-                  <label for="email">E-Mail*</label>
-                  <input id="email" name="email" type="email" v-model="form.email" autocomplete="email" />
-                  <span v-if="errors.email" class="form-error">{{ errors.email }}</span>
-                </div>
+  <!-- 9. Bestell-Section: Kartenset bestellen -->
+  <section class="final-text-overlay-section" id="section-bestellen">
+    <div class="forderungen-canvas-container">
+      <P5CanvasForderungen :width="widthForderungen" :height="heightForderungen" :background="'transparent'"
+        :font-family="'PxGroteskPan'" :isMobile="isMobile" :trigger-fall="triggerFallForderungen"
+        :reset-counter="resetForderungen" />
+    </div>
+    <div class="text-overlay-content">
+      <h2>Jetzt Kartenset bestellen</h2>
+      <p>
+        Bestelle jetzt ein Set mit drei Postkarten und mache sichtbar, was oft verborgen bleibt. Schreibe Menschen in
+        deinem Umfeld und fordere konsequentes und kollektives Handeln gegen sexualisierte Gewalt.
+      </p>
+      <div class="bestellung-form-success-wrapper">
+        <div v-if="!submitted">
+          <form class="kontakt-form" @submit.prevent="handleFormSubmit">
+            <div class="form-row">
+              <div class="form-field">
+                <label for="email">E-Mail*</label>
+                <input id="email" name="email" type="email" v-model="form.email" autocomplete="email" />
+                <span v-if="errors.email" class="form-error">{{ errors.email }}</span>
               </div>
-              <div class="form-row two-cols">
-                <div class="form-field">
-                  <label for="vorname">Vorname*</label>
-                  <input id="vorname" name="vorname" v-model="form.vorname" autocomplete="given-name" />
-                  <span v-if="errors.vorname" class="form-error">{{ errors.vorname }}</span>
-                </div>
-                <div class="form-field">
-                  <label for="name">Name*</label>
-                  <input id="name" name="name" v-model="form.name" autocomplete="family-name" />
-                  <span v-if="errors.name" class="form-error">{{ errors.name }}</span>
-                </div>
+            </div>
+            <div class="form-row two-cols">
+              <div class="form-field">
+                <label for="vorname">Vorname*</label>
+                <input id="vorname" name="vorname" v-model="form.vorname" autocomplete="given-name" />
+                <span v-if="errors.vorname" class="form-error">{{ errors.vorname }}</span>
               </div>
-              <div class="form-row">
-                <div class="form-field">
-                  <label for="adresse">Adresse*</label>
-                  <input id="adresse" name="adresse" v-model="form.adresse" autocomplete="street-address" />
-                  <span v-if="errors.adresse" class="form-error">{{ errors.adresse }}</span>
-                </div>
+              <div class="form-field">
+                <label for="name">Name*</label>
+                <input id="name" name="name" v-model="form.name" autocomplete="family-name" />
+                <span v-if="errors.name" class="form-error">{{ errors.name }}</span>
               </div>
-              <div class="form-row two-cols plz-ort">
-                <div class="form-field">
-                  <label for="plz">Postleitzahl*</label>
-                  <input id="plz" name="plz" v-model="form.plz" autocomplete="postal-code" />
-                  <span v-if="errors.plz" class="form-error">{{ errors.plz }}</span>
-                </div>
-                <div class="form-field">
-                  <label for="ort">Ort*</label>
-                  <input id="ort" name="ort" v-model="form.ort" autocomplete="address-level2" />
-                  <span v-if="errors.ort" class="form-error">{{ errors.ort }}</span>
-                </div>
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label for="adresse">Adresse*</label>
+                <input id="adresse" name="adresse" v-model="form.adresse" autocomplete="street-address" />
+                <span v-if="errors.adresse" class="form-error">{{ errors.adresse }}</span>
               </div>
-              <div class="form-row">
-                <div class="form-field">
-                  <label for="kommentar">Kommentar</label>
-                  <textarea id="kommentar" name="kommentar" rows="4" v-model="form.kommentar"></textarea>
-                </div>
+            </div>
+            <div class="form-row two-cols plz-ort">
+              <div class="form-field">
+                <label for="plz">Postleitzahl*</label>
+                <input id="plz" name="plz" v-model="form.plz" autocomplete="postal-code" />
+                <span v-if="errors.plz" class="form-error">{{ errors.plz }}</span>
               </div>
-              <label class="checkbox-field" for="newsletter">
-                <input id="newsletter" type="checkbox" name="newsletter" v-model="form.newsletter" />
-                Updates erhalten und auf dem Laufenden bleiben. Eine Abmeldung ist jederzeit möglich.
-              </label>
-              <button type="submit" class="fall-button">
-                Bestellen
-              </button>
-            </form>
-          </div>
-          <div v-else class="bestellung-success-message">
-            <span>Danke für deine Bestellung!</span>
-          </div>
+              <div class="form-field">
+                <label for="ort">Ort*</label>
+                <input id="ort" name="ort" v-model="form.ort" autocomplete="address-level2" />
+                <span v-if="errors.ort" class="form-error">{{ errors.ort }}</span>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label for="kommentar">Kommentar</label>
+                <textarea id="kommentar" name="kommentar" rows="4" v-model="form.kommentar"></textarea>
+              </div>
+            </div>
+            <label class="checkbox-field" for="newsletter">
+              <input id="newsletter" type="checkbox" name="newsletter" v-model="form.newsletter" />
+              Updates erhalten und auf dem Laufenden bleiben. Eine Abmeldung ist jederzeit möglich.
+            </label>
+            <button type="submit" class="fall-button">
+              Bestellen
+            </button>
+          </form>
         </div>
-      </div>
-    </section>
-
-    <!-- FooterBrava nur anzeigen, wenn ganz unten -->
-    <FooterBrava class="footer-brava" :class="{ 'footer-visible': showFooter }" />
-
-    <!-- Filter-Bottom-Sheet für Mobile -->
-    <FilterBottomSheet :show="showFilterSheet" @close="showFilterSheet = false">
-      <div class="filter-sheet-list">
-        <!-- Angezeigt/Tatsächlich Toggle (nur bei Dunkelziffer) -->
-        <div v-if="activeSection === 'dunkelziffer'" class="dunkelziffer-toggle-mobile">
-          <button :class="['dz-toggle-btn', { active: dunkelzifferMode === 'hell' }]"
-            @click="dunkelzifferMode = 'hell'; showFilterSheet = false">Angezeigt</button>
-          <button :class="['dz-toggle-btn', { active: dunkelzifferMode === 'dunkel' }]"
-            @click="dunkelzifferMode = 'dunkel'; showFilterSheet = false">Tatsächlich</button>
+        <div v-else class="bestellung-success-message">
+          <span>Danke für deine Bestellung!</span>
         </div>
-        <button v-for="s in STRAFTATEN" :key="s.key"
-          :class="['filter-sheet-btn', { active: (activeSection === 'beschuldigte' ? activeBeschuldigte : activeSection === 'ort' ? activeOrt : activeSection === 'beziehung' ? activeBeziehung : activeSection === 'dunkelziffer' ? activeDunkelziffer : activeGeschaedigte) === s.key }]"
-          @click="activeSection === 'beschuldigte' ? activeBeschuldigte = s.key : activeSection === 'ort' ? activeOrt = s.key : activeSection === 'beziehung' ? activeBeziehung = s.key : activeSection === 'dunkelziffer' ? activeDunkelziffer = s.key : activeGeschaedigte = s.key; showFilterSheet = false">
-          <span class="filter-sheet-btn-label">{{ s.label }}</span>
-        </button>
-        <!-- Info-Button im gleichen Stil, mit Trennlinie -->
-        <button class="filter-sheet-btn filter-sheet-btn-info" @click="showMobileInfo = true">
-          <span class="filter-sheet-btn-label">Info</span>
-        </button>
-        <!-- <button class="filter-sheet-info-btn" @click="showInfoGeschaedigte = !showInfoGeschaedigte">Info</button> -->
-        <!-- <button class="info-btn" @click="showMobileInfo = true">i</button> -->
-      </div>
-    </FilterBottomSheet>
-
-    <!-- Info-Overlay nur für Mobile -->
-    <div v-if="showMobileInfo && showHamburger" class="mobile-info-overlay">
-      <button class="close-btn" @click="showMobileInfo = false">×</button>
-      <div class="mobile-info-content">
-        <h3>Anmerkungen</h3>
-        <template v-if="activeSection === 'beschuldigte'">
-          <p>Darstellung: Ein Kreuz entspricht einer beschuldigten Person.</p>
-          <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a
-              href="#section-pks">«Über die Visualisierungen»</a>.</p>
-          <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
-        </template>
-        <template v-else-if="activeSection === 'ort'">
-          <p>Darstellung: Ein Kreuz entspricht einer Straftat.</p>
-          <p>Hinweis: Als privater Raum gelten ausschliesslich die eigenen vier Wände. Treppenhaus oder Waschküche
-            gelten bereits als öffentlich. Delikte, bei denen kein Ort angegeben wurde, sind nicht dargestellt.</p>
-          <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a
-              href="#section-pks">«Über die Visualisierungen»</a>.</p>
-          <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
-        </template>
-        <template v-else-if="activeSection === 'beziehung'">
-          <p>Darstellung: Ein Kreuz entspricht einer geschädigten Person.</p>
-          <p>Kategorien: Partner (inkl. Ex), verwandt, bekannt, Arbeit/Ausbildung, keine Beziehung, andere Beziehung.
-          </p>
-          <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a
-              href="#section-pks">«Über die Visualisierungen»</a>.</p>
-          <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
-        </template>
-        <template v-else-if="activeSection === 'dunkelziffer'">
-          <p>Darstellung: Ein Kreuz entspricht einer betroffenen Person.</p>
-          <p>Hinweis: «Angezeigt» stellt das Hellfeld, also die Anzahl polizeilich registrierter Betroffener dar.
-            «Tatsächlich» zeigt die Anzahl Betroffener, wenn sowohl Hellfeld als auch Dunkelfeld berücksichtigt werden.
-          </p>
-          <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a
-              href="#section-pks">«Über die Visualisierungen»</a>.</p>
-          <p>Quellen: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik (Hellfeld). Crime Survey 2022
-            (Dunkelfeld).</p>
-        </template>
-        <template v-else>
-          <p>Darstellung: Ein Kreuz entspricht einer geschädigten bzw. betroffenen Person.</p>
-          <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a
-              href="#section-pks">«Über die Visualisierungen»</a>.</p>
-          <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
-        </template>
       </div>
     </div>
+  </section>
+
+  <!-- FooterBrava nur anzeigen, wenn ganz unten -->
+  <FooterBrava class="footer-brava" :class="{ 'footer-visible': showFooter }" />
+
+  <!-- Filter-Bottom-Sheet für Mobile -->
+  <FilterBottomSheet :show="showFilterSheet" @close="showFilterSheet = false">
+    <div class="filter-sheet-list">
+      <!-- Angezeigt/Tatsächlich Toggle (nur bei Dunkelziffer) -->
+      <div v-if="activeSection === 'dunkelziffer'" class="dunkelziffer-toggle-mobile">
+        <button :class="['dz-toggle-btn', { active: dunkelzifferMode === 'hell' }]"
+          @click="dunkelzifferMode = 'hell'; showFilterSheet = false; window?._paq?.push(['trackEvent', 'Filter', 'Klick', 'Dunkelziffer: hell'])">Angezeigt</button>
+        <button :class="['dz-toggle-btn', { active: dunkelzifferMode === 'dunkel' }]"
+          @click="dunkelzifferMode = 'dunkel'; showFilterSheet = false; window?._paq?.push(['trackEvent', 'Filter', 'Klick', 'Dunkelziffer: dunkel'])">Tatsächlich</button>
+      </div>
+      <button v-for="s in STRAFTATEN" :key="s.key"
+        :class="['filter-sheet-btn', { active: (activeSection === 'beschuldigte' ? activeBeschuldigte : activeSection === 'ort' ? activeOrt : activeSection === 'beziehung' ? activeBeziehung : activeSection === 'dunkelziffer' ? activeDunkelziffer : activeGeschaedigte) === s.key }]"
+        @click="activeSection === 'beschuldigte' ? activeBeschuldigte = s.key : activeSection === 'ort' ? activeOrt = s.key : activeSection === 'beziehung' ? activeBeziehung = s.key : activeSection === 'dunkelziffer' ? activeDunkelziffer = s.key : activeGeschaedigte = s.key; showFilterSheet = false">
+        <span class="filter-sheet-btn-label">{{ s.label }}</span>
+      </button>
+      <!-- Info-Button im gleichen Stil, mit Trennlinie -->
+      <button class="filter-sheet-btn filter-sheet-btn-info" @click="showMobileInfo = true">
+        <span class="filter-sheet-btn-label">Info</span>
+      </button>
+      <!-- <button class="filter-sheet-info-btn" @click="showInfoGeschaedigte = !showInfoGeschaedigte">Info</button> -->
+      <!-- <button class="info-btn" @click="showMobileInfo = true">i</button> -->
+    </div>
+  </FilterBottomSheet>
+
+  <!-- Info-Overlay nur für Mobile -->
+  <div v-if="showMobileInfo && showHamburger" class="mobile-info-overlay">
+    <button class="close-btn" @click="showMobileInfo = false">×</button>
+    <div class="mobile-info-content">
+      <h3>Anmerkungen</h3>
+      <template v-if="activeSection === 'beschuldigte'">
+        <p>Darstellung: Ein Kreuz entspricht einer beschuldigten Person.</p>
+        <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a href="#section-pks">«Über
+            die Visualisierungen»</a>.</p>
+        <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
+      </template>
+      <template v-else-if="activeSection === 'ort'">
+        <p>Darstellung: Ein Kreuz entspricht einer Straftat.</p>
+        <p>Hinweis: Als privater Raum gelten ausschliesslich die eigenen vier Wände. Treppenhaus oder Waschküche
+          gelten bereits als öffentlich. Delikte, bei denen kein Ort angegeben wurde, sind nicht dargestellt.</p>
+        <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a href="#section-pks">«Über
+            die Visualisierungen»</a>.</p>
+        <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
+      </template>
+      <template v-else-if="activeSection === 'beziehung'">
+        <p>Darstellung: Ein Kreuz entspricht einer geschädigten Person.</p>
+        <p>Kategorien: Partner (inkl. Ex), verwandt, bekannt, Arbeit/Ausbildung, keine Beziehung, andere Beziehung.
+        </p>
+        <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a href="#section-pks">«Über
+            die Visualisierungen»</a>.</p>
+        <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
+      </template>
+      <template v-else-if="activeSection === 'dunkelziffer'">
+        <p>Darstellung: Ein Kreuz entspricht einer betroffenen Person.</p>
+        <p>Hinweis: «Angezeigt» stellt das Hellfeld, also die Anzahl polizeilich registrierter Betroffener dar.
+          «Tatsächlich» zeigt die Anzahl Betroffener, wenn sowohl Hellfeld als auch Dunkelfeld berücksichtigt werden.
+        </p>
+        <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a href="#section-pks">«Über
+            die Visualisierungen»</a>.</p>
+        <p>Quellen: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik (Hellfeld). Crime Survey 2022
+          (Dunkelfeld).</p>
+      </template>
+      <template v-else>
+        <p>Darstellung: Ein Kreuz entspricht einer geschädigten bzw. betroffenen Person.</p>
+        <p>Definitionen: Weitere Infos zu den einzelnen Straftaten findest du im Abschnitt <a href="#section-pks">«Über
+            die Visualisierungen»</a>.</p>
+        <p>Quelle: Polizeiliche Kriminalstatistik 2025, Bundesamt für Statistik.</p>
+      </template>
+    </div>
+  </div>
 
   </div>
 </template>
@@ -1131,7 +1182,7 @@ function setFilter(key) {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   font-family: inherit;
   font-weight: 700;
-  cursor: pointer;
+  cursor: none !important;
   transition: background 0.2s, color 0.2s, border 0.2s;
   display: block;
   text-align: center;
@@ -1163,7 +1214,7 @@ function setFilter(key) {
   font-size: 1.1em;
   font-family: inherit;
   font-weight: 700;
-  cursor: pointer;
+  cursor: none !important;
   transition: background 0.2s, color 0.2s;
   border-radius: 0 !important;
   text-align: center;
@@ -1193,7 +1244,7 @@ function setFilter(key) {
   font-family: inherit;
   font-weight: 700;
   text-align: left;
-  cursor: pointer;
+  cursor: none !important;
   transition: background 0.2s, color 0.2s;
   width: 100vw;
   margin-left: -24px;
@@ -1259,7 +1310,7 @@ function setFilter(key) {
   border: none;
   font-size: 2.5em;
   color: #000;
-  cursor: pointer;
+  cursor: none !important;
 }
 
 
@@ -1291,11 +1342,11 @@ function setFilter(key) {
   background: none;
   border: none;
   padding: 8px;
-  cursor: pointer;
+  cursor: none !important;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  transition: all 0.2s ease;
+  transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
 }
 
 .dot {
@@ -1375,7 +1426,7 @@ function setFilter(key) {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  cursor: none !important;
   z-index: 36000;
   position: relative;
   padding: 0;
@@ -1465,13 +1516,14 @@ function setFilter(key) {
   font-size: 2.2em;
   font-family: inherit;
   font-weight: 700;
-  cursor: pointer;
+  cursor: none !important;
   padding: 5px 30px;
   transition: color 0.2s;
   text-align: left;
 }
 
-@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
+@media (max-width: 768px),
+(pointer: coarse) and (max-width: 1024px) {
   .hamburger-link {
     font-size: 1.6em;
     padding: 5px 20px;
@@ -1507,7 +1559,8 @@ function setFilter(key) {
   scroll-behavior: smooth;
 }
 
-@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
+@media (max-width: 768px),
+(pointer: coarse) and (max-width: 1024px) {
   #section-dunkelziffer.fullscreen-section {
     padding-left: 0 !important;
     padding-right: 0 !important;
@@ -1565,7 +1618,8 @@ function setFilter(key) {
 }
 
 
-@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
+@media (max-width: 768px),
+(pointer: coarse) and (max-width: 1024px) {
   #section-intro .fullscreen-sketch {
     display: flex;
     flex-direction: column;
@@ -1662,7 +1716,8 @@ function setFilter(key) {
   pointer-events: none;
 }
 
-@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
+@media (max-width: 768px),
+(pointer: coarse) and (max-width: 1024px) {
   .dunkelziffer-title {
     left: 20px;
     right: 20px;
@@ -1698,7 +1753,7 @@ function setFilter(key) {
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  /* Canvas selbst nicht klickbar, damit Buttons durchklickbar bleiben */
+  /* Canvas selbst nicht klickbar, damit Buttons trotzdem klickbar bleiben */
 }
 
 
@@ -1714,6 +1769,7 @@ function setFilter(key) {
 
 .split-left {
   flex: 1 1 60%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: left;
@@ -1733,8 +1789,7 @@ function setFilter(key) {
   align-items: left;
   justify-content: left;
   margin-left: 60px;
-  overflow: hidden;
-  /* Verhindert Canvas-Überlauf in split-right */
+  overflow: visible;
 }
 
 .split-right {
@@ -1771,9 +1826,14 @@ BUTTONS
 .filter-buttons-with-info {
   display: flex;
   gap: 5px;
-  align-items: center;
+  align-items: stretch;
   flex-wrap: wrap;
   position: relative;
+}
+
+/* Dunkelziffer Straftaten-Buttons: max-width damit Text auf 2 Zeilen umbricht */
+.filter-buttons-with-info > button {
+  max-width: 160px;
 }
 
 /* Sicherstellen, dass alle Buttons in fullscreen-buttons anklickbar bleiben */
@@ -1781,12 +1841,43 @@ BUTTONS
   pointer-events: auto;
 }
 
-/* Dunkelziffer-Buttons unter den Kreuzen (canvas z-index: 15).
-   Canvas hat pointer-events: none → Buttons trotzdem klickbar, aber visuell von Kreuzen überdeckt. */
+/* Dunkelziffer-Controls-Row: kein z-index am Wrapper (kein Stacking-Context), damit
+   Filter-Buttons (z-index:5) visually UNTER dem Canvas (z-index:15) bleiben,
+   und Info-Zelle (z-index:25) ÜBER dem Canvas erscheint. */
 .btns.fullscreen-buttons {
-  z-index: 10;
   position: relative;
   justify-content: center;
+  z-index: 5;
+  /* unter Canvas (z-index:15) – Kreuze erscheinen vor Buttons */
+}
+
+/* Dunkelziffer: Wrapper ohne z-index (kein eigener Stacking-Context) */
+.dunkelziffer-controls-row {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 30px;
+  margin: 20px 0;
+  width: 100%;
+  pointer-events: auto;
+}
+
+/* Btns inside wrapper: width auto (not full width) */
+.dunkelziffer-controls-row > .btns.fullscreen-buttons {
+  width: auto !important;
+  flex: 0 1 auto;
+  margin: 0 !important;
+}
+
+/* Info-Zelle: hoher z-index damit i-Button und Popup ÜBER Canvas erscheinen */
+.dunkelziffer-info-cell {
+  position: relative;
+  z-index: 25;
+  display: flex;
+  align-items: stretch;
+  pointer-events: auto;
 }
 
 /* Button-Container in Split-Sections - mehr Abstand vom unteren Rand */
@@ -1797,8 +1888,9 @@ BUTTONS
 }
 
 /* Buttons in sticky-sketch immer am unteren Rand halten (verhindert Sprung beim Canvas-Remount) */
-.sticky-sketch > .btns {
+.sticky-sketch>.btns {
   margin-top: auto;
+  padding-top: 8px;
 }
 
 /* Info Button absolut positioniert für Overlay-Effekt */
@@ -1806,20 +1898,20 @@ BUTTONS
   position: relative;
   margin-left: 15px;
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;
   /* kein z-index, damit Popup unabhängig ist */
 }
 
 .info-btn-absolute-wrapper .info-btn {
   width: 35px;
-  height: 35px;
+  height: auto;
   padding: 0 16px;
   background-color: #fff;
   color: #000;
   border: 2.5px solid #000;
-  cursor: pointer;
+  cursor: none !important;
   border-radius: 0;
-  transition: all 0.3s cubic-bezier(.4, 2, .6, 1);
+  transition: background 0.3s cubic-bezier(.4, 2, .6, 1), color 0.3s cubic-bezier(.4, 2, .6, 1), border 0.3s cubic-bezier(.4, 2, .6, 1), transform 0.3s cubic-bezier(.4, 2, .6, 1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1838,7 +1930,7 @@ BUTTONS
   border: none;
   font-size: 1.8em;
   line-height: 1;
-  cursor: pointer;
+  cursor: none !important;
   padding: 0;
   width: 28px;
   height: 28px;
@@ -1975,7 +2067,8 @@ BUTTONS
   box-sizing: border-box;
 }
 
-@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
+@media (max-width: 768px),
+(pointer: coarse) and (max-width: 1024px) {
 
   .form-field input,
   .form-field textarea {
@@ -2029,7 +2122,7 @@ BUTTONS
   appearance: none;
   -webkit-appearance: none;
   outline: none;
-  cursor: pointer;
+  cursor: none !important;
   box-sizing: content-box;
 }
 
@@ -2043,7 +2136,8 @@ BUTTONS
   animation: footer-fade-in 1.2s cubic-bezier(.4, 2, .6, 1);
 }
 
-@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
+@media (max-width: 768px),
+(pointer: coarse) and (max-width: 1024px) {
   .footer-brava.footer-visible {
     animation: none !important;
     transform: none !important;
@@ -2066,7 +2160,8 @@ BUTTONS
 
 
 
-@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
+@media (max-width: 768px),
+(pointer: coarse) and (max-width: 1024px) {
 
   /* Alle Sections auf Mobile: volle Breite, keine Splits */
   .split-section,
@@ -2104,7 +2199,8 @@ BUTTONS
   }
 
 
-  @media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
+  @media (max-width: 768px),
+  (pointer: coarse) and (max-width: 1024px) {
 
     .split-section,
     .fullscreen-section,
@@ -2115,7 +2211,8 @@ BUTTONS
     }
   }
 
-  @media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
+  @media (max-width: 768px),
+  (pointer: coarse) and (max-width: 1024px) {
     .text-overlay-content {
       max-width: 100vw !important;
       padding: 0 !important;
@@ -2124,7 +2221,8 @@ BUTTONS
   }
 }
 
-@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
+@media (max-width: 768px),
+(pointer: coarse) and (max-width: 1024px) {
 
   /* section-pks: als Snap-Punkt behalten, aber intern scrollbar machen */
   #section-pks {
@@ -2145,8 +2243,13 @@ BUTTONS
   .final-text-overlay-section {
     padding-left: 20px !important;
     padding-right: 20px !important;
-    box-sizing: border-box;
+    padding-top: 3vh !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
     flex-direction: column !important;
+    margin: 0 !important;
+    border: none !important;
+    box-sizing: border-box;
   }
 
   .text-overlay-content {
@@ -2206,12 +2309,12 @@ BUTTONS
     overflow-y: auto !important;
   }
 
-  /* scrollable-text: kein sticky auf Mobile */
+  /* scrollable-text: kein sticky mehr */
   .scrollable-text {
     position: static !important;
-    top: auto !important;
-    min-height: auto !important;
     height: auto !important;
+    min-height: auto !important;
+    top: auto !important;
   }
 
   /* side-text: kein Padding auf Mobile */
@@ -2298,9 +2401,14 @@ BUTTONS
 
   /* 3. Filter-Buttons + Schriften: fixe px-Werte damit font-size-Scaling sie nicht mehrfach verkleinert */
   .btns:not(.fullscreen-buttons) {
-    justify-content: flex-start !important;
+    justify-content: center !important;
     flex-wrap: wrap !important;
     gap: 8px !important;
+  }
+
+  /* Buttons über volle Breite (nicht auf Canvas-Breite beschränkt) */
+  .sticky-sketch > .btns {
+    max-width: calc(100vw - 120px) !important;
   }
 
   .btns {
@@ -2358,23 +2466,33 @@ BUTTONS
     transform: none;
   }
 
-  /* 8. Dunkelziffer: Buttons sticky am unteren Rand, HINTER Canvas-Kreuzen (z-index < 15) */
-  /* Canvas hat pointer-events:none → Buttons bleiben klickbar trotz visueller Überdeckung */
-  .btns.fullscreen-buttons {
-    position: sticky;
-    bottom: 0;
-    z-index: 10;
+  /* 8. Dunkelziffer: Controls-Row KEIN sticky, KEIN z-index → kein eigener Stacking-Context.
+     Dadurch partizipieren Kinder direkt in #section-dunkelziffer (z-index:1):
+     .btns (z-index:5) → hinter Canvas (z-index:15), .dunkelziffer-info-cell (z-index:25) → davor.
+     position:sticky würde immer einen Stacking-Context erzeugen und alles vor das Canvas stellen. */
+  .dunkelziffer-controls-row {
+    position: relative;
+    /* z-index absichtlich nicht gesetzt */
     background: #fff;
     padding: 8px 20px;
     gap: 12px !important;
     justify-content: center !important;
     flex-wrap: wrap;
+    margin: 0 !important;
+  }
+  .dunkelziffer-controls-row > .btns.fullscreen-buttons {
+    position: relative !important;
+    background: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: auto !important;
+    flex: 0 1 auto;
   }
 
-  /* Info-Popup in split-sections: bottom/right anpassen (Popup ist jetzt in .btns, nicht mehr in .sticky-sketch) */
+  /* Info-Popup in split-sections: korrekt rechtsbündig mit info-btn */
   .info-popup:not(.info-popup-dunkelziffer) {
-    bottom: 42px;
-    right: 7px;
+    bottom: calc(100% + 8px);
+    right: 0;
   }
 
   /* 9. Dunkelziffer: Titel über Canvas halten, Canvas + Titel zentriert auf 800px */

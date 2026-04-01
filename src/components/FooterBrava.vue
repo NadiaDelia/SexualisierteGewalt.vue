@@ -11,6 +11,7 @@
                         rel="noopener noreferrer">Brava unterstützen</a></div>
             </div>
             <div class="footer-col footer-right">
+                <div class="footer-right-inner">
                 <div class="footer-gross">Brava folgen</div>
                 <ul class="cross-list">
                     <li><a class="footer-link" href="https://www.brava-ngo.ch/de/newsletter" target="_blank"
@@ -20,6 +21,7 @@
                     <li><a class="footer-link" href="https://www.linkedin.com/company/brava-ngo/" target="_blank"
                             rel="noopener noreferrer">LinkedIn</a></li>
                 </ul>
+                </div>
             </div>
         </div>
     </footer>
@@ -112,12 +114,18 @@ export default {
     width: 100%;
 }
 
+
 .footer-right {
     align-items: center;
-    text-align: left;
     display: flex;
     flex-direction: column;
     width: 100%;
+}
+
+.footer-right-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .footer-link {
@@ -134,11 +142,13 @@ export default {
     text-decoration: none;
 }
 
+
 .cross-list {
     color: #fff;
     margin: 0.2em 0;
     list-style: none;
     padding: 0;
+    margin-left: 0;
 }
 
 .cross-list li {
@@ -200,6 +210,7 @@ export default {
         text-align: left;
         order: 2;
         gap: 4px;
+        margin-left: 0 !important;
     }
 
     .footer-right .footer-gross {
@@ -208,6 +219,7 @@ export default {
 
     .footer-right .cross-list {
         margin: 0 !important;
+        margin-left: 0 !important;
     }
 
     .footer-left {
