@@ -17,6 +17,7 @@ $data = [];
 foreach ($fields as $field) {
     $data[] = isset($_POST[$field]) ? str_replace(["\r","\n",";"], ' ', trim($_POST[$field])) : '';
 }
+$data[] = date('d.m.Y H:i:s');
 
 // CSV-Datei Pfad (im gleichen Verzeichnis, ggf. anpassen)
 
@@ -24,7 +25,7 @@ $file = __DIR__ . '/bestellungen.csv';
 
 // Datei anlegen, falls nicht vorhanden, und Header schreiben
 if (!file_exists($file)) {
-    file_put_contents($file, "Vorname;Name;Email;Adresse;Adresszusatz;PLZ;Ort;Kommentar;Newsletter\n");
+    file_put_contents($file, "Vorname;Name;Email;Adresse;Adresszusatz;PLZ;Ort;Kommentar;Newsletter;Zeitstempel\n");
 }
 
 // Daten als neue Zeile anhängen

@@ -579,7 +579,7 @@ function setFilter(key) {
     <div class="fullscreen-section" id="section-intro">
       <div class="fullscreen-sketch">
         <div class="titelblatt-text">
-          <h1>Muster<br />und blinde<br />Flecken</h1>
+          <h1>Muster<br />und dunkle<br />Flecken</h1>
           <h2 class="titelblatt-headline">Was die Polizeiliche <br class="mobile-only" />Kriminalstatistik 2025
             zu<br />Sexualisierter Gewalt <br class="mobile-only" />aufzeigt
             – und was nicht</h2>
