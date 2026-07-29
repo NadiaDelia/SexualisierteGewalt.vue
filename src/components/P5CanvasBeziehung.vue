@@ -42,8 +42,9 @@ const sketch = (p) => {
     arbeit: 0, keine: 0, andere: 0
   }
 
-  let crossSize = props.isMobile ? 10 : 14
-  let crossStrokeWeight = props.isMobile ? 4 : 6
+  const isTablet = window.matchMedia('(pointer: coarse) and (min-width: 740px)').matches
+  let crossSize = props.isMobile ? (isTablet ? 14 : 10) : 14
+  let crossStrokeWeight = props.isMobile ? (isTablet ? 6 : 4) : 6
   const attractPower = props.isMobile ? 2.0 : 1.5
   const homePower    = props.isMobile ? 0.04 : 0.04
   const repelPower   = props.isMobile ? 2.0 : 2.0
@@ -52,17 +53,35 @@ const sketch = (p) => {
 
   p.touchMoved = () => false
 
+  const getResponsiveWidth = () => props.isMobile
+    ? Math.max(0, window.innerWidth - 40)
+    : props.width
+
+  const getResponsiveHeight = () => props.isMobile
+    ? Math.max(300, window.innerHeight - 230)
+    : props.height
+
   p.setup = () => {
-    p.createCanvas(props.width, props.height)
+    p.createCanvas(getResponsiveWidth(), getResponsiveHeight())
     p.frameRate(props.isMobile ? 30 : 60)
     selectedData = props.data || []
     applyData()
   }
 
+  p.windowResized = () => {
+    if (props.isMobile) {
+      p.resizeCanvas(getResponsiveWidth(), getResponsiveHeight())
+      applyData()
+    }
+  }
+
   p.draw = () => {
     p.background(props.background)
     p.textFont('PxGroteskPan')
-    p.textSize(60)
+    const dynamicTextSize = props.isMobile
+      ? Math.max(16, Math.min(p.width * 0.09, 45))
+      : 60
+    p.textSize(dynamicTextSize)
     p.textAlign(p.LEFT, p.BOTTOM)
     p.fill(255)
 
@@ -88,7 +107,7 @@ const sketch = (p) => {
       }
     })
 
-    drawLabelsAndNumbers(p)
+    drawLabelsAndNumbers(p, dynamicTextSize)
     if (!fpsCheckDone) {
       fpsCheckFrame++
       if (fpsCheckFrame === 120) {
@@ -105,27 +124,37 @@ const sketch = (p) => {
   }
   p.resizeTo = (w, h) => p.resizeCanvas(w, h)
 
-  function drawLabelsAndNumbers(p) {
-    let borderText = 30
-    
-    // Positionen für 3x2 Grid
-    const positions = [
-      { x: borderText, y: props.height * 0.35 }, // Partner (oben links)
-      { x: props.width * (1/3) + borderText, y: props.height * 0.35 }, // verwandt (oben mitte)
-      { x: props.width * (2/3) + borderText, y: props.height * 0.35 }, // bekannt (oben rechts)
-      { x: borderText, y: props.height * 0.85 }, // Arbeit (unten links)
-      { x: props.width * (1/3) + borderText, y: props.height * 0.85 }, // keine (unten mitte)
-      { x: props.width * (2/3) + borderText, y: props.height * 0.85 }  // andere (unten rechts)
-    ]
+  function drawLabelsAndNumbers(p, textSize) {
+    const borderText = 30
 
-    // Labels zeichnen
-    beziehungsTypes.forEach((type, index) => {
-      p.text(type.label, positions[index].x, positions[index].y)
-      
-      // Zahlen zeichnen
-      let count = particleQueue.length > 0 ? visible[type.key] : totals[type.key]
-      p.text(formatNumber(count), positions[index].x, positions[index].y - 70)
-    })
+    if (props.isMobile) {
+      // Mobile: 2 Spalten × 3 Zeilen
+      beziehungsTypes.forEach((type, index) => {
+        const col = index % 2
+        const rowPos = Math.floor(index / 2)
+        const cellH = p.height / 3
+        const x = col * (p.width / 2) + borderText
+        const y = rowPos * cellH + cellH * 0.75
+        p.text(type.label, x, y)
+        const count = particleQueue.length > 0 ? visible[type.key] : totals[type.key]
+        p.text(formatNumber(count), x, y - textSize * 1.1)
+      })
+    } else {
+      // Desktop: 3 Spalten × 2 Zeilen
+      const positions = [
+        { x: borderText, y: p.height * 0.35 },
+        { x: p.width * (1/3) + borderText, y: p.height * 0.35 },
+        { x: p.width * (2/3) + borderText, y: p.height * 0.35 },
+        { x: borderText, y: p.height * 0.85 },
+        { x: p.width * (1/3) + borderText, y: p.height * 0.85 },
+        { x: p.width * (2/3) + borderText, y: p.height * 0.85 }
+      ]
+      beziehungsTypes.forEach((type, index) => {
+        p.text(type.label, positions[index].x, positions[index].y)
+        const count = particleQueue.length > 0 ? visible[type.key] : totals[type.key]
+        p.text(formatNumber(count), positions[index].x, positions[index].y - 70)
+      })
+    }
   }
 
   // Ursprünglich: updateParticlesForCurrentSelection → umbenannt zu applyData für klareren Zweck
@@ -146,14 +175,25 @@ const sketch = (p) => {
         let count = row[type.field] || 0
         totals[type.key] += count
 
-        // Positionen für 3x2 Grid berechnen
-        let col = index % 3
-        let row_pos = Math.floor(index / 3)
-        
-        let xStart = col === 0 ? crossSize : props.width * (col/3) + borderCross
-        let xEnd = col === 2 ? props.width - crossSize : props.width * ((col+1)/3) - borderCross
-        let yStart = row_pos === 0 ? crossSize : props.height * 0.5 + borderCross
-        let yEnd = row_pos === 0 ? props.height * 0.5 - borderCross : props.height - crossSize
+        let xStart, xEnd, yStart, yEnd
+
+        if (props.isMobile) {
+          // Mobile: 2 Spalten × 3 Zeilen
+          const col = index % 2
+          const row_pos = Math.floor(index / 2)
+          xStart = col * (p.width / 2) + crossSize
+          xEnd = (col + 1) * (p.width / 2) - crossSize
+          yStart = row_pos * (p.height / 3) + crossSize
+          yEnd = (row_pos + 1) * (p.height / 3) - crossSize
+        } else {
+          // Desktop: 3 Spalten × 2 Zeilen
+          const col = index % 3
+          const row_pos = Math.floor(index / 3)
+          xStart = col === 0 ? crossSize : p.width * (col/3) + borderCross
+          xEnd = col === 2 ? p.width - crossSize : p.width * ((col+1)/3) - borderCross
+          yStart = row_pos === 0 ? crossSize : p.height * 0.5 + borderCross
+          yEnd = row_pos === 0 ? p.height * 0.5 - borderCross : p.height - crossSize
+        }
 
         for (let j = 0; j < count; j++) {
           let px = p.random(xStart, xEnd)
@@ -223,17 +263,26 @@ const sketch = (p) => {
     }
 
     constrainPosition(p) {
-      // Finde Index der Beziehung
       let typeIndex = beziehungsTypes.findIndex(t => t.key === this.beziehung)
       if (typeIndex === -1) return
 
-      let col = typeIndex % 3
-      let row_pos = Math.floor(typeIndex / 3)
-      
-      let xMin = col === 0 ? this.r : props.width * (col/3) + this.r
-      let xMax = col === 2 ? props.width - this.r : props.width * ((col+1)/3) - this.r
-      let yMin = row_pos === 0 ? this.r : props.height * 0.5 + this.r
-      let yMax = row_pos === 0 ? props.height * 0.5 - this.r : props.height - this.r
+      let xMin, xMax, yMin, yMax
+
+      if (props.isMobile) {
+        const col = typeIndex % 2
+        const row_pos = Math.floor(typeIndex / 2)
+        xMin = col * (p.width / 2) + this.r
+        xMax = (col + 1) * (p.width / 2) - this.r
+        yMin = row_pos * (p.height / 3) + this.r
+        yMax = (row_pos + 1) * (p.height / 3) - this.r
+      } else {
+        const col = typeIndex % 3
+        const row_pos = Math.floor(typeIndex / 3)
+        xMin = col === 0 ? this.r : p.width * (col/3) + this.r
+        xMax = col === 2 ? p.width - this.r : p.width * ((col+1)/3) - this.r
+        yMin = row_pos === 0 ? this.r : p.height * 0.5 + this.r
+        yMax = row_pos === 0 ? p.height * 0.5 - this.r : p.height - this.r
+      }
 
       this.pos.x = p.constrain(this.pos.x, xMin, xMax)
       this.pos.y = p.constrain(this.pos.y, yMin, yMax)
